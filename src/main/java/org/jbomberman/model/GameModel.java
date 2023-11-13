@@ -57,17 +57,11 @@ public class GameModel extends Observable {
         notifyObservers(new LoadMap(COORDINATE_GROUND, 0));
         setChanged();
         notifyObservers(new LoadMap(COORDINATES_FIXED_BLOCKS, 1));
-
-        COORDINATES_RANDOM_BLOCKS.forEach(coordinate -> {
-            setChanged();
-            notifyObservers(new LoadDestroyable(coordinate));
-        });
-        COORDINATE_ENEMIES.forEach(coordinate -> {
-            setChanged();
-            notifyObservers(new USpawnEntity(coordinate, 0));
-        });
         setChanged();
-        notifyObservers(new USpawnEntity(playerPosition, 1));
+        notifyObservers(new LoadDestroyable(COORDINATES_RANDOM_BLOCKS));
+        setChanged();
+        notifyObservers(new USpawnEntity(COORDINATE_ENEMIES, playerPosition));
+
     }
 
     private void powerUP() {

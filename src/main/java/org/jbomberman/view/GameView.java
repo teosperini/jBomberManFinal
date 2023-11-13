@@ -146,6 +146,7 @@ public class GameView implements Observer {
         imageView.setFitWidth(GameView.SCALE_FACTOR);
         return imageView;
     }
+
     private void addBottomBar() {
 
         // build the bottombar
@@ -176,41 +177,36 @@ public class GameView implements Observer {
 
     @Override
     public void update(Observable ignored, Object arg) {
-    }
-/*
         switch (arg) {
             case UBomb data -> drawBomb(data.c());
 
             case LoadMap data -> {
                 switch (data.id()) {
-                    case 0 -> loader(data.array(), BlockImage.GRASS.getImage());
-                    case 1 -> loader(data.array(), BlockImage.BEDROCK.getImage());
+                    //case 0 -> loader(data.array(), BlockImage.GRASS.getImage());
+                    //case 1 -> loader(data.array(), BlockImage.BEDROCK.getImage());
+                    case 2 -> data.array().forEach(coordinate -> {
+                        ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
+                        randomBlocks.add(image);
+                        gameBoard.getChildren().add(image);
+                    });
                 }
-            }
-
-            case LoadDestroyable data ->{
-                ImageView image = drawImage(data.block(), BlockImage.STONE.getImage());
-                randomBlocks.add(image);
-                gameBoard.getChildren().add(image);
             }
 
             case USpawnEntity data -> {
-                switch (data.id()) {
-                    case 0 -> {
-                        player = drawImage(data.c(), BlockImage.STEVE.getImage());
-                        gameBoard.getChildren().add(player);
-                    }
-                    case 1 -> {
-                        ImageView enemy = drawImage(data.c(), BlockImage.ENEMY.getImage());
-                        enemies.add(enemy);
-                        gameBoard.getChildren().add(enemy);
-                    }
-                }
+                player = drawImage(data.c(), BlockImage.STEVE.getImage());
+                gameBoard.getChildren().add(player);
+
+                data.enemyArray().forEach(coordinate ->  {
+                    ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
+                    enemies.add(enemy);
+                    gameBoard.getChildren().add(enemy);
+                });
             }
 
-            case UBlockDestroyed data -> destroyEntity(randomBlocks, data.index());
 
-            case UEnemyDead data -> destroyEntity(enemies, data.index());
+            //case UBlockDestroyed data -> destroyEntity(randomBlocks, data.index());
+
+            //case UEnemyDead data -> destroyEntity(enemies, data.index());
 
             case UMovement data -> {
                 Coordinate newCoord = data.newC();
@@ -220,7 +216,7 @@ public class GameView implements Observer {
                     transition.setOnFinished(event -> controller.moved());
                     transition.play();
                      */
-    /*
+
                 if (data.id() < 0) {
                     int newX = newCoord.x() * SCALE_FACTOR;
                     int newY = newCoord.y() * SCALE_FACTOR;
@@ -235,14 +231,12 @@ public class GameView implements Observer {
                     enemies.get(data.id()).setLayoutY(data.newC().y());
 
 
-     */
-                    /*
                     enemies.stream().
                             filter(x -> x.getLayoutX() == oldCoord.x() && x.getLayoutY() == oldCoord.y()).
                             findAny().
                             ifPresentOrElse(enemyToMove -> {
-                                        TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
-                                        transition.play();
+                                        //TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
+                                        //transition.play();
                                     },
                                     () -> System.out.println("enemy not found")
                             );
@@ -250,7 +244,7 @@ public class GameView implements Observer {
                 }
             }
             case UBombPowerUp data -> {
-                doBombPowerUp();
+                //doBombPowerUp();
             }
 
             case ULife data -> {
@@ -265,7 +259,7 @@ public class GameView implements Observer {
                 pauseLessLife.play();
 
             }
-
+/*
             case ENEMY_POSITION_CHANGED -> {
                 Coordinate oldCoord = updateInfo.getOldCoord();
                 Coordinate newCoord = updateInfo.getNewCoord();
@@ -457,6 +451,13 @@ public class GameView implements Observer {
         gameBoard.getChildren().addAll(gameOver, gameWin);
     }
 
-                     */
+          
+
+            }
+            
+ */
+            default -> throw new IllegalStateException("Unexpected value: " + arg);
+        }} 
+
 
 }
