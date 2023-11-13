@@ -38,9 +38,6 @@ public class GameModel extends Observable {
     // the coordinates of the winning cell
     public Coordinate EXIT;
 
-    private boolean isPlayerMoving = false;
-
-
     public GameModel() {
         initialize();
     }
@@ -100,14 +97,14 @@ public class GameModel extends Observable {
                     distanceFromBorder + random.nextInt(MAX.x() - 2 * distanceFromBorder + 1),
                     distanceFromBorder + random.nextInt(MAX.y() - 2 * distanceFromBorder + 1)
             );
-            if (isValidRandomBlockLocation(location)) {
+            if (isValidLocation(location)) {
                 COORDINATES_RANDOM_BLOCKS.add(location);
                 i++;
             }
         }
     }
 
-    private boolean isValidRandomBlockLocation(Coordinate c) {
+    private boolean isValidLocation(Coordinate c) {
         return !COORDINATES_FIXED_BLOCKS.contains(c) && (c.x() + c.y() > 3);
     }
 
@@ -128,14 +125,14 @@ public class GameModel extends Observable {
     boolean isBombExploding = false;
 
     public void releaseBomb() {
-        if (TNT_COORDINATES != null) {
+        if ((TNT_COORDINATES != null) && isValidLocation(playerPosition)){
             return;
         }
 
         TNT_COORDINATES = playerPosition;
 
         setChanged();
-        notifyObservers(new UBomb(TNT_COORDINATES));
+        notifyObservers(new UpdateInfo(UpdateType.BOMB_RELEASED));
     }
 
     public void bombExploded() {
@@ -187,17 +184,17 @@ public class GameModel extends Observable {
 
 
     private void lessLife() {
-        isPlayerMoving = true;
         PLAYER_HP -=1;
         if(PLAYER_HP <= 0){
             defeat();
         }
         else {
-            setChanged();
-            notifyObservers(new ULife(PLAYER_HP));
+
             PauseTransition respawn = new PauseTransition(Duration.millis(400));
             respawn.setOnFinished(event -> {
-                updatePlayerPosition(new Coordinate(1,1), playerPosition);
+                playerPosition = new Coordinate(1,1);
+                setChanged();
+                notifyObservers(new UpdateInfo(UpdateType.U_RESPAWN, playerPosition));
             });
             respawn.play();
         }
@@ -250,16 +247,15 @@ public class GameModel extends Observable {
         BOMB_RANGE += 1;
         FIRE_PU = null;
         setChanged();
-        //notifyObservers(new POWER_UP_BOMB));
+        notifyObservers(new UpdateInfo(UpdateType.U_PU_BOMB));
     }
 
     public void powerUpIncreaseLife(){
         PLAYER_HP += 1;
         LIFE_PU = null;
         setChanged();
-        notifyObservers(new ULife(PLAYER_HP));
+        notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE));
     }
-
 
     /**
      * Given the key code of the key pressed by the player, changes accordingly its position,
@@ -267,7 +263,6 @@ public class GameModel extends Observable {
      * @param keyCode is the code of the key pressed by the player
      */
     public void movePlayer(KeyCode keyCode) {
-        if (isPlayerMoving) return;
         Coordinate oldPosition = playerPosition;
         Coordinate newPosition = calculateNewPosition(keyCode, playerPosition);
 
@@ -357,12 +352,10 @@ public class GameModel extends Observable {
 
     public void updatePlayerPosition(Coordinate coordinate, Coordinate oldPosition) {
         System.out.println("updating enemy position: " + oldPosition + "->" + coordinate);
-        isPlayerMoving = true;
         playerPosition = coordinate;
         setChanged();
         notifyObservers(new UMovement(oldPosition,coordinate, -1));
         controlPosition();
-        isPlayerMoving = false;
     }
 
     public void initializeEnemies() {
@@ -432,5 +425,9 @@ public class GameModel extends Observable {
         playerPosition = new Coordinate(1,1);
         PLAYER_HP = 3;
         BOMB_RANGE = 1;
+    }
+
+    public void respawn() {
+
     }
 }

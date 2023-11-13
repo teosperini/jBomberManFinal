@@ -2,7 +2,6 @@ package org.jbomberman.view;
 
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
-import org.jbomberman.updatemanager.*;
 import org.jbomberman.utils.*;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
@@ -69,6 +68,7 @@ public class GameView implements Observer {
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_1.png")),
         ENEMY(BlockImage.class.getResourceAsStream("enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
+        LIFE(BlockImage.class.getResourceAsStream("power_up/life.png"))
         ;
 
         private final Image image;
@@ -206,7 +206,6 @@ public class GameView implements Observer {
                     });
                 }
 
-                case U_PU_BOMB -> drawBomb(updateInfo.getCoordinate());
 
                 case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
@@ -222,60 +221,51 @@ public class GameView implements Observer {
 
                     int index = updateInfo.getIndex();
 
-                    TranslateTransition transition = TranslateTransition transition = new TranslateTransition(Duration.millis(400), entity);
-                    transition.setFromX(oldX);
-                    transition.setFromY(oldY);
-                    transition.setToX(newX);
-                    transition.setToY(newY);
-
-                    transition.setOnFinished(event -> controller.moved());
-                    transition.play();
-
-
                     if (index < 0) {
                         player.setLayoutX(newX);
                         player.setLayoutY(newY);
+                        /*
+                        TranslateTransition transition = new TranslateTransition(Duration.millis(400), player);
+                        transition.setFromX(oldX);
+                        transition.setFromY(oldY);
+                        transition.setToX(newX);
+                        transition.setToY(newY);
+
+                        transition.setOnFinished(event -> controller.moved());
+                        transition.play();
+                         */
                     } else {
                         enemies.get(index).setLayoutX(newX);
                         enemies.get(index).setLayoutY(newY);
                     }
-            }
-                case BOMB_RELEASED ->  {
-                doBombPowerUp();
-            }
-
-            case ULife data -> {
-                //controller.isRespawning = true;
-                //magari ci si può mettere una animazione
-                livesLabel.setText("Vite: " + data.life());
-                //il personaggio verrà anche riposizionato nel blocco iniziale
-                PauseTransition pauseLessLife = new PauseTransition(Duration.millis(400));
-                pauseLessLife.setOnFinished(event -> {
-                    //controller.isRespawning = false;
-                });
-                pauseLessLife.play();
-            }
-
-            case ENEMY_POSITION_CHANGED -> {
-                Coordinate oldCoord = updateInfo.getOldCoord();
-                Coordinate newCoord = updateInfo.getNewCoord();
-                int cx = oldCoord.x() * SCALE_FACTOR;
-                int cy = oldCoord.y() * SCALE_FACTOR;
-                enemies.stream().
-                        filter(x -> x.getLayoutX() == cx && x.getLayoutY() == cy).
-                        findAny().
-                        ifPresentOrElse(enemyToMove -> {
-                            //TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
-                            //transition.play();
-                            },
-                                () -> System.out.println("enemy not found")
-                        );
                 }
 
-            case PAUSE -> {
-                pause.setVisible(true);
-                pause.requestFocus();
-            }
+                case U_RESPAWN -> {
+                    controller.respawning(true);
+                    Coordinate coordinate = updateInfo.getCoordinate();
+
+                    PauseTransition pauseLessLife = new PauseTransition(Duration.millis(400));
+                    pauseLessLife.setOnFinished(event -> {
+                        player.setLayoutX(coordinate.x());
+                        player.setLayoutY(coordinate.y());
+                        updateLife(updateInfo.getIndex());
+                        controller.respawning(false);
+                    });
+                    pauseLessLife.play();
+                }
+
+                case U_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
+
+                case U_PU_BOMB -> doBombPowerUp();
+
+                case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
+
+                case PAUSE -> {
+                    pause.setVisible(true);
+                    pause.requestFocus();
+                }
+
+
             case END_PAUSE -> {
                 pause.setVisible(false);
                 gameBoard.requestFocus();
@@ -319,12 +309,21 @@ public class GameView implements Observer {
         }
     }
 
+    private void updateLife(int index){
+        livesLabel.setText("Vite: " + index);
+    }
+    private void doLifePowerUp(int index) {
+        updateLife(index);
+        PauseTransition pauseRemovePowerUp = new PauseTransition(Duration.millis(200));
+        pauseRemovePowerUp.setOnFinished(event -> gameBoard.getChildren().remove(oneUp));
+        pauseRemovePowerUp.play();
+    }
+
     private void doBombPowerUp(){
     PauseTransition pauseRemovePowerUp = new PauseTransition(Duration.millis(200));
-                pauseRemovePowerUp.setOnFinished(event -> {
-        gameBoard.getChildren().remove(fireImageView);
-    });
-                pauseRemovePowerUp.play();
+    pauseRemovePowerUp.setOnFinished(event -> gameBoard.getChildren().remove(fireImageView));
+    pauseRemovePowerUp.play();
+
     ImageView imageView = new ImageView(BlockImage.FIRE.getImage());
     imageView.setLayoutY(SCALE_FACTOR);
     imageView.setLayoutX(SCALE_FACTOR);

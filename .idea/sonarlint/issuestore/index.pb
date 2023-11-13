@@ -35,3 +35,15 @@ i
 9src/main/java/org/jbomberman/updatemanager/UMovement.java,4\a\4a26000c2f41da0b3a9a7474530c6152b2026bf3
 l
 <src/main/java/org/jbomberman/updatemanager/USpawnEntity.java,0\c\0cc7ac223a17985ccdb3a9730928b4c3b6bfff92
+o
+?src/main/java/org/jbomberman/updatemanager/LoadDestroyable.java,5\a\5abb5091d4f7c10e267bd0d3b2b59166dc034d0e
+b
+2src/main/java/org/jbomberman/utils/UpdateType.java,d\b\db79c3b7854718638467b8c0021343b5576a33e4
+b
+2src/main/java/org/jbomberman/utils/UpdateInfo.java,b\4\b456b8995cbe06613693cfb9d1b51335a25214f7
+k
+;src/main/java/org/jbomberman/controller/GameController.java,5\4\54b782dddc90008519ac92da0ab20402ee1dd6cd
+S
+#.idea/sonarlint/issuestore/index.pb,9\f\9fe84ebb15faf917b7def6236dba604453cc61e0
+]
+-.idea/sonarlint/securityhotspotstore/index.pb,8\8\88a9255124c95bdc913197c120a8d560edc59c8e

@@ -79,19 +79,14 @@ public class MainController {
         KeyCode keyCode = keyEvent.getCode();
         if (keyCode == KeyCode.ESCAPE){
             pause();
-            // if space is pressed we try to release a bomb
-            // evitare che nel respawn venga data la possibilità di droppare una bomba
-
-
-
         } else if (isGamePaused || isRespawning || isPlayerMoving){
             if (keyCode == KeyCode.SPACE) {
+                // if space is pressed we try to release a bomb
+                // evitare che nel respawn venga data la possibilità di droppare una bomba
+                gameModel.releaseBomb();
             } else {
                 // else if an arrow key is pressed we move the player
-            /*
-            model.movePlayer(keyCode);
-            isRespawning = false;
-             */
+                gameModel.movePlayer(keyCode);
             }
         }
     }
@@ -127,8 +122,14 @@ public class MainController {
         gameModel.addObserver(gameView);
     }
 
+
+
+
     public void moved(){
         isPlayerMoving = !isPlayerMoving;
     }
 
+    public void respawning(boolean b) {
+        isRespawning = b;
+    }
 }
