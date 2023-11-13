@@ -177,13 +177,16 @@ public class GameView implements Observer {
 
     @Override
     public void update(Observable ignored, Object arg) {
-        switch (arg) {
-            case UBomb data -> drawBomb(data.c());
+        /*
+        if (arg instanceof UpdateInfo updateInfo) {
+            UpdateType updateType = updateInfo.getUpdateType();
+            switch (updateType) {
+                case UPDATE_PU_BOMB -> drawBomb(updateInfo.getCoordinate());
 
-            case LoadMap data -> {
+            case LOAD_MAP -> {
                 switch (data.id()) {
-                    //case 0 -> loader(data.array(), BlockImage.GRASS.getImage());
-                    //case 1 -> loader(data.array(), BlockImage.BEDROCK.getImage());
+                    case 0 -> loader(data.array(), BlockImage.GRASS.getImage());
+                    case 1 -> loader(data.array(), BlockImage.BEDROCK.getImage());
                     case 2 -> data.array().forEach(coordinate -> {
                         ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
                         randomBlocks.add(image);
@@ -216,7 +219,7 @@ public class GameView implements Observer {
                     transition.setOnFinished(event -> controller.moved());
                     transition.play();
                      */
-
+        /*
                 if (data.id() < 0) {
                     int newX = newCoord.x() * SCALE_FACTOR;
                     int newY = newCoord.y() * SCALE_FACTOR;
@@ -243,8 +246,8 @@ public class GameView implements Observer {
 
                 }
             }
-            case UBombPowerUp data -> {
-                //doBombPowerUp();
+                case BOMB_RELEASED ->  {
+                doBombPowerUp();
             }
 
             case ULife data -> {
@@ -257,9 +260,8 @@ public class GameView implements Observer {
                     //controller.isRespawning = false;
                 });
                 pauseLessLife.play();
-
             }
-/*
+
             case ENEMY_POSITION_CHANGED -> {
                 Coordinate oldCoord = updateInfo.getOldCoord();
                 Coordinate newCoord = updateInfo.getNewCoord();
@@ -302,7 +304,7 @@ public class GameView implements Observer {
                 BackgroundMusic.stopMusic();
                 //controller.stop();
                 allowKeyPress = false;
-                Board.getLivesLabel().setText("Vite: " + 0);
+                getLivesLabel().setText("Vite: " + 0);
 
                 PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
                 pauseGameOver.setOnFinished(event -> {
@@ -319,9 +321,7 @@ public class GameView implements Observer {
                 allowKeyPress = false;
                 controller.quitMatch();
             }
-
-
-            default -> throw new IllegalStateException("Unexpected value: " + arg);
+            }
         }
     }
 
@@ -449,15 +449,10 @@ public class GameView implements Observer {
         });
 
         gameBoard.getChildren().addAll(gameOver, gameWin);
+        */
     }
 
-          
 
-            }
-            
- */
-            default -> throw new IllegalStateException("Unexpected value: " + arg);
-        }} 
 
 
 }
