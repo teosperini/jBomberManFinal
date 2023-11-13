@@ -22,6 +22,11 @@ public class MainController {
     Stage stage;
     Scene scene;
 
+    private boolean isPlayerMoving;
+    public boolean isRespawning = false;
+
+    private boolean isGamePaused = false;
+
     private static MainController instance;
 
     private MainController() {
@@ -72,22 +77,22 @@ public class MainController {
     //HANDLING OF THE KEY-EVENTS IN GAME
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
-        if (keyCode == KeyCode.SPACE) {
+        if (keyCode == KeyCode.ESCAPE){
+            pause();
             // if space is pressed we try to release a bomb
             // evitare che nel respawn venga data la possibilità di droppare una bomba
-            /*
-            if(!isRespawning) {
-                model.releaseBomb();
-            }
-             */
-        } else if (keyCode == KeyCode.ESCAPE) {
-            pause();
-        } else {
-            // else if an arrow key is moved we move the player
+
+
+
+        } else if (isGamePaused || isRespawning || isPlayerMoving){
+            if (keyCode == KeyCode.SPACE) {
+            } else {
+                // else if an arrow key is pressed we move the player
             /*
             model.movePlayer(keyCode);
             isRespawning = false;
              */
+            }
         }
     }
 
@@ -97,10 +102,13 @@ public class MainController {
 
     //HANDLING OF BUTTONS IN GAME
     public void pause() {
+        isGamePaused = !isGamePaused;
+        if (isGamePaused){
 
+        }
         //timeline.pause();
         gameModel.gamePause();
-        //isGamePaused = true;
+
 
     }
 
@@ -118,4 +126,9 @@ public class MainController {
         //gameModel.reset()
         gameModel.addObserver(gameView);
     }
+
+    public void moved(){
+        isPlayerMoving = !isPlayerMoving;
+    }
+
 }

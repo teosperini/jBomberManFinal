@@ -8,6 +8,7 @@ public class UpdateInfo {
     private Coordinate newc;
     private Coordinate coordinate;
     private ArrayList<Coordinate> array;
+    private int index;
 
     public UpdateInfo(UpdateType updateType, Coordinate oldc, Coordinate newc) {
         this.updateType = updateType;
@@ -45,5 +46,9 @@ public class UpdateInfo {
 
     public ArrayList<Coordinate> getArray() {
         return array;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

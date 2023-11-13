@@ -177,74 +177,68 @@ public class GameView implements Observer {
 
     @Override
     public void update(Observable ignored, Object arg) {
-        /*
+
         if (arg instanceof UpdateInfo updateInfo) {
             UpdateType updateType = updateInfo.getUpdateType();
             switch (updateType) {
-                case UPDATE_PU_BOMB -> drawBomb(updateInfo.getCoordinate());
 
-            case LOAD_MAP -> {
-                switch (data.id()) {
-                    case 0 -> loader(data.array(), BlockImage.GRASS.getImage());
-                    case 1 -> loader(data.array(), BlockImage.BEDROCK.getImage());
-                    case 2 -> data.array().forEach(coordinate -> {
-                        ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
-                        randomBlocks.add(image);
-                        gameBoard.getChildren().add(image);
+                case L_MAP -> {
+                    switch (updateInfo.getIndex()) {
+                        case 0 -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                        case 1 -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+                        case 2 -> updateInfo.getArray().forEach(coordinate -> {
+                            ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
+                            randomBlocks.add(image);
+                            gameBoard.getChildren().add(image);
+                        });
+                    }
+                }
+
+                case L_PLAYER -> {
+                    player = drawImage(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+                    gameBoard.getChildren().add(player);
+                }
+                case L_ENEMIES -> {
+                    updateInfo.getArray().forEach(coordinate ->  {
+                        ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
+                        enemies.add(enemy);
+                        gameBoard.getChildren().add(enemy);
                     });
                 }
-            }
 
-            case USpawnEntity data -> {
-                player = drawImage(data.c(), BlockImage.STEVE.getImage());
-                gameBoard.getChildren().add(player);
+                case U_PU_BOMB -> drawBomb(updateInfo.getCoordinate());
 
-                data.enemyArray().forEach(coordinate ->  {
-                    ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
-                    enemies.add(enemy);
-                    gameBoard.getChildren().add(enemy);
-                });
-            }
+                case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
+                case U_ENEMY_DEAD -> destroyEntity(enemies, updateInfo.getIndex());
 
-            //case UBlockDestroyed data -> destroyEntity(randomBlocks, data.index());
-
-            //case UEnemyDead data -> destroyEntity(enemies, data.index());
-
-            case UMovement data -> {
-                Coordinate newCoord = data.newC();
-                Coordinate oldCoord = data.oldC();
-                    /*
-                    TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, player);
-                    transition.setOnFinished(event -> controller.moved());
-                    transition.play();
-                     */
-        /*
-                if (data.id() < 0) {
+                case U_POSITION -> {
+                    Coordinate newCoord = updateInfo.getNewCoord();
+                    Coordinate oldCoord = updateInfo.getOldCoord();
+                    int oldX = oldCoord.x() * SCALE_FACTOR;
+                    int oldY = oldCoord.y() * SCALE_FACTOR;
                     int newX = newCoord.x() * SCALE_FACTOR;
                     int newY = newCoord.y() * SCALE_FACTOR;
-                    player.setLayoutX(newX);
-                    player.setLayoutY(newY);
-                } else {
-                    //mettere uno switch case che con -1 muove il player, con i numeri tra 0 e n muove i nemici che sia
-                    //nell'array nel model sia in quello nella view sono salvati nella stessa posizione, indicata
-                    //dall'intero ricevuto
 
-                    enemies.get(data.id()).setLayoutX(data.newC().x());
-                    enemies.get(data.id()).setLayoutY(data.newC().y());
+                    int index = updateInfo.getIndex();
+
+                    TranslateTransition transition = TranslateTransition transition = new TranslateTransition(Duration.millis(400), entity);
+                    transition.setFromX(oldX);
+                    transition.setFromY(oldY);
+                    transition.setToX(newX);
+                    transition.setToY(newY);
+
+                    transition.setOnFinished(event -> controller.moved());
+                    transition.play();
 
 
-                    enemies.stream().
-                            filter(x -> x.getLayoutX() == oldCoord.x() && x.getLayoutY() == oldCoord.y()).
-                            findAny().
-                            ifPresentOrElse(enemyToMove -> {
-                                        //TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
-                                        //transition.play();
-                                    },
-                                    () -> System.out.println("enemy not found")
-                            );
-
-                }
+                    if (index < 0) {
+                        player.setLayoutX(newX);
+                        player.setLayoutY(newY);
+                    } else {
+                        enemies.get(index).setLayoutX(newX);
+                        enemies.get(index).setLayoutY(newY);
+                    }
             }
                 case BOMB_RELEASED ->  {
                 doBombPowerUp();
@@ -271,8 +265,8 @@ public class GameView implements Observer {
                         filter(x -> x.getLayoutX() == cx && x.getLayoutY() == cy).
                         findAny().
                         ifPresentOrElse(enemyToMove -> {
-                            TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
-                            transition.play();
+                            //TranslateTransition transition = getTranslateTransition(newCoord, oldCoord, enemyToMove);
+                            //transition.play();
                             },
                                 () -> System.out.println("enemy not found")
                         );
@@ -304,7 +298,7 @@ public class GameView implements Observer {
                 BackgroundMusic.stopMusic();
                 //controller.stop();
                 allowKeyPress = false;
-                getLivesLabel().setText("Vite: " + 0);
+                livesLabel.setText("Vite: " + 0);
 
                 PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
                 pauseGameOver.setOnFinished(event -> {
@@ -350,21 +344,6 @@ public class GameView implements Observer {
         });
     }
 
-    private TranslateTransition getTranslateTransition(Coordinate newCoord, Coordinate oldCoord, ImageView entity) {
-
-        int oldX = oldCoord.x() * SCALE_FACTOR;
-        int oldY = oldCoord.y() * SCALE_FACTOR;
-
-        int newX = newCoord.x() * SCALE_FACTOR;
-        int newY = newCoord.y() * SCALE_FACTOR;
-
-        TranslateTransition transition = new TranslateTransition(Duration.millis(400), entity);
-        transition.setFromX(oldX);
-        transition.setFromY(oldY);
-        transition.setToX(newX);
-        transition.setToY(newY);
-        return transition;
-    }
 
     private void genPause() {
         Label resumeButton = SceneManager.getButton("resume", 0, Color.BLACK);
@@ -449,7 +428,7 @@ public class GameView implements Observer {
         });
 
         gameBoard.getChildren().addAll(gameOver, gameWin);
-        */
+
     }
 
 

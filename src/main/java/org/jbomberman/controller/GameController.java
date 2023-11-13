@@ -19,7 +19,7 @@ public class GameController {
     public Timeline timeline;
     public boolean isRespawning = false;
     private boolean isGamePaused;
-    private boolean isPlayerMoving;
+
 
     private static GameController instance;
     private Scene scene;
@@ -92,9 +92,7 @@ public class GameController {
         isGamePaused = false;
     }
 
-    public void moved(){
-        isPlayerMoving = !isPlayerMoving;
-    }
+
     public void stop() {
         timeline.stop();
     }
