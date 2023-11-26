@@ -41,6 +41,12 @@ public class UpdateInfo {
         this.index = index;
     }
 
+    public UpdateInfo(UpdateType updateType, ArrayList<Coordinate> array, int index) {
+        this.updateType = updateType;
+        this.array = array;
+        this.index = index;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }

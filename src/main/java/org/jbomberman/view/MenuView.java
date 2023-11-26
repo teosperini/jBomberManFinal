@@ -18,27 +18,19 @@ public class MenuView implements Observer{
 
     private Pane options;
     private Pane profile;
-    private final Profile profileGetter;
+    private Profile profileGetter;
 
     //per fare il label toggle, devo creare un label e impostare che sul click deve eseguire l'azione
 
-    private final MainController controller;
+    private MainController controller;
 
-
-
-    /**
-     * Constructor of the class
-     */
-    public MenuView() {
-        controller = MainController.getInstance();
-        profileGetter = new Profile();
-        initialize();
-    }
 
     /**
      * Initializes the menu
      */
     public void initialize() {
+        controller = MainController.getInstance();
+        profileGetter = new Profile();
         buttons();
         options();
         profile();

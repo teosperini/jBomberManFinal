@@ -47,3 +47,7 @@ S
 #.idea/sonarlint/issuestore/index.pb,9\f\9fe84ebb15faf917b7def6236dba604453cc61e0
 ]
 -.idea/sonarlint/securityhotspotstore/index.pb,8\8\88a9255124c95bdc913197c120a8d560edc59c8e
+d
+4src/main/java/org/jbomberman/utils/SceneManager.java,c\b\cb1fb550247fb689ebe698b8108ee2771982ab35
+a
+1src/main/java/org/jbomberman/model/MenuModel.java,7\3\73ef91d0af58797d212c3a0f5b8abb969f5cea9b

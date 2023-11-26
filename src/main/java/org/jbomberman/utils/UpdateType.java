@@ -1,15 +1,20 @@
 package org.jbomberman.utils;
 
 public enum UpdateType {
+    //U = Update
+    //L = Loading
     U_BLOCK_DESTROYED,
     U_POSITION,
-    GAME_WIN,
+    U_GAME_WIN,
     U_PU_BOMB,
     U_LIFE,
-    MORE_LIFE,
-    ENEMY_POSITION_CHANGED,
     U_ENEMY_DEAD,
     BOMB_RELEASED,
-    PAUSE,
-    END_PAUSE, GAME_EXIT, PROFILE_LOADER, LOAD_FIXED_BLOCKS, L_ENEMIES, LOAD_RANDOM_BLOCKS, L_PLAYER, LOAD_GROUND, L_MAP, U_RESPAWN, U_PU_LIFE, GAME_OVER
+    PROFILE_LOADER,
+    L_ENEMIES,
+    L_PLAYER,
+    L_MAP,
+    U_RESPAWN,
+    U_PU_LIFE,
+    L_PU_LIFE, L_PU_BOMB, U_GAME_OVER
 }

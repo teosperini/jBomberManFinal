@@ -16,14 +16,18 @@ public class JBomberMan extends Application {
     @Override
     public void start(Stage stage){
         this.stage = stage;
-        System.out.println("stronzo");
-        Image icon = new Image(getClass().getResourceAsStream("bomb/bomb_2.png"));
+        Image icon = new Image(getClass().getResourceAsStream("view/bomb/bomb_2.png"));
         stage.getIcons().add(icon);
+
+        System.out.println("romina");
 
         stage.setResizable(true);
         stage.setTitle("JBomberMan");
 
         MainController controller = MainController.getInstance();
+
+        System.out.println("dxfcghbjn");
+
         controller.setStage(stage);
         controller.initialize();
     }

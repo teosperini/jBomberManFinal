@@ -47,7 +47,7 @@ public class Profile {
         hbox.setAlignment(Pos.CENTER);
         hbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.0)");
         ImageView imageView1 = new ImageView(new Image("/org/jbomberman/EndermanFace.png"));
-        ImageView imageView2 = new ImageView(new Image("/org/jbomberman/steve.png"));
+        ImageView imageView2 = new ImageView(new Image("/org/jbomberman/view/definitive/steve.png"));
         imageView1.setFitHeight(50);
         imageView1.setFitWidth(50);
         imageView2.setFitHeight(50);

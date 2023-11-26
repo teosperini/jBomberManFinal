@@ -1,9 +1,12 @@
 package org.jbomberman.model;
 
+import org.jbomberman.utils.UpdateInfo;
+import org.jbomberman.utils.UpdateType;
+
 import java.util.Observable;
 
 public class MenuModel extends Observable {
-
+    /*
     public void loadProfile() {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.PAUSE));
@@ -17,6 +20,8 @@ public class MenuModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.GAME_EXIT));
     }
+
+     */
 
     public void loadProfileMenu() {
         setChanged();

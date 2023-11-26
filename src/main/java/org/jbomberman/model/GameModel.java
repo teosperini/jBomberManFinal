@@ -22,21 +22,21 @@ public class GameModel extends Observable {
     public final Coordinate MIN = new Coordinate(1,1);
     // COORDINATES OF THE TNT
     private Coordinate TNT_COORDINATES;
-    public int BOMB_RANGE = 1;
+    private int BOMB_RANGE = 1;
 
     //coordinate power up
-    public Coordinate FIRE_PU;
-    public Coordinate LIFE_PU;
+    private Coordinate bombPu;
+    private Coordinate lifePu;
 
-    public int PLAYER_HP = 3;
-    public Coordinate playerPosition = new Coordinate(1,1);
+    private int PLAYER_HP = 3;
+    private Coordinate playerPosition = new Coordinate(1,1);
 
     // how much the character can move every time a key is pressed
-    public final int MOVEMENT = 1;
+    private final int MOVEMENT = 1;
     // how many random blocks are going to spawn
-    public int NUM_RND_BLOCKS = 20;
+    private int NUM_RND_BLOCKS = 20;
     // the coordinates of the winning cell
-    public Coordinate EXIT;
+    private Coordinate EXIT;
 
     public GameModel() {
         initialize();
@@ -51,23 +51,31 @@ public class GameModel extends Observable {
 
     public void ready() {
         setChanged();
-        notifyObservers(new LoadMap(COORDINATE_GROUND, 0));
+        notifyObservers(new UpdateInfo(UpdateType.L_MAP, COORDINATE_GROUND, 0));
         setChanged();
-        notifyObservers(new LoadMap(COORDINATES_FIXED_BLOCKS, 1));
+        notifyObservers(new UpdateInfo(UpdateType.L_MAP, COORDINATES_FIXED_BLOCKS, 1));
         setChanged();
-        notifyObservers(new LoadDestroyable(COORDINATES_RANDOM_BLOCKS));
+        notifyObservers(new UpdateInfo(UpdateType.L_MAP, COORDINATES_RANDOM_BLOCKS, 2));
         setChanged();
-        notifyObservers(new USpawnEntity(COORDINATE_ENEMIES, playerPosition));
-
+        notifyObservers(new UpdateInfo(UpdateType.L_PLAYER, playerPosition));
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.L_ENEMIES, COORDINATE_ENEMIES));
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.L_PU_BOMB, bombPu));
     }
 
     private void powerUP() {
         Random random = new Random();
-        int randomIndex = random.nextInt(COORDINATES_RANDOM_BLOCKS.size());
-        FIRE_PU = COORDINATES_RANDOM_BLOCKS.get(randomIndex);
-        if (FIRE_PU.equals(EXIT)){
-            powerUP();
+        int randomFire = random.nextInt(COORDINATES_RANDOM_BLOCKS.size());
+        bombPu = COORDINATES_RANDOM_BLOCKS.get(randomFire);
+        int randomLife = random.nextInt(COORDINATES_RANDOM_BLOCKS.size());
+        lifePu = COORDINATES_RANDOM_BLOCKS.get(randomLife);
+        if (bombPu.equals(EXIT) || lifePu.equals(EXIT)){
+             powerUP();
+        } else {
+
         }
+
     }
 
 
@@ -75,16 +83,12 @@ public class GameModel extends Observable {
         generateFixedBlocks();
         generateRandomBlocks();
         generateRandomExit();
-        drawBackground();
+        generateBackground();
     }
 
     private void generateFixedBlocks() {
         // generates the coordinates of the internal fixed blocks
-        for (int x = MIN.x() + 1; x <= MAX.x(); x += 2) {
-            for (int y = MIN.y() + 1; y <= MAX.y(); y += 2) {
-                COORDINATES_FIXED_BLOCKS.add(new Coordinate(x, y));
-            }
-        }
+
     }
 
     private void generateRandomBlocks() {
@@ -114,12 +118,30 @@ public class GameModel extends Observable {
         EXIT = COORDINATES_RANDOM_BLOCKS.get(randomIndex);
     }
 
-    private void drawBackground() {
+    private void generateBackground() {
         for (int x = 1; x <= 15; x += 1) {
-            for (int y = 1; y < 11; y += 1) {
+            for (int y = 1; y < 10; y += 1) {
                 COORDINATE_GROUND.add(new Coordinate(x, y));
             }
         }
+
+        for (int x = MIN.x() + 1; x <= MAX.x(); x += 2) {
+            for (int y = MIN.y() + 1; y <= MAX.y(); y += 2) {
+                COORDINATES_FIXED_BLOCKS.add(new Coordinate(x, y));
+            }
+        }
+
+        for (int x = 0; x <= MAX.x() + 1; x += 1) {
+            for (int y = 0; y <= MAX.y() + 1; y += 1) {
+                // Verifica se la coordinata è ai bordi
+                if (x == 0 || x == MAX.x()+1 || y == 0 || y == MAX.y()+1) {
+                    // Fai qualcosa con la coordinata ai bordi
+                    // Esempio:
+                    COORDINATES_FIXED_BLOCKS.add(new Coordinate(x, y));
+                }
+            }
+        }
+
     }
 
     boolean isBombExploding = false;
@@ -189,7 +211,6 @@ public class GameModel extends Observable {
             defeat();
         }
         else {
-
             PauseTransition respawn = new PauseTransition(Duration.millis(400));
             respawn.setOnFinished(event -> {
                 playerPosition = new Coordinate(1,1);
@@ -245,14 +266,14 @@ public class GameModel extends Observable {
 
     public void powerUpBiggerExplosion(){
         BOMB_RANGE += 1;
-        FIRE_PU = null;
+        bombPu = null;
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_PU_BOMB));
     }
 
     public void powerUpIncreaseLife(){
         PLAYER_HP += 1;
-        LIFE_PU = null;
+        lifePu = null;
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE));
     }
@@ -266,16 +287,14 @@ public class GameModel extends Observable {
         Coordinate oldPosition = playerPosition;
         Coordinate newPosition = calculateNewPosition(keyCode, playerPosition);
 
-        System.out.println("new position: " + newPosition + " old position: " + oldPosition);
-
-        if (!newPosition.equals(playerPosition) && !collisione(newPosition)) {
+        if (!newPosition.equals(oldPosition) && !collision(newPosition)) {
             updatePlayerPosition(newPosition, oldPosition);
 
             if (newPosition.equals(EXIT) && COORDINATE_ENEMIES.isEmpty()) {
                 victory();
-            } else if (newPosition.equals(FIRE_PU)) {
+            } else if (newPosition.equals(bombPu)) {
                 powerUpBiggerExplosion();
-            } else if (newPosition.equals(LIFE_PU)){
+            } else if (newPosition.equals(lifePu)){
                 powerUpIncreaseLife();
             }
         }
@@ -319,11 +338,11 @@ public class GameModel extends Observable {
 
     /**
      * Checks if the given coordinate collides with an existing fixed block or random block.
-     * @param coord
+     * @param coordinate
      * @return true if the given coordinate collides with an existing fixed block or random block.
      */
-    private boolean collisione(Coordinate coord) {
-        return (COORDINATES_FIXED_BLOCKS.contains(coord) || COORDINATES_RANDOM_BLOCKS.contains(coord) || (TNT_COORDINATES != null && TNT_COORDINATES.equals(coord)));
+    private boolean collision(Coordinate coordinate) {
+        return (COORDINATES_FIXED_BLOCKS.contains(coordinate) || COORDINATES_RANDOM_BLOCKS.contains(coordinate) || (TNT_COORDINATES != null && TNT_COORDINATES.equals(coordinate)));
     }
 
     private void notifyBlockRemoved(int blockToRemove) {
@@ -333,28 +352,29 @@ public class GameModel extends Observable {
 
     private void victory() {
         setChanged();
-        //notifyObservers(new UpdateInfo(UpdateType.GAME_WIN));
-        COORDINATES_RANDOM_BLOCKS.clear();
-        playerPosition = new Coordinate(1,1);
-        PLAYER_HP = 3;
-        BOMB_RANGE = 1;
+        notifyObservers(new UpdateInfo(UpdateType.U_GAME_WIN));
+        resetModel();
     }
 
     private void defeat() {
-        //notificare la sconfitta
         setChanged();
-        //notifyObservers(new UpdateInfo(UpdateType.GAME_OVER));
+        notifyObservers(new UpdateInfo(UpdateType.U_GAME_OVER));
+        resetModel();
+    }
+
+    private void resetModel() {
         COORDINATES_RANDOM_BLOCKS.clear();
+        COORDINATE_ENEMIES.clear();
         playerPosition = new Coordinate(1,1);
         PLAYER_HP = 3;
         BOMB_RANGE = 1;
     }
 
     public void updatePlayerPosition(Coordinate coordinate, Coordinate oldPosition) {
-        System.out.println("updating enemy position: " + oldPosition + "->" + coordinate);
+        //System.out.println("new position: " + coordinate + " old position: " + oldPosition);
         playerPosition = coordinate;
         setChanged();
-        notifyObservers(new UMovement(oldPosition,coordinate, -1));
+        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,coordinate, -1));
         controlPosition();
     }
 
@@ -364,7 +384,7 @@ public class GameModel extends Observable {
         while (i < NUMBER_OF_ENEMIES) {
             Coordinate coord = new Coordinate(random.nextInt(MAX.x()), random.nextInt(MAX.y()));
 
-            if ((coord.x() + coord.y() > 3) && !collisione(coord)) {
+            if ((coord.x() + coord.y() > 3) && !collision(coord)) {
                 COORDINATE_ENEMIES.add(coord);
                 i++;
             }
@@ -386,7 +406,7 @@ public class GameModel extends Observable {
         do {
             KeyCode keyCode = ENEMY_MOVES.get(random.nextInt(ENEMY_MOVES.size()));
             newEnemyPosition = calculateNewPosition(keyCode, oldEnemyPosition);
-        } while (collisione(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition));
+        } while (collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition));
 
         // the enemy didn't move: do nothing
         if (newEnemyPosition.equals(oldEnemyPosition)) return;
@@ -408,23 +428,8 @@ public class GameModel extends Observable {
         }
     }
 
-    public void gamePause() {
-        setChanged();
-        //(new UpdateInfo(UpdateType.PAUSE));
-    }
-
-    public void gameResume() {
-        setChanged();
-        //notifyObservers(new UpdateInfo(UpdateType.END_PAUSE));
-    }
-
-    public void gameExit(){
-        setChanged();
-        //notifyObservers(new UpdateInfo(UpdateType.GAME_EXIT));
-        COORDINATES_RANDOM_BLOCKS.clear();
-        playerPosition = new Coordinate(1,1);
-        PLAYER_HP = 3;
-        BOMB_RANGE = 1;
+    public void gameReset(){
+        resetModel();
     }
 
     public void respawn() {

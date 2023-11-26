@@ -14,12 +14,7 @@ import javafx.util.Duration;
 
 public class GameController {
     // model
-    public GameModel model;
-    private GameView gameView;
-    public Timeline timeline;
-    public boolean isRespawning = false;
-    private boolean isGamePaused;
-
+    /*
 
     private static GameController instance;
     private Scene scene;
@@ -79,30 +74,8 @@ public class GameController {
                 model.movePlayer(keyCode);
                 isRespawning = false;
             }
-        }
-    }
-    public void pause(){
-        timeline.pause();
-        model.gamePause();
-        isGamePaused = true;
-    }
-    public void resume(){
-        timeline.play();
-        model.gameResume();
-        isGamePaused = false;
-    }
 
 
-    public void stop() {
-        timeline.stop();
-    }
 
-    public void exit() {
-        model.gameExit();
-    }
-
-    public void newGame() {
-        initialize();
-    }
-
+     */
 }

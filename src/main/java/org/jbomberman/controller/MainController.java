@@ -1,7 +1,12 @@
 package org.jbomberman.controller;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import org.jbomberman.model.GameModel;
 import org.jbomberman.model.MenuModel;
+import org.jbomberman.utils.BackgroundMusic;
 import org.jbomberman.utils.SceneManager;
 import org.jbomberman.view.GameView;
 import org.jbomberman.view.MenuView;
@@ -22,17 +27,14 @@ public class MainController {
     Stage stage;
     Scene scene;
 
-    private boolean isPlayerMoving;
-    public boolean isRespawning = false;
+    private Timeline mobMovement = new Timeline();
 
-    private boolean isGamePaused = false;
+    private boolean moving = false;
+    private boolean pause = false;
 
     private static MainController instance;
 
     private MainController() {
-        menuView = new MenuView();
-        model = new MenuModel();
-        model.addObserver(menuView);
     }
 
     public static MainController getInstance() {
@@ -48,7 +50,10 @@ public class MainController {
 
 
     public void initialize(){
-
+        menuView = new MenuView();
+        model = new MenuModel();
+        model.addObserver(menuView);
+        menuView.initialize();
         gameView = new GameView();
         gameModel = new GameModel();
         gameModel.addObserver(gameView);
@@ -57,6 +62,7 @@ public class MainController {
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
         stage.setScene(scene);
+        System.out.println("eeegh");
         stage.show();
     }
 
@@ -64,6 +70,11 @@ public class MainController {
 
     public void gameButtonPressed() {
         scene.setRoot(gameView.getGame());
+        //faccio ripartire il controller
+        //in caso io finisca una partita (sia vinta che persa), e ne ricominci un'altra senza uscire
+        //dal gioco, devo far ripartire i movimenti dei mob che erano stati fermati dalla chiamata
+        //di pauseController() alla fine del gioco
+        resumeController();
     }
 
     public void loadProfile() {
@@ -78,12 +89,16 @@ public class MainController {
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
         if (keyCode == KeyCode.ESCAPE){
-            pause();
-        } else if (isGamePaused || isRespawning || isPlayerMoving){
+            pauseController();
+        } else if (!pause && !moving){
+            // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
+            // per uscire ne si possono muovere i mob
+            // se il player si sta muovendo o sta respawnando non devo permettere di ricevere input
+            //ma i mob devono continuare a muoversi
             if (keyCode == KeyCode.SPACE) {
                 // if space is pressed we try to release a bomb
                 // evitare che nel respawn venga data la possibilità di droppare una bomba
-                gameModel.releaseBomb();
+                //gameModel.releaseBomb();
             } else {
                 // else if an arrow key is pressed we move the player
                 gameModel.movePlayer(keyCode);
@@ -91,45 +106,43 @@ public class MainController {
         }
     }
 
-    public void stop() {
-        //timeline.stop();
-    }
-
-    //HANDLING OF BUTTONS IN GAME
-    public void pause() {
-        isGamePaused = !isGamePaused;
-        if (isGamePaused){
-
-        }
-        //timeline.pause();
-        gameModel.gamePause();
-
-
-    }
-
-    public void resume() {
-        //timeline.play();
-        gameModel.gameResume();
-        //isGamePaused = false;
-    }
-    public void quitMatch() {
-        scene.setRoot(menuView.getMenu());
-    }
-
     public void newGame() {
         gameView = new GameView();
-        //gameModel.reset()
         gameModel.addObserver(gameView);
+        setTimeline();
     }
 
-
-
-
-    public void moved(){
-        isPlayerMoving = !isPlayerMoving;
+    public void pauseController() {
+        pause = true;
+        gameView.pauseView();
+        mobMovement.pause();
     }
 
-    public void respawning(boolean b) {
-        isRespawning = b;
+    public void resumeController() {
+        pause = false;
+        gameView.resumeView();
+        mobMovement.play();
+    }
+
+    public void moving(boolean bool) {
+        moving = bool;
+    }
+
+    public void quitMatch() {
+        BackgroundMusic.stopMusic();
+        scene.setRoot(menuView.getMenu());
+        gameModel.gameReset();
+        gameView = null;
+        //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
+    }
+
+    private void setTimeline(){
+        mobMovement = new Timeline(
+                new KeyFrame(Duration.millis(1200), event ->
+                        gameModel.moveEnemies())
+        );
+        mobMovement.setCycleCount(Animation.INDEFINITE);
+        mobMovement.play();
     }
 }
+

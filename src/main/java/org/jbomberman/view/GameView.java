@@ -1,10 +1,10 @@
 package org.jbomberman.view;
 
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
 import javafx.animation.PauseTransition;
-import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -30,8 +30,7 @@ public class GameView implements Observer {
 
     public static final int SCALE_FACTOR = 35;
 
-    ImageView fireImageView;
-    ImageView oneUp;
+
     Font labelFont = Font.loadFont(getClass().getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 20.0);
     Pane gameOver;
     Pane gameWin;
@@ -39,15 +38,18 @@ public class GameView implements Observer {
     Pane options;
 
     ImageView player;
+    ImageView pu_bomb;
+    ImageView pu_life;
+    ImageView exit;
+
+    private boolean playerTransitionStarted= false;
+    private TranslateTransition playerTransition = new TranslateTransition(Duration.millis(400), player);
 
     private final MainController controller;
 
     private final List<ImageView> randomBlocks;
     private final List<ImageView> enemies;
-    private boolean isBombExploding = false;
-    private boolean allowKeyPress = true;
 
-    private int player_HP = 3;
     private static final HBox BOTTOM_BAR = new HBox();
 
     Label restartLabel;
@@ -57,18 +59,17 @@ public class GameView implements Observer {
     Label pointsLabel;
     Label timerLabel;
 
-    private final AudioClip boom = new AudioClip(getClass().getResource("/org/jbomberman/utils/tnt_exp.mp3").toExternalForm());
-
     private enum BlockImage {
+        //bomb is the real bomb, fire is the power_up
         BEDROCK(BlockImage.class.getResourceAsStream("definitive/static_block.png")),
         STONE(BlockImage.class.getResourceAsStream("definitive/random_block.png")),
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
-        STEVE(BlockImage.class.getResourceAsStream("down/image_2.png")),
-        DOOR(BlockImage.class.getResourceAsStream("definitive/door.png")),
+        STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
+        DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_1.png")),
-        ENEMY(BlockImage.class.getResourceAsStream("enemy.png")),
+        ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
-        LIFE(BlockImage.class.getResourceAsStream("power_up/life.png"))
+        LIFE(BlockImage.class.getResourceAsStream("power_up/fire.png"))
         ;
 
         private final Image image;
@@ -80,10 +81,11 @@ public class GameView implements Observer {
         public Image getImage() {
             return image;
         }
+
     }
 
-
     public GameView() {
+        System.out.println("pezzo di merd");
         controller = MainController.getInstance();
         gameBoard = new AnchorPane();
         randomBlocks = new ArrayList<>();
@@ -92,14 +94,10 @@ public class GameView implements Observer {
     }
 
     public void initialize() {
-
-        allowKeyPress = true;
-        //genPause();
-        //genWinLose();
+        genPause();
+        genWinLose();
         addBottomBar();
-        if (allowKeyPress) {
-            gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
-        }
+        gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
     }
 
     public AnchorPane getGame() {
@@ -114,7 +112,7 @@ public class GameView implements Observer {
         PauseTransition removeTNT = new PauseTransition(Duration.millis(650));
         spawnTNT.setOnFinished(event -> {
             player.toFront();
-            boom.play();
+            BackgroundMusic.playBomb();
             pauseTNT.play();
         });
 
@@ -180,17 +178,21 @@ public class GameView implements Observer {
 
         if (arg instanceof UpdateInfo updateInfo) {
             UpdateType updateType = updateInfo.getUpdateType();
+
             switch (updateType) {
 
                 case L_MAP -> {
                     switch (updateInfo.getIndex()) {
-                        case 0 -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                        case 0 -> {loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                            System.out.println("AAAAAAAAAAAAAAAA");
+                        }
                         case 1 -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
                         case 2 -> updateInfo.getArray().forEach(coordinate -> {
                             ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
                             randomBlocks.add(image);
                             gameBoard.getChildren().add(image);
                         });
+                        default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
                     }
                 }
 
@@ -198,19 +200,17 @@ public class GameView implements Observer {
                     player = drawImage(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
                     gameBoard.getChildren().add(player);
                 }
-                case L_ENEMIES -> {
-                    updateInfo.getArray().forEach(coordinate ->  {
+
+                case L_ENEMIES -> updateInfo.getArray().forEach(coordinate ->  {
                         ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
                         enemies.add(enemy);
                         gameBoard.getChildren().add(enemy);
                     });
-                }
-
 
                 case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
                 case U_ENEMY_DEAD -> destroyEntity(enemies, updateInfo.getIndex());
-
+/*
                 case U_POSITION -> {
                     Coordinate newCoord = updateInfo.getNewCoord();
                     Coordinate oldCoord = updateInfo.getOldCoord();
@@ -222,18 +222,52 @@ public class GameView implements Observer {
                     int index = updateInfo.getIndex();
 
                     if (index < 0) {
+                        System.out.println("old " + oldX +" "+ oldY + " current " + newX + " " + newY);
                         player.setLayoutX(newX);
                         player.setLayoutY(newY);
-                        /*
+                        //System.out.println(newX + " "+ player.getLayoutX());
+
+/*
+                        //PROBLEMA CON IL CALCOLO DELLE POSIZIONI
                         TranslateTransition transition = new TranslateTransition(Duration.millis(400), player);
                         transition.setFromX(oldX);
                         transition.setFromY(oldY);
-                        transition.setToX(newX);
-                        transition.setToY(newY);
+                        transition.setToX(newCoord.x()*SCALE_FACTOR);
+                        transition.setToY(newCoord.y()*SCALE_FACTOR);
 
-                        transition.setOnFinished(event -> controller.moved());
+                        //transition.setOnFinished(event -> controller.moved());
                         transition.play();
-                         */
+
+ */
+
+/*
+
+                    } else {
+                        enemies.get(index).setLayoutX(newX);
+                        enemies.get(index).setLayoutY(newY);
+                    }
+                }
+
+ */
+                case U_POSITION -> {
+                    Coordinate newCoord = updateInfo.getNewCoord();
+                    int newX = newCoord.x() * SCALE_FACTOR;
+                    int newY = newCoord.y() * SCALE_FACTOR;
+
+                    int index = updateInfo.getIndex();
+
+                    if (index < 0) {
+                        // Imposta il punto di partenza solo una volta
+                        if (!playerTransitionStarted) {
+                            playerTransition.setFromX(35);
+                            playerTransition.setFromY(35);
+                            playerTransitionStarted = true;
+                        }
+
+                        // Imposta il punto di arrivo
+                        playerTransition.setToX(newX);
+                        playerTransition.setToY(newY);
+                        playerTransition.play();
                     } else {
                         enemies.get(index).setLayoutX(newX);
                         enemies.get(index).setLayoutY(newY);
@@ -241,95 +275,101 @@ public class GameView implements Observer {
                 }
 
                 case U_RESPAWN -> {
-                    controller.respawning(true);
+                    controller.moving(true);
                     Coordinate coordinate = updateInfo.getCoordinate();
-
-                    PauseTransition pauseLessLife = new PauseTransition(Duration.millis(400));
-                    pauseLessLife.setOnFinished(event -> {
-                        player.setLayoutX(coordinate.x());
-                        player.setLayoutY(coordinate.y());
+                    System.out.println("coordinate respawn" +coordinate);
+                    PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+                    pauseRespawn.setOnFinished(event -> {
+                        player.setLayoutX(coordinate.x() * SCALE_FACTOR);
+                        player.setLayoutY(coordinate.y() * SCALE_FACTOR);
                         updateLife(updateInfo.getIndex());
-                        controller.respawning(false);
+                        controller.moving(false);
                     });
-                    pauseLessLife.play();
+                    pauseRespawn.play();
                 }
 
+                case L_PU_LIFE -> {
+                    Coordinate coordinate = updateInfo.getCoordinate();
+                    pu_life = new ImageView(BlockImage.LIFE.getImage());
+                    pu_life.setLayoutX(coordinate.x());
+                    pu_life.setLayoutY(coordinate.y());
+                    gameBoard.getChildren().add(pu_life);
+                }
                 case U_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
 
+                case L_PU_BOMB ->{
+                    Coordinate coordinate = updateInfo.getCoordinate();
+                    pu_bomb = new ImageView(BlockImage.BOMB.getImage());
+                    pu_bomb.setLayoutY(coordinate.x());
+                    pu_bomb.setLayoutY(coordinate.y());
+                    gameBoard.getChildren().add(pu_bomb);
+                }
                 case U_PU_BOMB -> doBombPowerUp();
 
                 case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
-                case PAUSE -> {
-                    pause.setVisible(true);
-                    pause.requestFocus();
+                case U_GAME_WIN -> {
+                    controller.pauseController();
+                    PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
+                    pauseGameWin.setOnFinished(event -> {
+                        gameWin.toFront();
+                        gameWin.setVisible(true);
+                        gameWin.requestFocus();
+                    });
+                    pauseGameWin.play();
                 }
 
-
-            case END_PAUSE -> {
-                pause.setVisible(false);
-                gameBoard.requestFocus();
-            }
-
-            case GAME_WIN -> {
-                BackgroundMusic.stopMusic();
-                //controller.stop();
-                allowKeyPress = false;
-
-
-                PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
-                pauseGameWin.setOnFinished(event -> {
-                    gameWin.setVisible(true);
-                });
-                pauseGameWin.play();
-            }
-
-            case GAME_OVER -> {
-                BackgroundMusic.stopMusic();
-                //controller.stop();
-                allowKeyPress = false;
-                livesLabel.setText("Vite: " + 0);
-
-                PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
-                pauseGameOver.setOnFinished(event -> {
-                    gameOver.setVisible(true);
-                    gameOver.requestFocus();
-                });
-                pauseGameOver.play();
-            }
-
-            case GAME_EXIT -> {
-                //a che cazzo serve sto coso?
-                BackgroundMusic.stopMusic();
-                controller.stop();
-                allowKeyPress = false;
-                controller.quitMatch();
-            }
+                case U_GAME_OVER -> {
+                    PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
+                    pauseGameOver.setOnFinished(event -> {
+                        gameOver.toFront();
+                        gameOver.setVisible(true);
+                        gameOver.requestFocus();
+                    });
+                    pauseGameOver.play();
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
         }
+    }
+
+    public void pauseView(){
+        pause.toFront();
+        pause.setVisible(true);
+        pause.requestFocus();
+    }
+
+    public void resumeView() {
+        pause.setVisible(false);
+        gameBoard.toFront();
+        gameBoard.requestFocus();
     }
 
     private void updateLife(int index){
         livesLabel.setText("Vite: " + index);
     }
+
     private void doLifePowerUp(int index) {
         updateLife(index);
-        PauseTransition pauseRemovePowerUp = new PauseTransition(Duration.millis(200));
-        pauseRemovePowerUp.setOnFinished(event -> gameBoard.getChildren().remove(oneUp));
-        pauseRemovePowerUp.play();
+        powerUPs(pu_life, 1);
     }
 
     private void doBombPowerUp(){
-    PauseTransition pauseRemovePowerUp = new PauseTransition(Duration.millis(200));
-    pauseRemovePowerUp.setOnFinished(event -> gameBoard.getChildren().remove(fireImageView));
-    pauseRemovePowerUp.play();
+        powerUPs(pu_bomb, 2);
+    }
 
-    ImageView imageView = new ImageView(BlockImage.FIRE.getImage());
-    imageView.setLayoutY(SCALE_FACTOR);
-    imageView.setLayoutX(SCALE_FACTOR);
-    BOTTOM_BAR.setAlignment(Pos.BOTTOM_LEFT);
-    HBox.setMargin(imageView, new Insets(0, 0, 10, 0));
-    BOTTOM_BAR.getChildren().add(imageView);
+    private void powerUPs(ImageView imageView, double i) {
+        PauseTransition removePU = new PauseTransition(Duration.millis(200));
+        removePU.setOnFinished(event -> gameBoard.getChildren().remove(imageView));
+        removePU.play();
+
+        imageView.setLayoutY(SCALE_FACTOR);
+        imageView.setLayoutX(SCALE_FACTOR);
+        BOTTOM_BAR.setAlignment(Pos.BOTTOM_LEFT);
+        //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che
+        //power up è
+        HBox.setMargin(imageView, new Insets(0, 0, i * 10, 0));
+        BOTTOM_BAR.getChildren().add(imageView);
     }
 
     private void destroyEntity(List<ImageView> array, int index) {
@@ -339,10 +379,9 @@ public class GameView implements Observer {
 
     private void loader(ArrayList<Coordinate> array, Image image) {
         array.forEach(coordinate -> {
-            drawImage(coordinate, image);
+            gameBoard.getChildren().add(drawImage(coordinate, image));
         });
     }
-
 
     private void genPause() {
         Label resumeButton = SceneManager.getButton("resume", 0, Color.BLACK);
@@ -362,7 +401,7 @@ public class GameView implements Observer {
         gameBoard.getChildren().addAll(pause, options);
 
 
-        resumeButton.setOnMouseClicked(event -> controller.resume());
+        resumeButton.setOnMouseClicked(event -> controller.resumeController());
 
         optionsButton.setOnMouseClicked(event -> {
             pause.setVisible(false);
@@ -382,6 +421,11 @@ public class GameView implements Observer {
     private void genWinLose() {
         gameOver = SceneManager.getSTPane("GAME OVER", 40);
         gameWin = SceneManager.getSTPane("YOU WON", 40);
+
+        //perchè li sto facendo così e non a pulsanti?
+        //tipo "next level", "main menu"
+        //che sarebbe molto più semplice?
+        //TODO cambiare in quello che scritto sopra
         restartLabel = new Label("Press ENTER to restart the game");
         nextLevelLabel = new Label("Press SPACE to go to the next level");
         escLabel = new Label("Press ESC to go back to the main menu");
@@ -413,7 +457,6 @@ public class GameView implements Observer {
         gameOver.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
                 controller.newGame();
-                //model.initialize();
             } else if (keyEvent.getCode() == KeyCode.ESCAPE) {
                 controller.quitMatch();
             }
@@ -429,8 +472,4 @@ public class GameView implements Observer {
         gameBoard.getChildren().addAll(gameOver, gameWin);
 
     }
-
-
-
-
 }
