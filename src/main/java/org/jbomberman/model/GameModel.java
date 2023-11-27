@@ -1,10 +1,7 @@
 package org.jbomberman.model;
 
-import org.jbomberman.updatemanager.*;
 import org.jbomberman.utils.*;
-import javafx.animation.PauseTransition;
 import javafx.scene.input.KeyCode;
-import javafx.util.Duration;
 
 import java.util.*;
 
@@ -16,7 +13,7 @@ public class GameModel extends Observable {
     private static final ArrayList<Coordinate> COORDINATES_RANDOM_BLOCKS = new ArrayList<>();
     private static final ArrayList<Coordinate> COORDINATE_ENEMIES = new ArrayList<>();
 
-    private static final ArrayList<KeyCode> ENEMY_MOVES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
+    private static final ArrayList<KeyCode> KEY_CODES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
     // LIMITS OF THE MAP
     public final Coordinate max = new Coordinate(15, 9);
     public final Coordinate min = new Coordinate(1,1);
@@ -34,7 +31,7 @@ public class GameModel extends Observable {
     // how much the character can move every time a key is pressed
     private final int movement = 1;
     // how many random blocks are going to spawn
-    private final int numRndBlocks = 70;
+    private final int numRndBlocks = 20;
     // the coordinates of the winning cell
     private Coordinate exit;
 
@@ -256,7 +253,7 @@ public class GameModel extends Observable {
 
         if (!newPosition.equals(oldPosition) && !collision(newPosition)) {
             playerPosition = newPosition;
-            notifyPlayerPosition(newPosition, oldPosition);
+            notifyPlayerPosition(newPosition, oldPosition, keyCode.getName());
 
             if (newPosition.equals(exit) && COORDINATE_ENEMIES.isEmpty()) {
                 notifyVictory();
@@ -354,9 +351,9 @@ public class GameModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.U_ENEMY_DEAD, index));
     }
 
-    public void notifyPlayerPosition(Coordinate coordinate, Coordinate oldPosition) {
+    public void notifyPlayerPosition(Coordinate coordinate, Coordinate oldPosition, String name) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,coordinate, -1));
+        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,coordinate, name, -1));
         controlPosition();
     }
 
@@ -407,14 +404,14 @@ public class GameModel extends Observable {
 
     public void calculateNewEnemyPosition(int enemyId) {
         Coordinate oldEnemyPosition = COORDINATE_ENEMIES.get(enemyId);
-        int randomInt = random.nextInt(ENEMY_MOVES.size());
+        int randomInt = random.nextInt(KEY_CODES.size());
         Coordinate newEnemyPosition;
         int i = 0;
         do{
-            newEnemyPosition = calculateNewPosition(ENEMY_MOVES.get((randomInt + i)%4), oldEnemyPosition);
+            newEnemyPosition = calculateNewPosition(KEY_CODES.get((randomInt + i)%4), oldEnemyPosition);
             i++;
 
-        } while((collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition)) && i < 4);
+        } while((collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition)|| !isSafeZone(newEnemyPosition)) && i < 4);
 
         if (i != 4){
             COORDINATE_ENEMIES.set(enemyId, newEnemyPosition);
@@ -422,6 +419,9 @@ public class GameModel extends Observable {
         }
     }
 
+    private boolean isSafeZone(Coordinate newEnemyPosition) {
+        return (newEnemyPosition.x()+newEnemyPosition.y() >3);
+    }
 
 
 //####################################  END OF THE MATCH  ####################################//

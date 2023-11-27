@@ -51,3 +51,5 @@ d
 4src/main/java/org/jbomberman/utils/SceneManager.java,c\b\cb1fb550247fb689ebe698b8108ee2771982ab35
 a
 1src/main/java/org/jbomberman/model/MenuModel.java,7\3\73ef91d0af58797d212c3a0f5b8abb969f5cea9b
+a
+1src/main/java/org/jbomberman/utils/Direction.java,a\a\aacf9bd8c129b38afd770490bd8241597ec7bd7f

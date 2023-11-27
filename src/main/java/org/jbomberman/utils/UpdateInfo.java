@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 public class UpdateInfo {
     private final UpdateType updateType;
+    private String name;
     private Coordinate oldc;
     private Coordinate newc;
-    private Coordinate coordinate;
+    private Coordinate c;
     private ArrayList<Coordinate> array;
     private int index;
 
@@ -18,13 +19,13 @@ public class UpdateInfo {
     }
     public UpdateInfo(UpdateType updateType, Coordinate coordinate, int index) {
         this.updateType = updateType;
-        this.coordinate = coordinate;
+        this.c = coordinate;
         this.index = index;
     }
 
-    public UpdateInfo(UpdateType updateType, Coordinate coordinate) {
+    public UpdateInfo(UpdateType updateType, Coordinate c) {
         this.updateType = updateType;
-        this.coordinate = coordinate;
+        this.c = c;
     }
 
     public UpdateInfo(UpdateType updateType) {
@@ -47,6 +48,14 @@ public class UpdateInfo {
         this.index = index;
     }
 
+    public UpdateInfo(UpdateType updateType, Coordinate oldc, Coordinate newc, String name, int index) {
+        this.updateType = updateType;
+        this.oldc = oldc;
+        this.newc = newc;
+        this.name = name;
+        this.index = index;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }
@@ -60,7 +69,7 @@ public class UpdateInfo {
     }
 
     public Coordinate getCoordinate() {
-        return coordinate;
+        return c;
     }
 
     public ArrayList<Coordinate> getArray() {

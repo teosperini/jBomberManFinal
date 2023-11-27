@@ -1,8 +1,8 @@
 package org.jbomberman.view;
 
 import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
@@ -57,6 +57,7 @@ public class GameView implements Observer {
     Label pointsLabel;
     Label timerLabel;
 
+
     private enum BlockImage {
         //bomb is the real bomb, fire is the power_up
         BEDROCK(BlockImage.class.getResourceAsStream("definitive/static_block.png")),
@@ -81,6 +82,8 @@ public class GameView implements Observer {
         }
 
     }
+
+
 
     public GameView() {
         System.out.println("pezzo di merd");
@@ -237,16 +240,10 @@ public class GameView implements Observer {
 
                 case U_RESPAWN -> {
                     controller.moving(true);
-                    Coordinate coordinate = updateInfo.getCoordinate();
-                    PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+                    PauseTransition pauseRespawn = getPauseTransition();
 
-                    pauseRespawn.setOnFinished(event -> {
-                        player.setTranslateX(0);
-                        player.setTranslateY(0);
-                        player.setLayoutX(coordinate.x()*SCALE_FACTOR);
-                        player.setLayoutY(coordinate.y()*SCALE_FACTOR);
-                        controller.moving(false);
-                    });
+
+                    updateLife(updateInfo.getIndex());
                     pauseRespawn.play();
                 }
 
@@ -291,8 +288,21 @@ public class GameView implements Observer {
         }
     }
 
-    private void gameOverAnimation(Coordinate coordinate) {
+    private PauseTransition getPauseTransition() {
+        PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+        pauseRespawn.setOnFinished(event -> {
+            player.setTranslateX(0);
+            player.setTranslateY(0);
+            controller.moving(false);
+        });
+        return pauseRespawn;
+    }
 
+    private AnimationTimer animationTimer(){
+        return null;
+    }
+    private void gameOverAnimation(Coordinate coordinate) {
+        //TODO
     }
 
     public void pauseView(){
