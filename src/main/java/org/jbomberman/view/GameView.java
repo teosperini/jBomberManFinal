@@ -1,6 +1,8 @@
 package org.jbomberman.view;
 
+import javafx.animation.Animation;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
@@ -40,9 +42,6 @@ public class GameView implements Observer {
     ImageView pu_bomb;
     ImageView pu_life;
     ImageView exit;
-
-    private boolean playerTransitionStarted= false;
-    private TranslateTransition playerTransition = new TranslateTransition(Duration.millis(400), player);
 
     private final MainController controller;
 
@@ -137,10 +136,10 @@ public class GameView implements Observer {
 
     private ImageView drawImage(Coordinate c, Image image) {
         ImageView imageView = new ImageView(image);
-        imageView.setLayoutX((double)c.x() * GameView.SCALE_FACTOR);
-        imageView.setLayoutY((double)c.y() * GameView.SCALE_FACTOR);
-        imageView.setFitHeight(GameView.SCALE_FACTOR);
-        imageView.setFitWidth(GameView.SCALE_FACTOR);
+        imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
+        imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
+        imageView.setFitHeight(SCALE_FACTOR);
+        imageView.setFitWidth(SCALE_FACTOR);
         return imageView;
     }
 
@@ -148,9 +147,9 @@ public class GameView implements Observer {
 
         // build the bottomBar
         bottomBar.setLayoutX(0);
-        bottomBar.setLayoutY((double)GameView.SCALE_FACTOR * 11);
-        bottomBar.setPrefHeight(GameView.SCALE_FACTOR);
-        bottomBar.setPrefWidth((double)GameView.SCALE_FACTOR * 17);
+        bottomBar.setLayoutY((double)SCALE_FACTOR * 11);
+        bottomBar.setPrefHeight(SCALE_FACTOR);
+        bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
         bottomBar.setStyle("-fx-background-color: grey");
 
         // build the label
@@ -215,71 +214,51 @@ public class GameView implements Observer {
                     int newY = newCoord.y() * SCALE_FACTOR;
 
                     int index = updateInfo.getIndex();
+                    TranslateTransition transition = new TranslateTransition();
+                    transition.setDuration(Duration.millis(400));
+                    if (oldX != newX){
+                        transition.setByX((double)newX-oldX);
+                    }else{
+                        transition.setByY((double)newY-oldY);
+                    }
 
                     if (index < 0) {
-                        player.setLayoutX(newX);
-                        player.setLayoutY(newY);
+                        controller.moving(true);
+                        transition.setOnFinished(event ->
+                                controller.moving(false)
+                        );
+                        transition.setNode(player);
                     } else {
-                        enemies.get(index).setLayoutX(newX);
-                        enemies.get(index).setLayoutY(newY);
+                        transition.setNode(enemies.get(index));
                     }
+                    transition.play();
                 }
 
-                /*
-                case U_POSITION -> {
-                    Coordinate newCoord = updateInfo.getNewCoord();
-                    int newX = newCoord.x() * SCALE_FACTOR;
-                    int newY = newCoord.y() * SCALE_FACTOR;
-
-                    int index = updateInfo.getIndex();
-                    System.out.println("old " + oldX +" "+ oldY + " current " + newX + " " + newY);
-                    if (index < 0) {
-                        // Imposta il punto di partenza solo una volta
-                        if (!playerTransitionStarted) {
-                            playerTransition.setFromX(35);
-                            playerTransition.setFromY(35);
-                            playerTransitionStarted = true;
-                        }
-
-                        // Imposta il punto di arrivo
-                        playerTransition.setToX(newX);
-                        playerTransition.setToY(newY);
-                        playerTransition.play();
-                    } else {
-                        enemies.get(index).setLayoutX(newX);
-                        enemies.get(index).setLayoutY(newY);
-                    }
-                }
-                */
 
                 case U_RESPAWN -> {
                     controller.moving(true);
                     Coordinate coordinate = updateInfo.getCoordinate();
-                    System.out.println("coordinate respawn" +coordinate);
                     PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+
                     pauseRespawn.setOnFinished(event -> {
-                        player.setLayoutX(coordinate.x() * SCALE_FACTOR);
-                        player.setLayoutY(coordinate.y() * SCALE_FACTOR);
-                        updateLife(updateInfo.getIndex());
+                        player.setTranslateX(0);
+                        player.setTranslateY(0);
+                        player.setLayoutX(coordinate.x()*SCALE_FACTOR);
+                        player.setLayoutY(coordinate.y()*SCALE_FACTOR);
                         controller.moving(false);
                     });
                     pauseRespawn.play();
                 }
 
+
                 case L_PU_LIFE -> {
-                    Coordinate coordinate = updateInfo.getCoordinate();
-                    pu_life = new ImageView(BlockImage.LIFE.getImage());
-                    pu_life.setLayoutX(coordinate.x());
-                    pu_life.setLayoutY(coordinate.y());
+                    pu_life = drawImage(updateInfo.getCoordinate(),BlockImage.LIFE.getImage());
                     gameBoard.getChildren().add(pu_life);
                 }
                 case U_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
 
                 case L_PU_BOMB ->{
-                    Coordinate coordinate = updateInfo.getCoordinate();
-                    pu_bomb = new ImageView(BlockImage.BOMB.getImage());
-                    pu_bomb.setLayoutY(coordinate.x());
-                    pu_bomb.setLayoutY(coordinate.y());
+                    pu_bomb = drawImage(updateInfo.getCoordinate(), BlockImage.BOMB.getImage());
                     gameBoard.getChildren().add(pu_bomb);
                 }
                 case U_PU_BOMB -> doBombPowerUp();
@@ -299,6 +278,7 @@ public class GameView implements Observer {
 
                 case U_GAME_OVER -> {
                     PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
+                    gameOverAnimation(updateInfo.getCoordinate());
                     pauseGameOver.setOnFinished(event -> {
                         gameOver.toFront();
                         gameOver.setVisible(true);
@@ -309,6 +289,10 @@ public class GameView implements Observer {
                 default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
         }
+    }
+
+    private void gameOverAnimation(Coordinate coordinate) {
+
     }
 
     public void pauseView(){
@@ -341,7 +325,7 @@ public class GameView implements Observer {
         removePU.setOnFinished(event -> gameBoard.getChildren().remove(imageView));
         removePU.play();
 
-        imageView.setLayoutY(SCALE_FACTOR);
+        imageView.setFitHeight(SCALE_FACTOR);
         imageView.setLayoutX(SCALE_FACTOR);
         bottomBar.setAlignment(Pos.BOTTOM_LEFT);
         //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che

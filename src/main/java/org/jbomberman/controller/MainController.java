@@ -57,12 +57,11 @@ public class MainController {
         gameView = new GameView();
         gameModel = new GameModel();
         gameModel.addObserver(gameView);
-        gameModel.ready();
+        gameModel.notifyModelReady();
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
         stage.setScene(scene);
-        System.out.println("eeegh");
         stage.show();
     }
 
@@ -139,8 +138,11 @@ public class MainController {
 
     private void setTimeline(){
         mobMovement = new Timeline(
-                new KeyFrame(Duration.millis(1200), event ->
-                        gameModel.moveEnemies())
+                new KeyFrame(Duration.millis(500), event ->{
+                        if (!pause){
+                            gameModel.moveEnemies();
+                        }
+                })
         );
         mobMovement.setCycleCount(Animation.INDEFINITE);
         mobMovement.play();
