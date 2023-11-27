@@ -34,7 +34,7 @@ public class GameModel extends Observable {
     // how much the character can move every time a key is pressed
     private final int MOVEMENT = 1;
     // how many random blocks are going to spawn
-    private int NUM_RND_BLOCKS = 20;
+    private int numRndBlocks = 40;
     // the coordinates of the winning cell
     private Coordinate EXIT;
 
@@ -80,28 +80,22 @@ public class GameModel extends Observable {
 
 
     public void generateBlocks() {
-        generateFixedBlocks();
+        generateBackground();
         generateRandomBlocks();
         generateRandomExit();
-        generateBackground();
     }
 
-    private void generateFixedBlocks() {
-        // generates the coordinates of the internal fixed blocks
-
-    }
 
     private void generateRandomBlocks() {
         Random random = new Random();
-        int distanceFromBorder = 1;
 
         int i = 0;
-        while (i < NUM_RND_BLOCKS) {
+        while (i < numRndBlocks) {
             Coordinate location = new Coordinate(
-                    distanceFromBorder + random.nextInt(MAX.x() - 2 * distanceFromBorder + 1),
-                    distanceFromBorder + random.nextInt(MAX.y() - 2 * distanceFromBorder + 1)
+                    1 + random.nextInt(MAX.x()),
+                    1 + random.nextInt(MAX.y())
             );
-            if (isValidLocation(location)) {
+            if (isValidLocation(location) && !COORDINATES_FIXED_BLOCKS.contains(location)) {
                 COORDINATES_RANDOM_BLOCKS.add(location);
                 i++;
             }
@@ -371,12 +365,14 @@ public class GameModel extends Observable {
     }
 
     public void updatePlayerPosition(Coordinate coordinate, Coordinate oldPosition) {
-        //System.out.println("new position: " + coordinate + " old position: " + oldPosition);
         playerPosition = coordinate;
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,coordinate, -1));
         controlPosition();
     }
+
+
+//########################################  ENEMIES  ########################################//
 
     public void initializeEnemies() {
         Random random = new Random();
@@ -400,14 +396,20 @@ public class GameModel extends Observable {
 
     public void calculateNewEnemyPosition(int enemyId) {
         Coordinate oldEnemyPosition = COORDINATE_ENEMIES.get(enemyId);
-        Random random = new Random();
+        int randomInt = new Random().nextInt(ENEMY_MOVES.size());
+        Coordinate newEnemyPosition = calculateNewPosition(ENEMY_MOVES.get(randomInt), oldEnemyPosition);
 
-        Coordinate newEnemyPosition;
-        do {
-            KeyCode keyCode = ENEMY_MOVES.get(random.nextInt(ENEMY_MOVES.size()));
-            newEnemyPosition = calculateNewPosition(keyCode, oldEnemyPosition);
-        } while (collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition));
-
+        if (collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition)){
+            int i = 1;
+            while(i<4) {
+                newEnemyPosition = calculateNewPosition(ENEMY_MOVES.get((randomInt + i)%4), oldEnemyPosition);
+                if (!(collision(newEnemyPosition) || COORDINATE_ENEMIES.contains(newEnemyPosition))){
+                    break;
+                } else {
+                    i++;
+                }
+            }
+        }
         // the enemy didn't move: do nothing
         if (newEnemyPosition.equals(oldEnemyPosition)) return;
 
@@ -416,8 +418,9 @@ public class GameModel extends Observable {
     }
 
     private void updateEnemyPosition(Coordinate oldPosition, Coordinate newPosition, int enemyId) {
+        System.out.println("movimento nemico");
         setChanged();
-        notifyObservers(new UMovement(oldPosition,newPosition, enemyId));
+        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,newPosition, enemyId));
         controlPosition();
     }
 
@@ -430,9 +433,5 @@ public class GameModel extends Observable {
 
     public void gameReset(){
         resetModel();
-    }
-
-    public void respawn() {
-
     }
 }

@@ -70,6 +70,7 @@ public class MainController {
 
     public void gameButtonPressed() {
         scene.setRoot(gameView.getGame());
+        setTimeline();
         //faccio ripartire il controller
         //in caso io finisca una partita (sia vinta che persa), e ne ricominci un'altra senza uscire
         //dal gioco, devo far ripartire i movimenti dei mob che erano stati fermati dalla chiamata

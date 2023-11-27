@@ -13,7 +13,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -50,7 +49,7 @@ public class GameView implements Observer {
     private final List<ImageView> randomBlocks;
     private final List<ImageView> enemies;
 
-    private static final HBox BOTTOM_BAR = new HBox();
+    private final HBox bottomBar = new HBox();
 
     Label restartLabel;
     Label nextLevelLabel;
@@ -147,12 +146,12 @@ public class GameView implements Observer {
 
     private void addBottomBar() {
 
-        // build the bottombar
-        BOTTOM_BAR.setLayoutX(0);
-        BOTTOM_BAR.setLayoutY((double)GameView.SCALE_FACTOR * 11);
-        BOTTOM_BAR.setPrefHeight(GameView.SCALE_FACTOR);
-        BOTTOM_BAR.setPrefWidth((double)GameView.SCALE_FACTOR * 17);
-        BOTTOM_BAR.setStyle("-fx-background-color: grey");
+        // build the bottomBar
+        bottomBar.setLayoutX(0);
+        bottomBar.setLayoutY((double)GameView.SCALE_FACTOR * 11);
+        bottomBar.setPrefHeight(GameView.SCALE_FACTOR);
+        bottomBar.setPrefWidth((double)GameView.SCALE_FACTOR * 17);
+        bottomBar.setStyle("-fx-background-color: grey");
 
         // build the label
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
@@ -164,13 +163,9 @@ public class GameView implements Observer {
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
-
-        //vedere se aggiungere
-
-        // add the label to the bottombar
-        BOTTOM_BAR.getChildren().addAll(livesLabel);
-        // add the bottombar to the game board
-        //GameView.gameBoard.getChildren().add(BOTTOM_BAR);
+        bottomBar.getChildren().addAll(livesLabel);
+        // add the bottomBar to the game board
+        gameBoard.getChildren().add(bottomBar);
     }
 
     @Override
@@ -210,7 +205,7 @@ public class GameView implements Observer {
                 case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
                 case U_ENEMY_DEAD -> destroyEntity(enemies, updateInfo.getIndex());
-/*
+
                 case U_POSITION -> {
                     Coordinate newCoord = updateInfo.getNewCoord();
                     Coordinate oldCoord = updateInfo.getOldCoord();
@@ -222,40 +217,22 @@ public class GameView implements Observer {
                     int index = updateInfo.getIndex();
 
                     if (index < 0) {
-                        System.out.println("old " + oldX +" "+ oldY + " current " + newX + " " + newY);
                         player.setLayoutX(newX);
                         player.setLayoutY(newY);
-                        //System.out.println(newX + " "+ player.getLayoutX());
-
-/*
-                        //PROBLEMA CON IL CALCOLO DELLE POSIZIONI
-                        TranslateTransition transition = new TranslateTransition(Duration.millis(400), player);
-                        transition.setFromX(oldX);
-                        transition.setFromY(oldY);
-                        transition.setToX(newCoord.x()*SCALE_FACTOR);
-                        transition.setToY(newCoord.y()*SCALE_FACTOR);
-
-                        //transition.setOnFinished(event -> controller.moved());
-                        transition.play();
-
- */
-
-/*
-
                     } else {
                         enemies.get(index).setLayoutX(newX);
                         enemies.get(index).setLayoutY(newY);
                     }
                 }
 
- */
+                /*
                 case U_POSITION -> {
                     Coordinate newCoord = updateInfo.getNewCoord();
                     int newX = newCoord.x() * SCALE_FACTOR;
                     int newY = newCoord.y() * SCALE_FACTOR;
 
                     int index = updateInfo.getIndex();
-
+                    System.out.println("old " + oldX +" "+ oldY + " current " + newX + " " + newY);
                     if (index < 0) {
                         // Imposta il punto di partenza solo una volta
                         if (!playerTransitionStarted) {
@@ -273,6 +250,7 @@ public class GameView implements Observer {
                         enemies.get(index).setLayoutY(newY);
                     }
                 }
+                */
 
                 case U_RESPAWN -> {
                     controller.moving(true);
@@ -365,11 +343,11 @@ public class GameView implements Observer {
 
         imageView.setLayoutY(SCALE_FACTOR);
         imageView.setLayoutX(SCALE_FACTOR);
-        BOTTOM_BAR.setAlignment(Pos.BOTTOM_LEFT);
+        bottomBar.setAlignment(Pos.BOTTOM_LEFT);
         //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che
         //power up è
         HBox.setMargin(imageView, new Insets(0, 0, i * 10, 0));
-        BOTTOM_BAR.getChildren().add(imageView);
+        bottomBar.getChildren().add(imageView);
     }
 
     private void destroyEntity(List<ImageView> array, int index) {
