@@ -379,7 +379,7 @@ public class GameModel extends Observable {
         playerHp += 1;
         lifePu = null;
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE));
+        notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE, playerHp));
     }
 
     private void notifyVictory() {

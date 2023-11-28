@@ -68,7 +68,7 @@ public class GameView implements Observer {
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
-        LIFE(BlockImage.class.getResourceAsStream("power_up/fire.png"))
+        LIFE(BlockImage.class.getResourceAsStream("power_up/potion.png"))
         ;
 
         private final Image image;
@@ -182,7 +182,6 @@ public class GameView implements Observer {
                 case L_MAP -> {
                     switch (updateInfo.getIndex()) {
                         case 0 -> {loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
-                            System.out.println("AAAAAAAAAAAAAAAA");
                         }
                         case 1 -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
                         case 2 -> updateInfo.getArray().forEach(coordinate -> {
@@ -197,6 +196,11 @@ public class GameView implements Observer {
                 case L_PLAYER -> {
                     player = drawImage(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
                     gameBoard.getChildren().add(player);
+                }
+
+                case L_EXIT -> {
+                    exit = drawImage(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
+                    gameBoard.getChildren().add(exit);
                 }
 
                 case L_ENEMIES -> updateInfo.getArray().forEach(coordinate ->  {
@@ -219,7 +223,6 @@ public class GameView implements Observer {
 
                     int index = updateInfo.getIndex();
                     TranslateTransition transition = new TranslateTransition();
-                    transition.setDuration(Duration.millis(400));
                     if (oldX != newX){
                         transition.setByX((double)newX-oldX);
                     }else{
@@ -228,11 +231,13 @@ public class GameView implements Observer {
 
                     if (index < 0) {
                         controller.moving(true);
+                        transition.setDuration(Duration.millis(300));
                         transition.setOnFinished(event ->
                                 controller.moving(false)
                         );
                         transition.setNode(player);
                     } else {
+                        transition.setDuration(Duration.millis(400));
                         transition.setNode(enemies.get(index));
                     }
                     transition.play();
@@ -254,7 +259,7 @@ public class GameView implements Observer {
                 case U_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
 
                 case L_PU_BOMB ->{
-                    pu_bomb = drawImage(updateInfo.getCoordinate(), BlockImage.BOMB.getImage());
+                    pu_bomb = drawImage(updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
                     gameBoard.getChildren().add(pu_bomb);
                 }
                 case U_PU_BOMB -> doBombPowerUp();
@@ -292,6 +297,8 @@ public class GameView implements Observer {
         pauseRespawn.setOnFinished(event -> {
             player.setTranslateX(0);
             player.setTranslateY(0);
+            player.setLayoutX(35);
+            player.setLayoutY(35);
             controller.moving(false);
         });
         return pauseRespawn;
