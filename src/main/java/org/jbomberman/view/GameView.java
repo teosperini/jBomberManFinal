@@ -1,8 +1,8 @@
 package org.jbomberman.view;
 
 import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
@@ -20,10 +20,7 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class GameView implements Observer {
 
@@ -56,6 +53,10 @@ public class GameView implements Observer {
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
+    private int currentImageIndex = 0;
+
+    private static final String IMAGE_PATH_SUFFIX = ".png";
+
 
     private enum BlockImage {
         //bomb is the real bomb, fire is the power_up
@@ -64,7 +65,7 @@ public class GameView implements Observer {
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
         STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
-        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_1.png")),
+        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/fire.png"))
@@ -79,8 +80,26 @@ public class GameView implements Observer {
         public Image getImage() {
             return image;
         }
-
     }
+
+    private static final Map<Direction, Image[]> DIRECTIONAL_IMAGES = new HashMap<>();
+
+    static {
+        DIRECTIONAL_IMAGES.put(Direction.UP, loadImages("up"));
+        DIRECTIONAL_IMAGES.put(Direction.DOWN, loadImages("down"));
+        DIRECTIONAL_IMAGES.put(Direction.LEFT, loadImages("left"));
+        DIRECTIONAL_IMAGES.put(Direction.RIGHT, loadImages("right"));
+    }
+
+    private static Image[] loadImages(String direction) {
+        Image[] images = new Image[4];
+        for (int i = 0; i < 4; i++) {
+            String imagePath = direction + (i + 1) + IMAGE_PATH_SUFFIX;
+            images[i] = new Image(GameView.class.getResourceAsStream(imagePath));
+        }
+        return images;
+    }
+
 
     public GameView() {
         System.out.println("pezzo di merd");
@@ -105,12 +124,13 @@ public class GameView implements Observer {
     private void drawBomb(Coordinate coordinate) {
         ImageView tntImage = drawImage(coordinate, BlockImage.BOMB.getImage());
         PauseTransition spawnTNT = new PauseTransition(Duration.millis(50));
-        PauseTransition pauseTNT = new PauseTransition(Duration.millis(500));
-        PauseTransition respawnTNT = new PauseTransition(Duration.millis(500));
+        PauseTransition pauseTNT = new PauseTransition(Duration.millis(400));
+        PauseTransition respawnTNT = new PauseTransition(Duration.millis(400));
         PauseTransition removeTNT = new PauseTransition(Duration.millis(650));
         spawnTNT.setOnFinished(event -> {
+            gameBoard.getChildren().add(tntImage);
             player.toFront();
-            BackgroundMusic.playBomb();
+            //BackgroundMusic.playBomb();
             pauseTNT.play();
         });
 
@@ -128,7 +148,7 @@ public class GameView implements Observer {
         removeTNT.setOnFinished(event4 -> {
             // remove the image from the board and tell the model that the bomb is exploded
             gameBoard.getChildren().remove(tntImage);
-            //model.bombExploded();
+            //controller.bombExploded();
         });
 
         spawnTNT.play();
@@ -191,15 +211,15 @@ public class GameView implements Observer {
                 }
 
                 case L_PLAYER -> {
-                    player = drawImage(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+                    player = drawImage(updateInfo.getCoordinate(), DIRECTIONAL_IMAGES.get(Direction.DOWN)[currentImageIndex]);
                     gameBoard.getChildren().add(player);
                 }
 
                 case L_ENEMIES -> updateInfo.getArray().forEach(coordinate ->  {
-                        ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
-                        enemies.add(enemy);
-                        gameBoard.getChildren().add(enemy);
-                    });
+                    ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
+                    enemies.add(enemy);
+                    gameBoard.getChildren().add(enemy);
+                });
 
                 case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
@@ -213,6 +233,8 @@ public class GameView implements Observer {
                     int newX = newCoord.x() * SCALE_FACTOR;
                     int newY = newCoord.y() * SCALE_FACTOR;
 
+                    AnimationTimer animationTimer = bombAnimationTimer();
+                    animationTimer.start();
                     int index = updateInfo.getIndex();
                     TranslateTransition transition = new TranslateTransition();
                     transition.setDuration(Duration.millis(400));
@@ -224,6 +246,7 @@ public class GameView implements Observer {
 
                     if (index < 0) {
                         controller.moving(true);
+
                         transition.setOnFinished(event ->
                                 controller.moving(false)
                         );
@@ -237,16 +260,8 @@ public class GameView implements Observer {
 
                 case U_RESPAWN -> {
                     controller.moving(true);
-                    Coordinate coordinate = updateInfo.getCoordinate();
-                    PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
-
-                    pauseRespawn.setOnFinished(event -> {
-                        player.setTranslateX(0);
-                        player.setTranslateY(0);
-                        player.setLayoutX(coordinate.x()*SCALE_FACTOR);
-                        player.setLayoutY(coordinate.y()*SCALE_FACTOR);
-                        controller.moving(false);
-                    });
+                    PauseTransition pauseRespawn = getPauseTransition();
+                    updateLife(updateInfo.getIndex());
                     pauseRespawn.play();
                 }
 
@@ -291,8 +306,32 @@ public class GameView implements Observer {
         }
     }
 
-    private void gameOverAnimation(Coordinate coordinate) {
+    private PauseTransition getPauseTransition() {
+        PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+        pauseRespawn.setOnFinished(event -> {
+            player.setTranslateX(0);
+            player.setTranslateY(0);
+            controller.moving(false);
+        });
+        return pauseRespawn;
+    }
 
+    private AnimationTimer bombAnimationTimer(){
+        return new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                // Cambia l'immagine ogni 60 frame (1 secondo a 60 fps)
+                if (now % 60 == 0) {
+                    currentImageIndex = (currentImageIndex + 1) % DIRECTIONAL_IMAGES.get(Direction.DOWN).length;
+                    player.setImage(DIRECTIONAL_IMAGES.get(Direction.DOWN)[currentImageIndex]);
+                }
+            }
+        };
+
+    }
+
+    private void gameOverAnimation(Coordinate coordinate) {
+        //TODO
     }
 
     public void pauseView(){
@@ -313,11 +352,11 @@ public class GameView implements Observer {
 
     private void doLifePowerUp(int index) {
         updateLife(index);
-        powerUPs(pu_life, 1);
+        powerUPs(pu_life, 0);
     }
 
     private void doBombPowerUp(){
-        powerUPs(pu_bomb, 2);
+        powerUPs(pu_bomb, 1);
     }
 
     private void powerUPs(ImageView imageView, double i) {
@@ -325,12 +364,12 @@ public class GameView implements Observer {
         removePU.setOnFinished(event -> gameBoard.getChildren().remove(imageView));
         removePU.play();
 
-        imageView.setFitHeight(SCALE_FACTOR);
-        imageView.setLayoutX(SCALE_FACTOR);
-        bottomBar.setAlignment(Pos.BOTTOM_LEFT);
+        imageView.setFitHeight(20);
+        imageView.setFitWidth(20);
+        //bottomBar.setAlignment(Pos.BOTTOM_RIGHT);
         //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che
         //power up è
-        HBox.setMargin(imageView, new Insets(0, 0, i * 10, 0));
+        HBox.setMargin(imageView, new Insets(0, 100 + (i * 30), 0, 0));
         bottomBar.getChildren().add(imageView);
     }
 
