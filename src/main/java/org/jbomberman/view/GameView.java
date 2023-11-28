@@ -65,7 +65,7 @@ public class GameView implements Observer {
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
         STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
-        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_1.png")),
+        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/fire.png"))
@@ -108,12 +108,13 @@ public class GameView implements Observer {
     private void drawBomb(Coordinate coordinate) {
         ImageView tntImage = drawImage(coordinate, BlockImage.BOMB.getImage());
         PauseTransition spawnTNT = new PauseTransition(Duration.millis(50));
-        PauseTransition pauseTNT = new PauseTransition(Duration.millis(500));
-        PauseTransition respawnTNT = new PauseTransition(Duration.millis(500));
+        PauseTransition pauseTNT = new PauseTransition(Duration.millis(400));
+        PauseTransition respawnTNT = new PauseTransition(Duration.millis(400));
         PauseTransition removeTNT = new PauseTransition(Duration.millis(650));
         spawnTNT.setOnFinished(event -> {
+            gameBoard.getChildren().add(tntImage);
             player.toFront();
-            BackgroundMusic.playBomb();
+            //BackgroundMusic.playBomb();
             pauseTNT.play();
         });
 
@@ -131,7 +132,7 @@ public class GameView implements Observer {
         removeTNT.setOnFinished(event4 -> {
             // remove the image from the board and tell the model that the bomb is exploded
             gameBoard.getChildren().remove(tntImage);
-            //model.bombExploded();
+            controller.bombExploded();
         });
 
         spawnTNT.play();
@@ -241,8 +242,6 @@ public class GameView implements Observer {
                 case U_RESPAWN -> {
                     controller.moving(true);
                     PauseTransition pauseRespawn = getPauseTransition();
-
-
                     updateLife(updateInfo.getIndex());
                     pauseRespawn.play();
                 }
@@ -323,11 +322,11 @@ public class GameView implements Observer {
 
     private void doLifePowerUp(int index) {
         updateLife(index);
-        powerUPs(pu_life, 1);
+        powerUPs(pu_life, 0);
     }
 
     private void doBombPowerUp(){
-        powerUPs(pu_bomb, 2);
+        powerUPs(pu_bomb, 1);
     }
 
     private void powerUPs(ImageView imageView, double i) {
@@ -335,12 +334,12 @@ public class GameView implements Observer {
         removePU.setOnFinished(event -> gameBoard.getChildren().remove(imageView));
         removePU.play();
 
-        imageView.setFitHeight(SCALE_FACTOR);
-        imageView.setLayoutX(SCALE_FACTOR);
-        bottomBar.setAlignment(Pos.BOTTOM_LEFT);
+        imageView.setFitHeight(20);
+        imageView.setFitWidth(20);
+        //bottomBar.setAlignment(Pos.BOTTOM_RIGHT);
         //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che
         //power up è
-        HBox.setMargin(imageView, new Insets(0, 0, i * 10, 0));
+        HBox.setMargin(imageView, new Insets(0, 100 + i * 20, 0, 0));
         bottomBar.getChildren().add(imageView);
     }
 

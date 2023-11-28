@@ -98,7 +98,7 @@ public class MainController {
             if (keyCode == KeyCode.SPACE) {
                 // if space is pressed we try to release a bomb
                 // evitare che nel respawn venga data la possibilità di droppare una bomba
-                //gameModel.releaseBomb();
+                gameModel.releaseBomb();
             } else {
                 // else if an arrow key is pressed we move the player
                 gameModel.movePlayer(keyCode);
@@ -146,6 +146,10 @@ public class MainController {
         );
         mobMovement.setCycleCount(Animation.INDEFINITE);
         mobMovement.play();
+    }
+
+    public void bombExploded() {
+        gameModel.explosion();
     }
 }
 

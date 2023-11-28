@@ -134,24 +134,26 @@ public class GameModel extends Observable {
     boolean isBombExploding = false;
 
     public void releaseBomb() {
-        if ((tntCoordinates != null) && isValidLocation(playerPosition)){
+        //if ((tntCoordinates != null) && isValidLocation(playerPosition)){
+        if (tntCoordinates != null){
             return;
         }
-
         tntCoordinates = playerPosition;
 
+
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.BOMB_RELEASED));
+        notifyObservers(new UpdateInfo(UpdateType.BOMB_RELEASED, tntCoordinates));
     }
 
-    public void bombExploded() {
-        Set<Coordinate> toRemove = new HashSet<>();
+    public void explosion() {
+        Set<Coordinate> blocksToRemove = new HashSet<>();
         Set<Coordinate> enemiesToRemove = new HashSet<>();
 
-        ArrayList<Triad> adjacentTernas = getCoordinates();
-        adjacentTernas.add(new Triad(tntCoordinates, Direction.CENTER, true));
+        //with getCoordinates() I get every coordinates that needs to be checked
+        ArrayList<Triad> adjacentCoordinates = getCoordinates();
+        adjacentCoordinates.add(new Triad(tntCoordinates, Direction.CENTER, true));
 
-        for (Triad terna : adjacentTernas) {
+        for (Triad terna : adjacentCoordinates) {
             Coordinate coord = terna.getCoordinate();
 
             if (playerPosition.equals(coord)) {
@@ -159,7 +161,7 @@ public class GameModel extends Observable {
             }
 
             if (COORDINATES_RANDOM_BLOCKS.contains(coord)) {
-                toRemove.add(coord);
+                blocksToRemove.add(coord);
             }
 
             if (COORDINATE_ENEMIES.contains(coord)){
@@ -167,7 +169,7 @@ public class GameModel extends Observable {
             }
         }
 
-        toRemove.forEach(coordinate -> {
+        blocksToRemove.forEach(coordinate -> {
             int index = COORDINATES_RANDOM_BLOCKS.indexOf(coordinate);
             COORDINATES_RANDOM_BLOCKS.remove(coordinate);
             notifyBlockRemoved(index);
@@ -179,50 +181,54 @@ public class GameModel extends Observable {
             notifyDeadEnemy(index);
         });
 
-        System.out.println(adjacentTernas);
+        System.out.println(adjacentCoordinates);
         tntCoordinates = null;
         isBombExploding = false;
     }
 
     private ArrayList<Triad> getCoordinates() {
-        ArrayList<Triad> adjacentTernas = new ArrayList<>();
-        boolean stopPropagationUp = false;
-        boolean stopPropagationDown = false;
-        boolean stopPropagationLeft = false;
-        boolean stopPropagationRight = false;
+        ArrayList<Triad> adjacentCoordinate = new ArrayList<>();
 
+        //Flags to stop the propagation of the bomb in that direction
+        //I'm using these flags because you need to know if the propagation in that direction has encountered an
+        //obstacle the cycle before
+        boolean stopUp = false;
+        boolean stopDown = false;
+        boolean stopLeft = false;
+        boolean stopRight = false;
+
+        //Checking every direction, then, if the bomb range is >1, check the external blocks
         for (int distance = 1; distance <= bombRange; distance++) {
-            Coordinate adjacentCoordUp = new Coordinate(tntCoordinates.x(), tntCoordinates.y() - distance);
-            Coordinate adjacentCoordDown = new Coordinate(tntCoordinates.x(), tntCoordinates.y() + distance);
-            Coordinate adjacentCoordLeft = new Coordinate(tntCoordinates.x() - distance, tntCoordinates.y());
-            Coordinate adjacentCoordRight = new Coordinate(tntCoordinates.x() + distance, tntCoordinates.y());
+            Coordinate coordUp = new Coordinate(tntCoordinates.x(), tntCoordinates.y() - distance);
+            Coordinate coordDown = new Coordinate(tntCoordinates.x(), tntCoordinates.y() + distance);
+            Coordinate coordLeft = new Coordinate(tntCoordinates.x() - distance, tntCoordinates.y());
+            Coordinate coordRight = new Coordinate(tntCoordinates.x() + distance, tntCoordinates.y());
 
-            if (!stopPropagationUp && !COORDINATES_FIXED_BLOCKS.contains(adjacentCoordUp)) {
-                adjacentTernas.add(new Triad(adjacentCoordUp, Direction.UP, distance == bombRange));
+            if (!stopUp && !COORDINATES_FIXED_BLOCKS.contains(coordUp)) {
+                adjacentCoordinate.add(new Triad(coordUp, Direction.UP, distance == bombRange));
             } else {
-                stopPropagationUp = true;
+                stopUp = true;
             }
 
-            if (!stopPropagationDown && !COORDINATES_FIXED_BLOCKS.contains(adjacentCoordDown)) {
-                adjacentTernas.add(new Triad(adjacentCoordDown, Direction.DOWN, distance == bombRange));
+            if (!stopDown && !COORDINATES_FIXED_BLOCKS.contains(coordDown)) {
+                adjacentCoordinate.add(new Triad(coordDown, Direction.DOWN, distance == bombRange));
             } else {
-                stopPropagationDown = true;
+                stopDown = true;
             }
 
-            if (!stopPropagationLeft && !COORDINATES_FIXED_BLOCKS.contains(adjacentCoordLeft)) {
-                adjacentTernas.add(new Triad(adjacentCoordLeft, Direction.LEFT, distance == bombRange));
+            if (!stopLeft && !COORDINATES_FIXED_BLOCKS.contains(coordLeft)) {
+                adjacentCoordinate.add(new Triad(coordLeft, Direction.LEFT, distance == bombRange));
             } else {
-                stopPropagationLeft = true;
+                stopLeft = true;
             }
 
-            if (!stopPropagationRight && !COORDINATES_FIXED_BLOCKS.contains(adjacentCoordRight)) {
-                adjacentTernas.add(new Triad(adjacentCoordRight, Direction.RIGHT, distance == bombRange));
+            if (!stopRight && !COORDINATES_FIXED_BLOCKS.contains(coordRight)) {
+                adjacentCoordinate.add(new Triad(coordRight, Direction.RIGHT, distance == bombRange));
             } else {
-                stopPropagationRight = true;
+                stopRight = true;
             }
         }
-
-        return adjacentTernas;
+        return adjacentCoordinate;
     }
 
 
