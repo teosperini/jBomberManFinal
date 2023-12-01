@@ -91,16 +91,14 @@ public class MainController {
         if (keyCode == KeyCode.ESCAPE){
             pauseController();
         } else if (!pause && !moving){
-            // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
-            // per uscire ne si possono muovere i mob
-            // se il player si sta muovendo o sta respawnando non devo permettere di ricevere input
-            //ma i mob devono continuare a muoversi
             if (keyCode == KeyCode.SPACE) {
                 // if space is pressed we try to release a bomb
-                // evitare che nel respawn venga data la possibilità di droppare una bomba
                 gameModel.releaseBomb();
             } else {
-                // else if an arrow key is pressed we move the player
+                // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
+                // per uscire ne si possono muovere i mob
+                // se il player si sta muovendo o sta respawnando non devo permettere di ricevere input
+                //ma i mob devono continuare a muoversi
                 gameModel.movePlayer(keyCode);
             }
         }

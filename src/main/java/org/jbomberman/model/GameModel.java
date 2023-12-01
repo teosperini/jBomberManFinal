@@ -134,8 +134,8 @@ public class GameModel extends Observable {
     boolean isBombExploding = false;
 
     public void releaseBomb() {
-        //if ((tntCoordinates != null) && isValidLocation(playerPosition)){
-        if (tntCoordinates != null){
+
+        if (tntCoordinates != null || Objects.equals(playerPosition, new Coordinate(1, 1))){
             return;
         }
         tntCoordinates = playerPosition;
@@ -328,7 +328,6 @@ public class GameModel extends Observable {
     }
 
 
-
 //####################################  NOTIFICATIONS  ####################################//
 
     public void notifyModelReady() {
@@ -340,6 +339,8 @@ public class GameModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.L_PU_BOMB, bombPu));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_PU_LIFE, lifePu));
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.L_EXIT, exit));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_MAP, COORDINATES_RANDOM_BLOCKS, 2));
         setChanged();

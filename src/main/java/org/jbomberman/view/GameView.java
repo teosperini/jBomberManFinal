@@ -1,12 +1,9 @@
 package org.jbomberman.view;
 
-import javafx.animation.Animation;
-import javafx.animation.AnimationTimer;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.geometry.Insets;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
-import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -231,7 +228,7 @@ public class GameView implements Observer {
 
                     if (index < 0) {
                         controller.moving(true);
-                        transition.setDuration(Duration.millis(300));
+                        transition.setDuration(Duration.millis(200));
                         transition.setOnFinished(event ->
                                 controller.moving(false)
                         );
@@ -242,7 +239,9 @@ public class GameView implements Observer {
                     }
                     transition.play();
                 }
-
+                //TODO problema con la gestione del movimento e del respawn
+                // per capire il problema, provare a muoversi nel mentre si viene colpiti da un mostro o una bomba
+                // la posizione del giocatore risulterà sfalsata
 
                 case U_RESPAWN -> {
                     controller.moving(true);
@@ -293,20 +292,32 @@ public class GameView implements Observer {
     }
 
     private PauseTransition getPauseTransition() {
-        PauseTransition pauseRespawn = new PauseTransition(Duration.millis(400));
+        PauseTransition pauseRespawn = new PauseTransition(Duration.millis(200));
         pauseRespawn.setOnFinished(event -> {
             player.setTranslateX(0);
             player.setTranslateY(0);
-            player.setLayoutX(35);
-            player.setLayoutY(35);
+            //player.setLayoutX(35);
+            //player.setLayoutY(35);
             controller.moving(false);
         });
         return pauseRespawn;
     }
 
+/*
     private AnimationTimer animationTimer(){
-        return null;
+        return new AnimationTimer() {
+            public void handle(long now) {
+                // Avvia l'animazione parallela quando la transizione di traslazione inizia
+                if (translateTransition.getStatus() == Animation.Status.RUNNING) {
+                    parallelTransition.play();
+                    stop(); // Arresta l'AnimationTimer dopo l'avvio dell'animazione parallela
+
+                }
+            }
+        };
     }
+
+ */
     private void gameOverAnimation(Coordinate coordinate) {
         //TODO
     }
