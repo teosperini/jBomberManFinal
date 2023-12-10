@@ -113,13 +113,13 @@ public class MainController {
     public void pauseController() {
         pause = true;
         gameView.pauseView();
-        mobMovement.pause();
+        //mobMovement.pause();
     }
 
     public void resumeController() {
         pause = false;
         gameView.resumeView();
-        mobMovement.play();
+        //mobMovement.play();
     }
 
     public void moving(boolean bool) {

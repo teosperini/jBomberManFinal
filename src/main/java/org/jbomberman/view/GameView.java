@@ -323,12 +323,14 @@ public class GameView implements Observer {
     }
 
     public void pauseView(){
+        //controller.pauseController();
         pause.toFront();
         pause.setVisible(true);
         pause.requestFocus();
     }
 
     public void resumeView() {
+        //controller.resumeController();
         pause.setVisible(false);
         gameBoard.toFront();
         gameBoard.requestFocus();
@@ -373,15 +375,20 @@ public class GameView implements Observer {
     }
 
     private void genPause() {
-        Label resumeButton = SceneManager.getButton("resume", 0, Color.BLACK);
-        Label optionsButton = SceneManager.getButton("options", 1, Color.BLACK);
-        Label exitButton = SceneManager.getButton("main menu", 2, Color.BLACK);
+        Label resumeButton = SceneManager.getButton("resume", 0, Color.WHITE);
+        Label optionsButton = SceneManager.getButton("options", 1, Color.WHITE);
+        Label exitButton = SceneManager.getButton("main menu", 2, Color.WHITE);
 
-        Label backButton = SceneManager.getButton("back", 2, Color.BLACK);
+        Label backButton = SceneManager.getButton("back", 2, Color.WHITE);
 
         pause = SceneManager.getSTPane("PAUSE", 40);
         pause.getChildren().addAll(resumeButton, optionsButton, exitButton);
         pause.setVisible(false);
+        pause.setOnKeyPressed(keyEvent -> {
+            if(keyEvent.getCode().equals(KeyCode.ESCAPE)) {
+                resumeView();
+            }
+        });
 
         options = SceneManager.getSTPane("OPTIONS", 40);
         options.getChildren().addAll(backButton);
@@ -389,8 +396,9 @@ public class GameView implements Observer {
 
         gameBoard.getChildren().addAll(pause, options);
 
+        //============= BUTTONS =============//
 
-        resumeButton.setOnMouseClicked(event -> controller.resumeController());
+        resumeButton.setOnMouseClicked(event -> resumeView());
 
         optionsButton.setOnMouseClicked(event -> {
             pause.setVisible(false);
@@ -402,6 +410,7 @@ public class GameView implements Observer {
                 pause.setVisible(true);
             });
         });
+
 
         exitButton.setOnMouseClicked(event -> controller.quitMatch());
 

@@ -98,7 +98,7 @@ public class SceneManager {
         Platform.runLater(() -> {
             double centerX = (double) WIDTH / 2;
             double centerY = (double) HEIGHT / 2;
-            clickableText.setLayoutX(centerX - clickableText.getWidth() / 2);
+            clickableText.setLayoutX(centerX - clickableText.getWidth());
             clickableText.setLayoutY(centerY - clickableText.getHeight() / 2 + (i *50));
         });
 
