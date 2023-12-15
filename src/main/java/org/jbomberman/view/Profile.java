@@ -18,7 +18,7 @@ public class Profile {
     private int gamesWon;
     private int gamesLost;
     private int level;
-    private Pane mainProfile = SceneManager.getPane("PROFILE", 40);;
+    private Pane mainProfile = SceneManager.getP("PROFILE", false,false);;
     private Pane chooser;
 
     public Profile() {
@@ -42,7 +42,7 @@ public class Profile {
     }
 
     private void createChooser(){
-        chooser = SceneManager.getPane("choose your avatar",40);
+        chooser = SceneManager.getP("choose your avatar",false,false);
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER);
         hbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.0)");

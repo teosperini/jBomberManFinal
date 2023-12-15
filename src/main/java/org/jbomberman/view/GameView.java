@@ -2,25 +2,19 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
+import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class GameView implements Observer {
 
@@ -30,11 +24,16 @@ public class GameView implements Observer {
 
 
     Font labelFont = Font.loadFont(getClass().getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 20.0);
+    //END GAME PANELS
     Pane gameOver;
-    Pane gameWin;
+    Pane victory;
+
+    //PAUSE PANELS
     Pane pause;
     Pane options;
 
+
+    //IMAGE VIEWS
     ImageView player;
     ImageView pu_bomb;
     ImageView pu_life;
@@ -47,9 +46,8 @@ public class GameView implements Observer {
 
     private final HBox bottomBar = new HBox();
 
-    Label restartLabel;
-    Label nextLevelLabel;
-    Label escLabel;
+
+
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
@@ -78,12 +76,12 @@ public class GameView implements Observer {
             return image;
         }
 
+
     }
 
 
-
     public GameView() {
-        System.out.println("pezzo di merd");
+        System.out.println("View Initialization");
         controller = MainController.getInstance();
         gameBoard = new AnchorPane();
         randomBlocks = new ArrayList<>();
@@ -92,10 +90,34 @@ public class GameView implements Observer {
     }
 
     public void initialize() {
-        genPause();
-        genWinLose();
+        genInGamePanels();
         addBottomBar();
+        //gameBoard.toFront();
+        //gameBoard.requestFocus();
         gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
+        /*
+        gameBoard.setOnSwipeUp(swipeEvent -> {
+            controller.handleGameKeyEvent(KeyCode.UP);
+        });
+        gameBoard.setOnSwipeDown(swipeEvent -> {
+            controller.handleGameKeyEvent(KeyCode.DOWN);
+        });
+        gameBoard.setOnSwipeLeft(swipeEvent -> {
+            controller.handleGameKeyEvent(KeyCode.LEFT);
+        });
+        gameBoard.setOnSwipeRight(swipeEvent -> {
+            controller.handleGameKeyEvent(KeyCode.RIGHT);
+        });
+        gameBoard.setOnTouchPressed(touchEvent -> {
+            controller.handleGameKeyEvent(KeyCode.SPACE);
+        });
+        */
+    }
+
+    public void getFocus() {
+        gameBoard.setVisible(true);
+        gameBoard.toFront();
+        gameBoard.requestFocus();
     }
 
     public AnchorPane getGame() {
@@ -159,7 +181,7 @@ public class GameView implements Observer {
         pointsLabel = new Label("Punti: 0");
         timerLabel = new Label("Tempo: 0");
 
-        livesLabel.setAlignment(Pos.CENTER_LEFT);
+        //livesLabel.setAlignment(Pos.CENTER_LEFT);
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
@@ -234,7 +256,7 @@ public class GameView implements Observer {
                         );
                         transition.setNode(player);
                     } else {
-                        transition.setDuration(Duration.millis(400));
+                        transition.setDuration(Duration.millis(600));
                         transition.setNode(enemies.get(index));
                     }
                     transition.play();
@@ -266,17 +288,18 @@ public class GameView implements Observer {
                 case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
                 case U_GAME_WIN -> {
-                    controller.pauseController();
+                    controller.endMatch();
                     PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
                     pauseGameWin.setOnFinished(event -> {
-                        gameWin.toFront();
-                        gameWin.setVisible(true);
-                        gameWin.requestFocus();
+                        victory.toFront();
+                        victory.setVisible(true);
+                        victory.requestFocus();
                     });
                     pauseGameWin.play();
                 }
 
                 case U_GAME_OVER -> {
+                    controller.endMatch();
                     PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
                     gameOverAnimation(updateInfo.getCoordinate());
                     pauseGameOver.setOnFinished(event -> {
@@ -286,6 +309,7 @@ public class GameView implements Observer {
                     });
                     pauseGameOver.play();
                 }
+
                 default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
         }
@@ -329,9 +353,7 @@ public class GameView implements Observer {
     }
 
     public void resumeView() {
-        pause.setVisible(false);
-        gameBoard.toFront();
-        gameBoard.requestFocus();
+        SceneManager.changePane(pause,gameBoard);
     }
 
     private void updateLife(int index){
@@ -372,93 +394,86 @@ public class GameView implements Observer {
         });
     }
 
-    private void genPause() {
-        Label resumeButton = SceneManager.getButton("resume", 0, Color.BLACK);
-        Label optionsButton = SceneManager.getButton("options", 1, Color.BLACK);
-        Label exitButton = SceneManager.getButton("main menu", 2, Color.BLACK);
-
-        Label backButton = SceneManager.getButton("back", 2, Color.BLACK);
-
-        pause = SceneManager.getSTPane("PAUSE", 40);
-        pause.getChildren().addAll(resumeButton, optionsButton, exitButton);
+    private void genInGamePanels() {
+        //################# PAUSE ################//
+        pause = SceneManager.getP("Pause", true, false);
         pause.setVisible(false);
 
-        options = SceneManager.getSTPane("OPTIONS", 40);
-        options.getChildren().addAll(backButton);
+        Label pauseResumeButton = SceneManager.getButton("resume", 0, Color.WHITE);
+        Label pauseOptionsButton = SceneManager.getButton("options", 1, Color.WHITE);
+        Label pauseRestartButton = SceneManager.getButton("restart", 2, Color.WHITE);
+        Label pauseExitButton = SceneManager.getButton("menu", 3, Color.WHITE);
+
+        pauseResumeButton.setOnMouseClicked(mouseEvent -> controller.resumeController());
+        pauseOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(pause,options));
+        pauseRestartButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
+        pauseExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
+
+        pause.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
+                controller.resumeController();
+                keyEvent.consume();
+            }
+        });
+
+        pause.getChildren().addAll(pauseResumeButton, pauseOptionsButton, pauseRestartButton, pauseExitButton);
+
+        //################# OPTIONS ################//
+        options = SceneManager.getP("Options", true, false);
         options.setVisible(false);
 
-        gameBoard.getChildren().addAll(pause, options);
+        Label optionsBackButton = SceneManager.getButton("back", 2, Color.WHITE);
 
+        optionsBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options, pause));
 
-        resumeButton.setOnMouseClicked(event -> controller.resumeController());
-
-        optionsButton.setOnMouseClicked(event -> {
-            pause.setVisible(false);
-            options.setVisible(true);
-            options.requestFocus();
-
-            backButton.setOnMouseClicked(event2 -> {
-                options.setVisible(false);
-                pause.setVisible(true);
-            });
+        options.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
+                SceneManager.changePane(options,pause);
+                keyEvent.consume();
+            }
         });
 
-        exitButton.setOnMouseClicked(event -> controller.quitMatch());
+        options.getChildren().addAll(optionsBackButton);
 
-    }
-
-    private void genWinLose() {
-        gameOver = SceneManager.getSTPane("GAME OVER", 40);
-        gameWin = SceneManager.getSTPane("YOU WON", 40);
-
-        //perchè li sto facendo così e non a pulsanti?
-        //tipo "next level", "main menu"
-        //che sarebbe molto più semplice?
-        //TODO cambiare in quello che scritto sopra
-        restartLabel = new Label("Press ENTER to restart the game");
-        nextLevelLabel = new Label("Press SPACE to go to the next level");
-        escLabel = new Label("Press ESC to go back to the main menu");
-
-        restartLabel.setFont(labelFont);
-        restartLabel.setTextFill(Color.BLACK);
-        restartLabel.setAlignment(Pos.CENTER);
-        restartLabel.setLayoutY((double) SCALE_FACTOR * 9 - 5); // Posiziona in basso
-        restartLabel.setLayoutX((double) SCALE_FACTOR * 4);
-
-
-        nextLevelLabel.setFont(labelFont);
-        nextLevelLabel.setTextFill(Color.BLACK);
-        nextLevelLabel.setAlignment(Pos.CENTER);
-        nextLevelLabel.setLayoutY((double) SCALE_FACTOR * 9 - 5); // Posiziona in basso
-        nextLevelLabel.setLayoutX((double) SCALE_FACTOR * 4 - 5);
-
-        escLabel.setFont(labelFont);
-        escLabel.setTextFill(Color.BLACK);
-        escLabel.setAlignment(Pos.CENTER);
-        escLabel.setLayoutY((double) SCALE_FACTOR * 9 + 12); // Posiziona in basso
-        escLabel.setLayoutX((double) SCALE_FACTOR * 3);
-
-        gameWin.setVisible(false);
+        //################## GAME OVER #################//
+        gameOver = SceneManager.getP("Game Over", true,false);
         gameOver.setVisible(false);
-        gameOver.getChildren().addAll(restartLabel, escLabel);
-        gameWin.getChildren().addAll(nextLevelLabel, escLabel);
+
+        Label gameOverRestartButton = SceneManager.getButton("restart", 1, Color.WHITE);
+        Label gameOverExitButton = SceneManager.getButton("menu", 2, Color.WHITE);
+
+        gameOverExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
+        gameOverRestartButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
 
         gameOver.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode() == KeyCode.ENTER) {
-                controller.newGame();
-            } else if (keyEvent.getCode() == KeyCode.ESCAPE) {
-                controller.quitMatch();
-            }
-        });
-        gameWin.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode() == KeyCode.SPACE) {
-                System.out.println("mettere nuovo livello");
-            } else if (keyEvent.getCode() == KeyCode.ESCAPE) {
+            if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
                 controller.quitMatch();
             }
         });
 
-        gameBoard.getChildren().addAll(gameOver, gameWin);
+        gameOver.getChildren().addAll(gameOverRestartButton, gameOverExitButton);
 
+        //################## VICTORY ###################//
+        victory = SceneManager.getP("Victory", true, false);
+        victory.setVisible(false);
+
+        Label victoryNextLevelButton = SceneManager.getButton("nextLevel", 1, Color.WHITE);
+        Label victoryExitButton = SceneManager.getButton("menu", 3, Color.WHITE);
+        victoryNextLevelButton.setOnMouseClicked(mouseEvent -> {
+            //TODO next level
+        });
+        victoryExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
+
+        victory.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
+                controller.quitMatch();
+            }
+        });
+
+        victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+
+        //################## GAMEBOARD ################//
+        gameBoard.getChildren().addAll(pause, options , gameOver, victory);
     }
+
 }

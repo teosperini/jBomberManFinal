@@ -3,10 +3,12 @@ package org.jbomberman.controller;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import org.jbomberman.model.GameModel;
 import org.jbomberman.model.MenuModel;
 import org.jbomberman.utils.BackgroundMusic;
+import org.jbomberman.utils.Difficulty;
 import org.jbomberman.utils.SceneManager;
 import org.jbomberman.view.GameView;
 import org.jbomberman.view.MenuView;
@@ -20,8 +22,8 @@ import javafx.stage.Stage;
 public class MainController {
     MenuView menuView;
     MenuModel model;
-    GameView gameView;
     GameModel gameModel;
+    GameView gameView;
 
 
     Stage stage;
@@ -33,6 +35,7 @@ public class MainController {
     private boolean pause = false;
 
     private static MainController instance;
+    private Difficulty difficulty;
 
     private MainController() {
     }
@@ -54,10 +57,8 @@ public class MainController {
         model = new MenuModel();
         model.addObserver(menuView);
         menuView.initialize();
-        gameView = new GameView();
-        gameModel = new GameModel();
-        gameModel.addObserver(gameView);
-        gameModel.notifyModelReady();
+
+        difficulty = Difficulty.NORMAL;
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
@@ -65,29 +66,32 @@ public class MainController {
         stage.show();
     }
 
-    //HANDLING OF BUTTONS OF THE MAIN MENU
-
+    //################ NEW GAME ################//
     public void gameButtonPressed() {
+        gameView = new GameView();
+        gameModel = new GameModel();
+        gameModel.setDifficulty(difficulty);
+        gameModel.addObserver(gameView);
+        gameModel.notifyModelReady();
+
         scene.setRoot(gameView.getGame());
+        gameView.getFocus();
+
+        pause = false;
+        moving = false;
         setTimeline();
-        //faccio ripartire il controller
-        //in caso io finisca una partita (sia vinta che persa), e ne ricominci un'altra senza uscire
-        //dal gioco, devo far ripartire i movimenti dei mob che erano stati fermati dalla chiamata
-        //di pauseController() alla fine del gioco
-        resumeController();
     }
+
 
     public void loadProfile() {
         //TODO caricherà i dati dal model quando ci sarà il file json
     }
 
-    public void gameExit() {
-        stage.close();
-    }
-
     //HANDLING OF THE KEY-EVENTS IN GAME
+
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
+        //public void handleGameKeyEvent(KeyCode keyCode){
         if (keyCode == KeyCode.ESCAPE){
             pauseController();
         } else if (!pause && !moving){
@@ -102,18 +106,13 @@ public class MainController {
                 gameModel.movePlayer(keyCode);
             }
         }
-    }
 
-    public void newGame() {
-        gameView = new GameView();
-        gameModel.addObserver(gameView);
-        setTimeline();
     }
-
     public void pauseController() {
         pause = true;
         gameView.pauseView();
         mobMovement.pause();
+
     }
 
     public void resumeController() {
@@ -126,17 +125,18 @@ public class MainController {
         moving = bool;
     }
 
-    public void quitMatch() {
-        BackgroundMusic.stopMusic();
-        scene.setRoot(menuView.getMenu());
-        gameModel.gameReset();
-        gameView = null;
-        //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
+    public void setDifficulty(Difficulty difficulty){
+        this.difficulty = difficulty;
+    }
+
+    public void endMatch(){
+        mobMovement.stop();
+        pause = true;
     }
 
     private void setTimeline(){
         mobMovement = new Timeline(
-                new KeyFrame(Duration.millis(500), event ->{
+                new KeyFrame(Duration.millis(1000), event ->{
                         if (!pause){
                             gameModel.moveEnemies();
                         }
@@ -148,6 +148,20 @@ public class MainController {
 
     public void bombExploded() {
         gameModel.explosion();
+    }
+
+    public void quitMatch() {
+        //BackgroundMusic.stopMusic();
+        scene.setRoot(menuView.getMenu());
+        gameModel = null;
+        gameView = null;
+        //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
+    }
+
+    //############## CLOSE THE WINDOW #############//
+
+    public void gameExit() {
+        stage.close();
     }
 }
 

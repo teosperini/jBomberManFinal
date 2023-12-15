@@ -19,14 +19,10 @@ public class JBomberMan extends Application {
         Image icon = new Image(getClass().getResourceAsStream("view/bomb/bomb_2.png"));
         stage.getIcons().add(icon);
 
-        System.out.println("romina");
-
         stage.setResizable(true);
         stage.setTitle("JBomberMan");
 
         MainController controller = MainController.getInstance();
-
-        System.out.println("dxfcghbjn");
 
         controller.setStage(stage);
         controller.initialize();

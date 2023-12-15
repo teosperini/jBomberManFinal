@@ -53,3 +53,7 @@ a
 1src/main/java/org/jbomberman/model/MenuModel.java,7\3\73ef91d0af58797d212c3a0f5b8abb969f5cea9b
 a
 1src/main/java/org/jbomberman/utils/Direction.java,a\a\aacf9bd8c129b38afd770490bd8241597ec7bd7f
+W
+'src/main/java/org/jbomberman/README.txt,6\d\6db6d1c69d33c89bf321dd6d0ba2c926fae1d6c9
+b
+2src/main/java/org/jbomberman/utils/Difficulty.java,8\9\897a021368849d648c1d3cee3e18d3a2144297d3
