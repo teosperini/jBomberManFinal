@@ -95,7 +95,7 @@ public class GameView implements Observer {
         //gameBoard.toFront();
         //gameBoard.requestFocus();
         gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
-        /*
+/*
         gameBoard.setOnSwipeUp(swipeEvent -> {
             controller.handleGameKeyEvent(KeyCode.UP);
         });
@@ -108,10 +108,12 @@ public class GameView implements Observer {
         gameBoard.setOnSwipeRight(swipeEvent -> {
             controller.handleGameKeyEvent(KeyCode.RIGHT);
         });
-        gameBoard.setOnTouchPressed(touchEvent -> {
+        gameBoard.setOnZoom(touchEvent -> {
             controller.handleGameKeyEvent(KeyCode.SPACE);
         });
-        */
+
+ */
+
     }
 
     public void getFocus() {

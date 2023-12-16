@@ -29,14 +29,9 @@ public class Profile {
     }
 
     private void createProfileWindow() {
-        mainProfile.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode() == KeyCode.ESCAPE) {
-                mainProfile.setVisible(false);
-            }
-        });
         Label chooseProfile = SceneManager.getButton("choose profile", 1, Color.WHITE);
         chooseProfile.setOnMouseClicked(event -> {
-            chooser.setVisible(true);
+            SceneManager.changePane(mainProfile, chooser);
         });
         mainProfile.getChildren().addAll(SceneManager.backButton(mainProfile),chooseProfile ,chooser);
     }
@@ -48,6 +43,8 @@ public class Profile {
         hbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.0)");
         ImageView imageView1 = new ImageView(new Image("/org/jbomberman/EndermanFace.png"));
         ImageView imageView2 = new ImageView(new Image("/org/jbomberman/view/definitive/steve.png"));
+        imageView1.setLayoutX(100);
+        imageView2.setLayoutX(110);
         imageView1.setFitHeight(50);
         imageView1.setFitWidth(50);
         imageView2.setFitHeight(50);
@@ -68,16 +65,14 @@ public class Profile {
         ImageView[] images = {imageView1, imageView2};
         for (ImageView imageView : images) {
             imageView.setOnMouseClicked(event -> {
-                chooser.setVisible(false);
-                mainProfile.setVisible(false);
+                SceneManager.changePane(chooser, mainProfile);
             });
         }
 
 
         chooser.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ESCAPE) {
-                chooser.setVisible(false);
-                mainProfile.setVisible(true);
+                SceneManager.changePane(chooser, mainProfile);
             }
         });
         Label back = SceneManager.backButtonInternal(chooser, mainProfile);

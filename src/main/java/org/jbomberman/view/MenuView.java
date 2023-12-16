@@ -15,7 +15,6 @@ import java.util.Observer;
 
 public class MenuView implements Observer{
 
-    //private final AnchorPane menu = new AnchorPane(SceneManager.getTitlePane("JBomberMan", 55));
     private final AnchorPane menu = new AnchorPane();
     private Pane mainMenu;
     private Pane options;
@@ -23,13 +22,8 @@ public class MenuView implements Observer{
     private Profile profileGetter;
     Pane difficulty;
 
-
-    //per fare il label toggle, devo creare un label e impostare che sul click deve eseguire l'azione
-
     private MainController controller;
-
-
-    /**
+        /**
      * Initializes the menu
      */
     public void initialize() {
@@ -52,7 +46,7 @@ public class MenuView implements Observer{
 
         mainMenuPlayButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
         mainMenuOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(mainMenu, options));
-        mainMenuProfileButton.setOnMouseClicked(mouseEvent -> {});
+        mainMenuProfileButton.setOnMouseClicked(mouseEvent -> {SceneManager.changePane(mainMenu, profile);});
         mainMeniExitButton.setOnMouseClicked(mouseEvent -> controller.gameExit());
 
         mainMenu.getChildren().addAll(mainMenuPlayButton, mainMenuOptionsButton, mainMenuProfileButton, mainMeniExitButton);
@@ -62,8 +56,10 @@ public class MenuView implements Observer{
         options.setVisible(false);
 
         Label optionsDifficultyButton = SceneManager.getButton("difficulty",1, color);
+        Label optionsBackButton = SceneManager.getButton("back", 2, color);
 
         optionsDifficultyButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options,difficulty));
+        optionsBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options, mainMenu));
 
         options.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
@@ -71,7 +67,7 @@ public class MenuView implements Observer{
             }
         });
 
-        options.getChildren().addAll(optionsDifficultyButton);
+        options.getChildren().addAll(optionsDifficultyButton, optionsBackButton);
 
         //############# DIFFICULTY ################//
         difficulty = SceneManager.getP("Difficulty", false, false);
@@ -107,86 +103,20 @@ public class MenuView implements Observer{
 
         difficulty.getChildren().addAll(difficultyEasy,difficultyNormal,difficultyHard,difficultyBackButton);
 
+        //################# PROFILE ################//
+        profile = profileGetter.getProfile();
+
+        profile.setVisible(false);
 
 
-        menu.getChildren().addAll(mainMenu, options, difficulty);
-
-
-        /*
-        Label playButton = SceneManager.getButton("play", 0, Color.WHITE);
-        Label optionsButton = SceneManager.getButton("options", 1, Color.WHITE);
-        Label profileButton = SceneManager.getButton("profile", 2, Color.WHITE);
-        Label exitButton = SceneManager.getButton("quit game", 3, Color.WHITE);
-        System.out.println(playButton.getAlignment());
-
-        playButton.setOnMouseClicked(event -> controller.gameButtonPressed());
-
-        optionsButton.setOnMouseClicked(event -> SceneManager.changePane(menu, options));
-
-        profileButton.setOnMouseClicked(event -> SceneManager.changePane(menu, profile));
-
-        exitButton.setOnMouseClicked(event -> controller.gameExit());
-
-        //##### options
-        options = SceneManager.getP("Options", false, false);
-
-
-        difficulty = SceneManager.getP("Difficulty", false, false);
-        difficulty.setVisible(false);
-
-        Label difficultyEasy = SceneManager.getButton("easy", 0, Color.WHITE);
-        Label difficultyNormal = SceneManager.getButton("normal", 1, Color.WHITE);
-        Label difficultyHard = SceneManager.getButton("hard", 2, Color.WHITE);
-        Label difficultyBackButton = SceneManager.getButton("back", 3, Color.WHITE);
-
-        difficultyEasy.setOnMouseClicked(mouseEvent -> {
-            controller.setDifficulty(Difficulty.EASY);
-            SceneManager.changePane(difficulty, options);
-        });
-        difficultyNormal.setOnMouseClicked(mouseEvent -> {
-            controller.setDifficulty(Difficulty.NORMAL);
-            SceneManager.changePane(difficulty, options);
-        });
-        difficultyHard.setOnMouseClicked(mouseEvent -> {
-            controller.setDifficulty(Difficulty.HARD);
-            SceneManager.changePane(difficulty, options);
-        });
-
-        difficultyBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(difficulty, options));
-
-        difficulty.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
-                SceneManager.changePane(difficulty,options);
-                keyEvent.consume();
-            }
-        });
-
-        difficulty.getChildren().addAll(difficultyEasy,difficultyNormal,difficultyHard,difficultyBackButton);
-
-
-        options.setVisible(false);
-
-        options.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
-                SceneManager.changePane(options, menu);
-            }
-        });
-
-        options.getChildren().add(difficulty);
-
-        menu.getChildren().addAll(exitButton ,profileButton, playButton, optionsButton, options);
-
-
-         */
+        menu.getChildren().addAll(mainMenu, options, difficulty, profile);
     }
 
     /**
      * Sets the profile of the menu
      */
     private void profile() {
-        profile = profileGetter.getProfile();
-        profile.setVisible(false);
-        menu.getChildren().add(profile);
+
     }
 
 

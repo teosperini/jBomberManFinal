@@ -58,6 +58,7 @@ public class GameModel extends Observable {
         generateRandomBlocks();
         generateRandomExit();
     }
+
     public void setDifficulty(Difficulty difficulty){
         switch (difficulty){
             case EASY -> numberOfEnemies = 2;
@@ -67,6 +68,7 @@ public class GameModel extends Observable {
         }
         generateEnemies();
     }
+
     private void generateBackground() {
         for (int x = 1; x <= 15; x += 1) {
             for (int y = 1; y < 10; y += 1) {
@@ -82,10 +84,8 @@ public class GameModel extends Observable {
 
         for (int x = 0; x <= max.x() + 1; x += 1) {
             for (int y = 0; y <= max.y() + 1; y += 1) {
-                // Verifica se la coordinata è ai bordi
+                //verifica se la coordinata è ai bordi
                 if (x == 0 || x == max.x()+1 || y == 0 || y == max.y()+1) {
-                    // Fai qualcosa con la coordinata ai bordi
-                    // Esempio:
                     coordinatesFixedBlocks.add(new Coordinate(x, y));
                 }
             }
