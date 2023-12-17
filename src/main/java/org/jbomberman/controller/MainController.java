@@ -80,6 +80,8 @@ public class MainController {
         pause = false;
         moving = false;
         setTimeline();
+        BackgroundMusic.playMusic();
+        BackgroundMusic.setVolume();
     }
 
 
@@ -151,7 +153,7 @@ public class MainController {
     }
 
     public void quitMatch() {
-        //BackgroundMusic.stopMusic();
+        BackgroundMusic.stopMusic();
         scene.setRoot(menuView.getMenu());
         gameModel = null;
         gameView = null;

@@ -20,9 +20,11 @@ public class GameModel extends Observable {
     private Coordinate tntCoordinates;
     private int bombRange = 1;
 
-    //coordinate power up
+    //coordinate exit and power up
+    private Coordinate exit;
     private Coordinate bombPu;
     private Coordinate lifePu;
+    private Coordinate pointsPu1;
 
     private int numberOfEnemies;
     private int playerHp = 3;
@@ -33,7 +35,6 @@ public class GameModel extends Observable {
     // how many random blocks are going to spawn
     private int numRndBlocks = 20;
     // the coordinates of the winning cell
-    private Coordinate exit;
 
     private final Random random = new Random();
 
@@ -109,11 +110,12 @@ public class GameModel extends Observable {
     }
 
     public void generateRandomExit() {
-        int randomIndex = random.nextInt(coordinatesRandomBlocks.size());
-        exit = coordinatesRandomBlocks.get(randomIndex);
+
     }
 
     private void generatePowerUP() {
+        int randomExit = random.nextInt(coordinatesRandomBlocks.size());
+        exit = coordinatesRandomBlocks.get(randomExit);
         int randomFire = random.nextInt(coordinatesRandomBlocks.size());
         bombPu = coordinatesRandomBlocks.get(randomFire);
         int randomLife = random.nextInt(coordinatesRandomBlocks.size());

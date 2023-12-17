@@ -127,6 +127,7 @@ public class GameView implements Observer {
     }
 
     private void drawBomb(Coordinate coordinate) {
+        BackgroundMusic.playBomb();
         ImageView tntImage = drawImage(coordinate, BlockImage.BOMB.getImage());
         PauseTransition spawnTNT = new PauseTransition(Duration.millis(50));
         PauseTransition pauseTNT = new PauseTransition(Duration.millis(400));
@@ -135,7 +136,6 @@ public class GameView implements Observer {
         spawnTNT.setOnFinished(event -> {
             gameBoard.getChildren().add(tntImage);
             player.toFront();
-            //BackgroundMusic.playBomb();
             pauseTNT.play();
         });
 
