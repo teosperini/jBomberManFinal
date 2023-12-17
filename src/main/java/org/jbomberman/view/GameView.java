@@ -63,7 +63,7 @@ public class GameView implements Observer {
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
-        LIFE(BlockImage.class.getResourceAsStream("power_up/potion.png"))
+        LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png"))
         ;
 
         private final Image image;
@@ -290,6 +290,8 @@ public class GameView implements Observer {
                 case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
                 case U_GAME_WIN -> {
+                    BackgroundMusic.stopMusic();
+                    BackgroundMusic.playSuccess();
                     controller.endMatch();
                     PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
                     pauseGameWin.setOnFinished(event -> {

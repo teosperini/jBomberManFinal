@@ -4,15 +4,11 @@ import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Paths;
-
 public class BackgroundMusic {
     private static final String PATH = System.getProperty("user.dir");
     private static final String GAMESOUNDTRACK = BackgroundMusic.class.getResource("UndertaleOST.mp3").toExternalForm();
     private static final AudioClip GAMEBOMB = new AudioClip(BackgroundMusic.class.getResource("tnt_exp.mp3").toExternalForm());
-
+    private static final AudioClip SUCCESS = new AudioClip(BackgroundMusic.class.getResource("success.mp3").toExternalForm());
 
     private static MediaPlayer mediaPlayer;
 
@@ -37,5 +33,9 @@ public class BackgroundMusic {
     //capire bene come funziona
     public static void setVolume(){
         mediaPlayer.setVolume(20);
+    }
+
+    public static void playSuccess() {
+        SUCCESS.play();
     }
 }

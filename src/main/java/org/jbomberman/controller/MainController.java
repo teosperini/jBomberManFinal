@@ -153,7 +153,7 @@ public class MainController {
     }
 
     public void quitMatch() {
-        BackgroundMusic.stopMusic();
+        //BackgroundMusic.stopMusic();
         scene.setRoot(menuView.getMenu());
         gameModel = null;
         gameView = null;
