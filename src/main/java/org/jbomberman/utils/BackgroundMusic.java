@@ -5,11 +5,12 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Paths;
 
 public class BackgroundMusic {
     private static final String PATH = System.getProperty("user.dir");
-    private static final InputStream GAMESOUNDTRACK = (BackgroundMusic.class.getResourceAsStream("UndertaleOST.mp3"));
+    private static final String GAMESOUNDTRACK = BackgroundMusic.class.getResource("UndertaleOST.mp3").toExternalForm();
     private static final AudioClip GAMEBOMB = new AudioClip(BackgroundMusic.class.getResource("tnt_exp.mp3").toExternalForm());
 
 
@@ -18,7 +19,8 @@ public class BackgroundMusic {
 
     public static void playMusic(){
         // Carica il file audio da riprodurre
-        Media media = new Media(Paths.get("C:\\Users\\matte\\Documents\\università\\PrimoAnno-SecondoSemstre\\metodologie di programmazione\\nuovoProgettoFinale\\jBomberMan\\src\\main\\resources\\org\\jbomberman\\utils\\UndertaleOST.mp3").toUri().toString());
+        Media media = new Media(GAMESOUNDTRACK);
+        System.out.println("source: " + GAMEBOMB.getSource());
         mediaPlayer =  new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Riproduce la musica in modo continuo
         mediaPlayer.play();
