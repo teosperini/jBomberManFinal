@@ -16,5 +16,10 @@ public enum UpdateType {
     L_MAP,
     U_RESPAWN,
     U_PU_LIFE,
-    L_PU_LIFE, L_PU_BOMB, L_EXIT, U_GAME_OVER
+    L_PU_LIFE,
+    L_PU_BOMB,
+    L_EXIT,
+    L_PU_INVINCIBLE,
+    U_PU_INVINCIBLE,
+    U_GAME_OVER
 }

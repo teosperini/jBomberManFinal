@@ -165,5 +165,14 @@ public class MainController {
     public void gameExit() {
         stage.close();
     }
+
+
+    //##################### TEST ####################//
+    //TODO remove after test
+    public void removeBlocks() {
+        gameModel.removeRandom();
+    }
+
+    //###############################################//
 }
 

@@ -2,6 +2,7 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
@@ -37,6 +38,7 @@ public class GameView implements Observer {
     ImageView player;
     ImageView pu_bomb;
     ImageView pu_life;
+    ImageView pu_invincible;
     ImageView exit;
 
     private final MainController controller;
@@ -62,8 +64,10 @@ public class GameView implements Observer {
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
-        FIRE(BlockImage.class.getResourceAsStream("power_up/fire.png")),
-        LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png"))
+        FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
+        LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
+        INVINCIBLE(BlockImage.class.getResourceAsStream("power_up/resistance.png")),
+        COIN(BlockImage.class.getResourceAsStream("power_up/coin.gif"))
         ;
 
         private final Image image;
@@ -183,12 +187,27 @@ public class GameView implements Observer {
         pointsLabel = new Label("Punti: 0");
         timerLabel = new Label("Tempo: 0");
 
-        //livesLabel.setAlignment(Pos.CENTER_LEFT);
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
-        bottomBar.getChildren().addAll(livesLabel);
-        // add the bottomBar to the game board
+
+        //##################### TEST ####################//
+        //TODO remove after test
+
+        Button buttonBlocks = new Button();
+        buttonBlocks.setOnMouseClicked(mouseEvent -> {
+            controller.removeBlocks();
+            mouseEvent.consume();
+            gameBoard.toFront();
+            gameBoard.requestFocus();
+        });
+        buttonBlocks.setLayoutX(40);
+        buttonBlocks.setLayoutY(20);
+
+        //###############################################//
+
+
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks);
         gameBoard.getChildren().add(bottomBar);
     }
 
@@ -287,6 +306,12 @@ public class GameView implements Observer {
                 }
                 case U_PU_BOMB -> doBombPowerUp();
 
+                case L_PU_INVINCIBLE -> {
+                    pu_invincible = drawImage(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
+                    gameBoard.getChildren().add(pu_invincible);
+                }
+                case U_PU_INVINCIBLE -> doInvinciblePowerUp(updateInfo.getBoo());
+
                 case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
                 case U_GAME_WIN -> {
@@ -346,10 +371,10 @@ public class GameView implements Observer {
     }
 
  */
+
     private void gameOverAnimation(Coordinate coordinate) {
         //TODO
     }
-
     public void pauseView(){
         pause.toFront();
         pause.setVisible(true);
@@ -366,24 +391,33 @@ public class GameView implements Observer {
 
     private void doLifePowerUp(int index) {
         updateLife(index);
-        powerUPs(pu_life, 0);
+        powerUPs(pu_life);
     }
 
     private void doBombPowerUp(){
-        powerUPs(pu_bomb, 1);
+        powerUPs(pu_bomb);
     }
 
-    private void powerUPs(ImageView imageView, double i) {
+    private void doInvinciblePowerUp(boolean boo) {
+        if (boo) {
+            player.setOpacity(0.5);
+            powerUPs(pu_invincible);
+        }else {
+            player.setOpacity(1);
+        }
+    }
+
+    private void powerUPs(ImageView imageView) {
         PauseTransition removePU = new PauseTransition(Duration.millis(200));
         removePU.setOnFinished(event -> gameBoard.getChildren().remove(imageView));
         removePU.play();
 
-        imageView.setFitHeight(20);
-        imageView.setFitWidth(20);
+        imageView.setFitHeight(25);
+        imageView.setFitWidth(25);
         //bottomBar.setAlignment(Pos.BOTTOM_RIGHT);
         //questo pezzo qui dovrebbe posizionare il power up nella bottom bar in base a che
         //power up è
-        HBox.setMargin(imageView, new Insets(0, 100 + i * 20, 0, 0));
+        HBox.setMargin(imageView, new Insets(5, 0, 0, 10));
         bottomBar.getChildren().add(imageView);
     }
 

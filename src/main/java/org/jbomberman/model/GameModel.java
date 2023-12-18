@@ -1,5 +1,7 @@
 package org.jbomberman.model;
 
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import org.jbomberman.utils.*;
 import javafx.scene.input.KeyCode;
 
@@ -24,7 +26,9 @@ public class GameModel extends Observable {
     private Coordinate exit;
     private Coordinate bombPu;
     private Coordinate lifePu;
-    private Coordinate pointsPu1;
+    private Coordinate invinciblePu;
+
+    private boolean playerInvincible = false;
 
     private int numberOfEnemies;
     private int playerHp = 3;
@@ -48,7 +52,7 @@ public class GameModel extends Observable {
 
     public void initialize(){
         generateBlocks();
-        generatePowerUP();
+        generateItemsExit();
         playerPosition = new Coordinate(1,1);
         playerHp = 3;
         bombRange = 1;
@@ -57,7 +61,6 @@ public class GameModel extends Observable {
     public void generateBlocks() {
         generateBackground();
         generateRandomBlocks();
-        generateRandomExit();
     }
 
     public void setDifficulty(Difficulty difficulty){
@@ -109,22 +112,27 @@ public class GameModel extends Observable {
         }
     }
 
-    public void generateRandomExit() {
+    private void generateItemsExit() {
+        //we can use this array to prevent the items to stack over the same position
+        ArrayList<Coordinate> partial = new ArrayList<>(coordinatesRandomBlocks);
 
-    }
-
-    private void generatePowerUP() {
         int randomExit = random.nextInt(coordinatesRandomBlocks.size());
         exit = coordinatesRandomBlocks.get(randomExit);
-        int randomFire = random.nextInt(coordinatesRandomBlocks.size());
-        bombPu = coordinatesRandomBlocks.get(randomFire);
-        int randomLife = random.nextInt(coordinatesRandomBlocks.size());
-        lifePu = coordinatesRandomBlocks.get(randomLife);
-        if (bombPu.equals(exit) || lifePu.equals(exit)){
-             generatePowerUP();
-        } else {
 
-        }
+        partial.remove(exit);
+
+        int randomFire = random.nextInt(partial.size());
+        bombPu = partial.get(randomFire);
+
+        partial.remove(bombPu);
+
+        int randomLife = random.nextInt(partial.size());
+        lifePu = partial.get(randomLife);
+
+        partial.remove(lifePu);
+
+        int randomInvincible = random.nextInt(partial.size());
+        invinciblePu = partial.get(randomInvincible);
     }
     
     public void generateEnemies() {
@@ -248,13 +256,14 @@ public class GameModel extends Observable {
 //####################################  POWER UPS AND LIFE  ####################################//
 
     private void lessLife() {
-        playerHp -=1;
-        if(playerHp <= 0){
-            notifyDefeat();
-        }
-        else {
-            playerPosition = new Coordinate(1,1);
-            notifyLessLife();
+        if (!playerInvincible) {
+            playerHp -= 1;
+            if (playerHp <= 0) {
+                notifyDefeat();
+            } else {
+                playerPosition = new Coordinate(1, 1);
+                notifyLessLife();
+            }
         }
     }
 
@@ -276,10 +285,12 @@ public class GameModel extends Observable {
 
             if (newPosition.equals(exit) && coordinateEnemies.isEmpty()) {
                 notifyVictory();
-            } else if (newPosition.equals(bombPu)) {
+            } else if (newPosition.equals(bombPu)){
                 notifyPUExplosion();
             } else if (newPosition.equals(lifePu)){
                 notifyPULife();
+            } else if (newPosition.equals(invinciblePu)){
+                notifyPUInvincible();
             }
         }
     }
@@ -353,6 +364,8 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_PU_LIFE, lifePu));
         setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.L_PU_INVINCIBLE, invinciblePu));
+        setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_EXIT, exit));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinatesRandomBlocks, 2));
@@ -394,6 +407,20 @@ public class GameModel extends Observable {
         lifePu = null;
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE, playerHp));
+    }
+
+    public void notifyPUInvincible(){
+        invinciblePu = null;
+        playerInvincible = true;
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.U_PU_INVINCIBLE, true));
+        PauseTransition pauseInvincible = new PauseTransition(Duration.seconds(10));
+        pauseInvincible.setOnFinished(actionEvent -> {
+            playerInvincible = false;
+            setChanged();
+            notifyObservers(new UpdateInfo(UpdateType.U_PU_INVINCIBLE, false));
+        });
+        pauseInvincible.play();
     }
 
     private void notifyVictory() {
@@ -446,4 +473,18 @@ public class GameModel extends Observable {
     private boolean isSafeZone(Coordinate newEnemyPosition) {
         return (newEnemyPosition.x()+newEnemyPosition.y() >3);
     }
+    //##################### TEST ####################//
+    //TODO remove after test
+    public void removeRandom() {
+        ArrayList<Coordinate> array = new ArrayList<>(coordinatesRandomBlocks);
+        array.forEach(coordinate -> {
+                    int index = coordinatesRandomBlocks.indexOf(coordinate);
+                    coordinatesRandomBlocks.remove(coordinate);
+                    notifyBlockRemoved(index);
+                }
+        );
+    }
+
+
+    //###############################################//
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class UpdateInfo {
     private final UpdateType updateType;
+    private boolean b;
     private String name;
     private Coordinate oldc;
     private Coordinate newc;
@@ -56,6 +57,11 @@ public class UpdateInfo {
         this.index = index;
     }
 
+    public UpdateInfo(UpdateType updateType, boolean b) {
+        this.updateType = updateType;
+        this.b = b;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }
@@ -78,5 +84,9 @@ public class UpdateInfo {
 
     public int getIndex() {
         return index;
+    }
+
+    public boolean getBoo(){
+        return b;
     }
 }
