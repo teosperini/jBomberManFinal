@@ -27,6 +27,11 @@ public class GameModel extends Observable {
     private Coordinate bombPu;
     private Coordinate lifePu;
     private Coordinate invinciblePu;
+    private Coordinate coin1;
+    private Coordinate coin2;
+    private Coordinate coin3;
+    private ArrayList<Coordinate> coins = new ArrayList<>();
+
 
     private boolean playerInvincible = false;
 
@@ -135,6 +140,28 @@ public class GameModel extends Observable {
 
         int randomInvincible = random.nextInt(partial.size());
         invinciblePu = partial.get(randomInvincible);
+
+        partial.remove(invinciblePu);
+
+
+        int randomCoin1 = random.nextInt(partial.size());
+        coin1 = partial.get(randomCoin1);
+
+        partial.remove(coin1);
+
+        int randomCoin2 = random.nextInt(partial.size());
+        coin2 = partial.get(randomCoin2);
+
+        partial.remove(coin2);
+
+        int randomCoin3 = random.nextInt(partial.size());
+        coin3 = partial.get(randomCoin3);
+
+        partial.remove(coin3);
+
+        coins.add(coin1);
+        coins.add(coin2);
+        coins.add(coin3);
     }
     
     public void generateEnemies() {
@@ -147,7 +174,6 @@ public class GameModel extends Observable {
                 i++;
             }
         }
-
     }
 
 
@@ -202,8 +228,9 @@ public class GameModel extends Observable {
             int index = coordinateEnemies.indexOf(coordinate);
             coordinateEnemies.remove(coordinate);
             notifyDeadEnemy(index);
-            points += 400;
-            notifyPoints(points, 400, coordinate);
+            int addedPoints = 200;
+            points += addedPoints;
+            notifyPoints(addedPoints, coordinate);
         });
 
         System.out.println(adjacentCoordinates);
@@ -296,6 +323,19 @@ public class GameModel extends Observable {
                 notifyPULife();
             } else if (newPosition.equals(invinciblePu)){
                 notifyPUInvincible();
+            } else {
+                ArrayList<Coordinate> coinsToRemove = new ArrayList<>(coins);
+                coinsToRemove.forEach(coordinate -> {
+                    if (newPosition.equals(coordinate)){
+                        //notifico che il player è passato sulla moneta quindi si può togliere
+                        notifyCoin(coins.indexOf(coordinate));
+                        coins.remove(coordinate);
+                        //notifico l'aggiunta dei punti
+                        int addedPoints = 400;
+                        points+= addedPoints;
+                        notifyPoints(addedPoints, coordinate);
+                    }
+                });
             }
         }
     }
@@ -331,7 +371,6 @@ public class GameModel extends Observable {
     private boolean isValidLocation(Coordinate c) {
         return !coordinatesFixedBlocks.contains(c) && (c.x() + c.y() > 3)&& !coordinatesRandomBlocks.contains(c);
     }
-
     /**
      * if value<0 it returns 0;
      * if value>max it returns max;
@@ -357,8 +396,8 @@ public class GameModel extends Observable {
     }
 
 
-//####################################  NOTIFICATIONS  ####################################//
 
+//####################################  NOTIFICATIONS  ####################################//
     public void notifyModelReady() {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinateGround, 0));
@@ -373,21 +412,34 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_EXIT, exit));
         setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.L_COINS, coins));
+        setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinatesRandomBlocks, 2));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_PLAYER, playerPosition));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.L_ENEMIES, coordinateEnemies));
+
     }
+
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_BLOCK_DESTROYED, blockToRemove));
     }
-
     // quando viene ucciso un nemico, i punti compariranno sopra di esso
     // quando invece è il giocatore a passare sopra a un item che da punti, i punti compariranno
     // sopra il giocatore
-    private void notifyPoints(int points, int currentPoints, Coordinate coordinate) {
+
+    /**
+     * notifica se il player è passato su una moneta
+     * @param i
+     */
+    private void notifyCoin(int i) {
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.U_COINS,i));
+    }
+
+    private void notifyPoints(int currentPoints, Coordinate coordinate) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_POINTS, coordinate, points, currentPoints));
     }

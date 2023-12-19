@@ -22,5 +22,7 @@ public enum UpdateType {
     L_PU_INVINCIBLE,
     U_PU_INVINCIBLE,
     U_POINTS,
+    L_COINS,
+    U_COINS,
     U_GAME_OVER
 }

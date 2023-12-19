@@ -46,6 +46,7 @@ public class GameView implements Observer {
 
     private final List<ImageView> randomBlocks;
     private final List<ImageView> enemies;
+    private final List<ImageView> coins;
 
     private final HBox bottomBar = new HBox();
 
@@ -91,6 +92,7 @@ public class GameView implements Observer {
         gameBoard = new AnchorPane();
         randomBlocks = new ArrayList<>();
         enemies = new ArrayList<>();
+        coins = new ArrayList<>();
         initialize();
     }
 
@@ -195,6 +197,7 @@ public class GameView implements Observer {
         pointsLabel.setTextFill(Color.BLACK);
         pointsLabel.setLayoutX(200);
 
+
         //##################### TEST ####################//
         //TODO remove after test
 
@@ -247,11 +250,13 @@ public class GameView implements Observer {
                     gameBoard.getChildren().add(exit);
                 }
 
-                case L_ENEMIES -> updateInfo.getArray().forEach(coordinate ->  {
+                case L_ENEMIES -> {
+                    updateInfo.getArray().forEach(coordinate ->  {
                         ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
                         enemies.add(enemy);
                         gameBoard.getChildren().add(enemy);
                     });
+                }
 
                 case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
 
@@ -296,6 +301,16 @@ public class GameView implements Observer {
                     updateLife(updateInfo.getIndex());
                     pauseRespawn.play();
                 }
+
+                case L_COINS -> {
+                    updateInfo.getArray().forEach(coordinate -> {
+                        ImageView image = drawImage(coordinate, BlockImage.COIN.getImage());
+                        coins.add(image);
+                        gameBoard.getChildren().add(image);
+                    });
+                }
+
+                case U_COINS -> destroyEntity(coins, updateInfo.getIndex());
 
                 case U_POINTS -> updatePoints(updateInfo.getIndex(), updateInfo.getIndex2(), updateInfo.getCoordinate());
 
@@ -405,17 +420,17 @@ public class GameView implements Observer {
         TranslateTransition transition = new TranslateTransition(Duration.millis(700), text);
         transition.setByY(-30);
 
-        FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(500), text);
+        FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(900), text);
         fadeOutTransition.setFromValue(1);
         fadeOutTransition.setToValue(0);
 
 
-        transition.setOnFinished(actionEvent -> fadeOutTransition.play());
+        //transition.setOnFinished(actionEvent -> fadeOutTransition.play());
         fadeOutTransition.setOnFinished(actionEvent -> gameBoard.getChildren().remove(text));
 
-        transition.play();
+        ParallelTransition parallelTransition  = new ParallelTransition(transition, fadeOutTransition);
 
-        System.out.println("puntiiiiiiiii");
+        parallelTransition.play();
     }
 
     private void doLifePowerUp(int index) {
