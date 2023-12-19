@@ -57,3 +57,5 @@ W
 'src/main/java/org/jbomberman/README.txt,6\d\6db6d1c69d33c89bf321dd6d0ba2c926fae1d6c9
 b
 2src/main/java/org/jbomberman/utils/Difficulty.java,8\9\897a021368849d648c1d3cee3e18d3a2144297d3
+c
+3src/main/java/org/jbomberman/utils/FontManager.java,e\9\e9afb21dc2e2ae1e7c834ddf6071e4e25591c0a9

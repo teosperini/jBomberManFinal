@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
 import javafx.scene.control.Label;
@@ -183,13 +184,16 @@ public class GameView implements Observer {
 
         // build the label
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
-        livesLabel = new Label("Vite: " + 3);
-        pointsLabel = new Label("Punti: 0");
+        livesLabel = new Label("Lives: " + 3);
+        pointsLabel = new Label("Points: " + 0);
         timerLabel = new Label("Tempo: 0");
 
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
+        pointsLabel.setFont(customFontSmall);
+        pointsLabel.setTextFill(Color.BLACK);
+        pointsLabel.setLayoutX(200);
 
         //##################### TEST ####################//
         //TODO remove after test
@@ -204,10 +208,10 @@ public class GameView implements Observer {
         buttonBlocks.setLayoutX(40);
         buttonBlocks.setLayoutY(20);
 
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel);
         //###############################################//
 
-
-        bottomBar.getChildren().addAll(livesLabel, buttonBlocks);
+        //bottomBar.getChildren().addAll(livesLabel);
         gameBoard.getChildren().add(bottomBar);
     }
 
@@ -221,8 +225,8 @@ public class GameView implements Observer {
 
                 case L_MAP -> {
                     switch (updateInfo.getIndex()) {
-                        case 0 -> {loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
-                        }
+                        case 0 -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+
                         case 1 -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
                         case 2 -> updateInfo.getArray().forEach(coordinate -> {
                             ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
@@ -293,6 +297,7 @@ public class GameView implements Observer {
                     pauseRespawn.play();
                 }
 
+                case U_POINTS -> updatePoints(updateInfo.getIndex(), updateInfo.getIndex2(), updateInfo.getCoordinate());
 
                 case L_PU_LIFE -> {
                     pu_life = drawImage(updateInfo.getCoordinate(),BlockImage.LIFE.getImage());
@@ -386,7 +391,31 @@ public class GameView implements Observer {
     }
 
     private void updateLife(int index){
-        livesLabel.setText("Vite: " + index);
+        livesLabel.setText("Lives: " + index);
+    }
+
+    private void updatePoints(int totalPoints, int currentPoints, Coordinate coordinate){
+        pointsLabel.setText("Points: " + totalPoints);
+        Label text = SceneManager.getText(Integer.toString(currentPoints), coordinate, SCALE_FACTOR);
+
+        gameBoard.getChildren().add(text);
+        text.setVisible(true);
+        text.toFront();
+
+        TranslateTransition transition = new TranslateTransition(Duration.millis(700), text);
+        transition.setByY(-30);
+
+        FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(500), text);
+        fadeOutTransition.setFromValue(1);
+        fadeOutTransition.setToValue(0);
+
+
+        transition.setOnFinished(actionEvent -> fadeOutTransition.play());
+        fadeOutTransition.setOnFinished(actionEvent -> gameBoard.getChildren().remove(text));
+
+        transition.play();
+
+        System.out.println("puntiiiiiiiii");
     }
 
     private void doLifePowerUp(int index) {

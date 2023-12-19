@@ -130,4 +130,14 @@ public class SceneManager {
         });
         return backButton;
     }
+
+    public static Label getText(String string, Coordinate coordinate, int scale){
+        Label text = new Label("+" + string);
+        text.setFont(CUSTOM_FONT_SMALL);
+        text.setLayoutX((double)coordinate.x() * scale);
+        System.out.println(text.getLayoutX());
+        text.setLayoutY(((double)coordinate.y()) * scale);
+        System.out.println(text.getLayoutY());
+        return text;
+    }
 }

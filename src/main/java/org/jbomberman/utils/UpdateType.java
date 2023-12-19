@@ -21,5 +21,6 @@ public enum UpdateType {
     L_EXIT,
     L_PU_INVINCIBLE,
     U_PU_INVINCIBLE,
+    U_POINTS,
     U_GAME_OVER
 }

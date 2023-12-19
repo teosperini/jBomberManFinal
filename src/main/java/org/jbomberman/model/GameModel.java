@@ -40,6 +40,8 @@ public class GameModel extends Observable {
     private int numRndBlocks = 20;
     // the coordinates of the winning cell
 
+    private int points = 0;
+
     private final Random random = new Random();
 
 
@@ -200,12 +202,15 @@ public class GameModel extends Observable {
             int index = coordinateEnemies.indexOf(coordinate);
             coordinateEnemies.remove(coordinate);
             notifyDeadEnemy(index);
+            points += 400;
+            notifyPoints(points, 400, coordinate);
         });
 
         System.out.println(adjacentCoordinates);
         tntCoordinates = null;
         isBombExploding = false;
     }
+
 
     private ArrayList<Triad> getCoordinates() {
         ArrayList<Triad> adjacentCoordinate = new ArrayList<>();
@@ -377,6 +382,14 @@ public class GameModel extends Observable {
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.U_BLOCK_DESTROYED, blockToRemove));
+    }
+
+    // quando viene ucciso un nemico, i punti compariranno sopra di esso
+    // quando invece è il giocatore a passare sopra a un item che da punti, i punti compariranno
+    // sopra il giocatore
+    private void notifyPoints(int points, int currentPoints, Coordinate coordinate) {
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.U_POINTS, coordinate, points, currentPoints));
     }
 
     private void notifyDeadEnemy(int index) {
