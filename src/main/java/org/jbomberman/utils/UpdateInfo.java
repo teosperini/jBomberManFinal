@@ -13,6 +13,8 @@ public class UpdateInfo {
     private int index;
     private int index2;
 
+    private SubMap block;
+
     public UpdateInfo(UpdateType updateType, Coordinate oldc, Coordinate newc, int index) {
         this.updateType = updateType;
         this.oldc = oldc;
@@ -70,6 +72,12 @@ public class UpdateInfo {
         this.index2 = index2;
     }
 
+    public UpdateInfo(UpdateType updateType, ArrayList<Coordinate> array, SubMap block) {
+        this.updateType = updateType;
+        this.array = array;
+        this.block = block;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }
@@ -98,5 +106,9 @@ public class UpdateInfo {
 
     public boolean getBoo(){
         return b;
+    }
+
+    public SubMap getSubBlock() {
+        return block;
     }
 }

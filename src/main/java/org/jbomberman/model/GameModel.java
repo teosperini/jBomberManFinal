@@ -191,7 +191,7 @@ public class GameModel extends Observable {
 
 
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.BOMB_RELEASED, tntCoordinates));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_BOMB_RELEASED, tntCoordinates));
     }
 
     public void explosion() {
@@ -402,31 +402,31 @@ public class GameModel extends Observable {
 //####################################  NOTIFICATIONS  ####################################//
     public void notifyModelReady() {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinateGround, 0));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinateGround, SubMap.GROUND_BLOCKS));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinatesFixedBlocks, 1));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinatesFixedBlocks, SubMap.STATIC_BLOCKS));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_PU_BOMB, bombPu));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_POWER_UP_BOMB, bombPu));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_PU_LIFE, lifePu));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_POWER_UP_LIFE, lifePu));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_PU_INVINCIBLE, invinciblePu));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_POWER_UP_INVINCIBLE, invinciblePu));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_EXIT, exit));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_EXIT, exit));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_COINS, coins));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_COINS, coins));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_MAP, coordinatesRandomBlocks, 2));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinatesRandomBlocks, SubMap.RANDOM_BLOCKS));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_PLAYER, playerPosition));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_PLAYER, playerPosition));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.L_ENEMIES, coordinateEnemies));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_ENEMIES, coordinateEnemies));
 
     }
 
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_BLOCK_DESTROYED, blockToRemove));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_BLOCK_DESTROYED, blockToRemove));
     }
     // quando viene ucciso un nemico, i punti compariranno sopra di esso
     // quando invece è il giocatore a passare sopra a un item che da punti, i punti compariranno
@@ -438,71 +438,71 @@ public class GameModel extends Observable {
      */
     private void notifyCoin(int i) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_COINS,i));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_COINS,i));
     }
 
     private void notifyPoints(int currentPoints, Coordinate coordinate) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_POINTS, coordinate, points, currentPoints));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POINTS, coordinate, points, currentPoints));
     }
 
     private void notifyDeadEnemy(int index) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_ENEMY_DEAD, index));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_ENEMY_DEAD, index));
     }
 
     public void notifyPlayerPosition(Coordinate coordinate, Coordinate oldPosition, String name) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,coordinate, name, -1));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,coordinate, name, -1));
         controlPosition();
     }
 
     private void notifyLessLife() {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_RESPAWN, playerPosition, playerHp));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_RESPAWN, playerPosition, playerHp));
     }
 
     public void notifyPUExplosion(){
         bombRange += 1;
         bombPu = null;
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_PU_BOMB));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_PU_BOMB));
     }
 
     public void notifyPULife(){
         playerHp += 1;
         lifePu = null;
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_PU_LIFE, playerHp));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_PU_LIFE, playerHp));
     }
 
     public void notifyPUInvincible(){
         invinciblePu = null;
         playerInvincible = true;
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_PU_INVINCIBLE, true));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_PU_INVINCIBLE, true));
         PauseTransition pauseInvincible = new PauseTransition(Duration.seconds(10));
         pauseInvincible.setOnFinished(actionEvent -> {
             playerInvincible = false;
             setChanged();
-            notifyObservers(new UpdateInfo(UpdateType.U_PU_INVINCIBLE, false));
+            notifyObservers(new UpdateInfo(UpdateType.UPDATE_PU_INVINCIBLE, false));
         });
         pauseInvincible.play();
     }
 
     private void notifyVictory() {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_GAME_WIN));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_GAME_WIN));
     }
 
     private void notifyDefeat() {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_GAME_OVER, playerPosition));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_GAME_OVER, playerPosition));
     }
 
     private void notifyEnemyMovement(Coordinate oldPosition, Coordinate newPosition, int enemyId) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.U_POSITION, oldPosition,newPosition, enemyId));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,newPosition, enemyId));
         controlPosition();
     }
 

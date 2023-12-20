@@ -4,7 +4,6 @@ import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
 import javafx.scene.control.Label;
@@ -135,7 +134,7 @@ public class GameView implements Observer {
 
     private void drawBomb(Coordinate coordinate) {
         BackgroundMusic.playBomb();
-        ImageView tntImage = drawImage(coordinate, BlockImage.BOMB.getImage());
+        ImageView tntImage = createImageView(coordinate, BlockImage.BOMB.getImage());
         PauseTransition tnt = new PauseTransition(Duration.seconds(1.7));
 
         gameBoard.getChildren().add(tntImage);
@@ -179,7 +178,7 @@ public class GameView implements Observer {
          */
     }
 
-    private ImageView drawImage(Coordinate c, Image image) {
+    private ImageView createImageView(Coordinate c, Image image) {
         ImageView imageView = new ImageView(image);
         imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
         imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
@@ -239,43 +238,50 @@ public class GameView implements Observer {
 
             switch (updateType) {
 
-                case L_MAP -> {
-                    switch (updateInfo.getIndex()) {
-                        case 0 -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                case LOAD_MAP -> {
+                    switch (updateInfo.getSubBlock()) {
+                        case GROUND_BLOCKS -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
 
-                        case 1 -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
-                        case 2 -> updateInfo.getArray().forEach(coordinate -> {
-                            ImageView image = drawImage(coordinate, BlockImage.STONE.getImage());
-                            randomBlocks.add(image);
-                            gameBoard.getChildren().add(image);
-                        });
+                        case STATIC_BLOCKS -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+                        case RANDOM_BLOCKS -> updateInfo.getArray().forEach(coordinate -> drawImage(coordinate, BlockImage.STONE.getImage(), randomBlocks));
                         default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
                     }
                 }
 
-                case L_PLAYER -> {
-                    player = drawImage(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+                case LOAD_PLAYER -> {
+                    player = createImageView(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
                     gameBoard.getChildren().add(player);
                 }
 
-                case L_EXIT -> {
-                    exit = drawImage(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
+                case LOAD_EXIT -> {
+                    exit = createImageView(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
                     gameBoard.getChildren().add(exit);
                 }
 
-                case L_ENEMIES -> {
-                    updateInfo.getArray().forEach(coordinate ->  {
-                        ImageView enemy = drawImage(coordinate, BlockImage.ENEMY.getImage());
-                        enemies.add(enemy);
-                        gameBoard.getChildren().add(enemy);
-                    });
+                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImage(coordinate, BlockImage.ENEMY.getImage(), enemies));
+
+                case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImage(coordinate, BlockImage.COIN.getImage(), coins));
+
+                case LOAD_POWER_UP_LIFE -> {
+                    pu_life = createImageView(updateInfo.getCoordinate(),BlockImage.LIFE.getImage());
+                    gameBoard.getChildren().add(pu_life);
                 }
 
-                case U_BLOCK_DESTROYED -> destroyEntity(randomBlocks, updateInfo.getIndex());
+                case LOAD_POWER_UP_BOMB ->{
+                    pu_bomb = createImageView(updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
+                    gameBoard.getChildren().add(pu_bomb);
+                }
 
-                case U_ENEMY_DEAD -> destroyEntity(enemies, updateInfo.getIndex());
+                case LOAD_POWER_UP_INVINCIBLE -> {
+                    pu_invincible = createImageView(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
+                    gameBoard.getChildren().add(pu_invincible);
+                }
 
-                case U_POSITION -> {
+                case UPDATE_BLOCK_DESTROYED -> removeImage(randomBlocks, updateInfo.getIndex());
+
+                case UPDATE_ENEMY_DEAD -> removeImage(enemies, updateInfo.getIndex());
+
+                case UPDATE_POSITION -> {
                     Coordinate newCoord = updateInfo.getNewCoord();
                     Coordinate oldCoord = updateInfo.getOldCoord();
                     int oldX = oldCoord.x() * SCALE_FACTOR;
@@ -308,46 +314,26 @@ public class GameView implements Observer {
                 // per capire il problema, provare a muoversi nel mentre si viene colpiti da un mostro o una bomba
                 // la posizione del giocatore risulterà sfalsata
 
-                case U_RESPAWN -> {
+                case UPDATE_RESPAWN -> {
                     controller.moving(true);
                     PauseTransition pauseRespawn = getPauseTransition();
                     updateLife(updateInfo.getIndex());
                     pauseRespawn.play();
                 }
 
-                case L_COINS -> {
-                    updateInfo.getArray().forEach(coordinate -> {
-                        ImageView image = drawImage(coordinate, BlockImage.COIN.getImage());
-                        coins.add(image);
-                        gameBoard.getChildren().add(image);
-                    });
-                }
+                case UPDATE_COINS -> removeImage(coins, updateInfo.getIndex());
 
-                case U_COINS -> destroyEntity(coins, updateInfo.getIndex());
+                case UPDATE_POINTS -> updatePoints(updateInfo.getIndex(), updateInfo.getIndex2(), updateInfo.getCoordinate());
 
-                case U_POINTS -> updatePoints(updateInfo.getIndex(), updateInfo.getIndex2(), updateInfo.getCoordinate());
+                case UPDATE_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
 
-                case L_PU_LIFE -> {
-                    pu_life = drawImage(updateInfo.getCoordinate(),BlockImage.LIFE.getImage());
-                    gameBoard.getChildren().add(pu_life);
-                }
-                case U_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
+                case UPDATE_PU_BOMB -> doBombPowerUp();
 
-                case L_PU_BOMB ->{
-                    pu_bomb = drawImage(updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
-                    gameBoard.getChildren().add(pu_bomb);
-                }
-                case U_PU_BOMB -> doBombPowerUp();
+                case UPDATE_PU_INVINCIBLE -> doInvinciblePowerUp(updateInfo.getBoo());
 
-                case L_PU_INVINCIBLE -> {
-                    pu_invincible = drawImage(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
-                    gameBoard.getChildren().add(pu_invincible);
-                }
-                case U_PU_INVINCIBLE -> doInvinciblePowerUp(updateInfo.getBoo());
+                case UPDATE_BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
-                case BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
-
-                case U_GAME_WIN -> {
+                case UPDATE_GAME_WIN -> {
                     BackgroundMusic.stopMusic();
                     BackgroundMusic.playSuccess();
                     controller.endMatch();
@@ -360,7 +346,7 @@ public class GameView implements Observer {
                     pauseGameWin.play();
                 }
 
-                case U_GAME_OVER -> {
+                case UPDATE_GAME_OVER -> {
                     BackgroundMusic.stopMusic();
                     controller.endMatch();
                     PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
@@ -376,6 +362,12 @@ public class GameView implements Observer {
                 default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
         }
+    }
+
+    private void drawImage(Coordinate coordinate, Image image, List<ImageView> entities) {
+        ImageView imageView = createImageView(coordinate, image);
+        entities.add(imageView);
+        gameBoard.getChildren().add(imageView);
     }
 
     private PauseTransition getPauseTransition() {
@@ -479,14 +471,14 @@ public class GameView implements Observer {
         bottomBar.getChildren().add(imageView);
     }
 
-    private void destroyEntity(List<ImageView> array, int index) {
+    private void removeImage(List<ImageView> array, int index) {
         gameBoard.getChildren().remove(array.get(index));
         array.remove(index);
     }
 
     private void loader(ArrayList<Coordinate> array, Image image) {
         array.forEach(coordinate -> {
-            gameBoard.getChildren().add(drawImage(coordinate, image));
+            gameBoard.getChildren().add(createImageView(coordinate, image));
         });
     }
 
