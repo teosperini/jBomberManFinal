@@ -6,6 +6,8 @@ import org.jbomberman.utils.UpdateType;
 import java.util.Observable;
 
 public class MenuModel extends Observable {
+    private int points;
+
     /*
     public void loadProfile() {
         setChanged();
@@ -22,6 +24,10 @@ public class MenuModel extends Observable {
     }
 
      */
+
+    public void setPoints(int points){
+        this.points = points;
+    }
 
     public void loadProfileMenu() {
         setChanged();

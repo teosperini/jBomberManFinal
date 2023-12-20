@@ -64,7 +64,7 @@ public class GameView implements Observer {
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
         STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
-        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb_2.png")),
+        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
@@ -136,13 +136,24 @@ public class GameView implements Observer {
     private void drawBomb(Coordinate coordinate) {
         BackgroundMusic.playBomb();
         ImageView tntImage = drawImage(coordinate, BlockImage.BOMB.getImage());
+        PauseTransition tnt = new PauseTransition(Duration.seconds(1.7));
+
+        gameBoard.getChildren().add(tntImage);
+        player.toFront();
+        tnt.setOnFinished(actionEvent -> {
+            gameBoard.getChildren().remove(tntImage);
+            controller.bombExploded();
+        });
+        tnt.play();
+
+        /*
         PauseTransition spawnTNT = new PauseTransition(Duration.millis(50));
         PauseTransition pauseTNT = new PauseTransition(Duration.millis(400));
         PauseTransition respawnTNT = new PauseTransition(Duration.millis(400));
         PauseTransition removeTNT = new PauseTransition(Duration.millis(650));
         spawnTNT.setOnFinished(event -> {
-            gameBoard.getChildren().add(tntImage);
-            player.toFront();
+
+
             pauseTNT.play();
         });
 
@@ -164,6 +175,8 @@ public class GameView implements Observer {
         });
 
         spawnTNT.play();
+
+         */
     }
 
     private ImageView drawImage(Coordinate c, Image image) {
@@ -348,6 +361,7 @@ public class GameView implements Observer {
                 }
 
                 case U_GAME_OVER -> {
+                    BackgroundMusic.stopMusic();
                     controller.endMatch();
                     PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
                     gameOverAnimation(updateInfo.getCoordinate());
@@ -489,7 +503,10 @@ public class GameView implements Observer {
         pauseResumeButton.setOnMouseClicked(mouseEvent -> controller.resumeController());
         pauseOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(pause,options));
         pauseRestartButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
-        pauseExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
+        pauseExitButton.setOnMouseClicked(mouseEvent -> {
+            controller.quitMatch();
+            BackgroundMusic.stopMusic();
+        });
 
         pause.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ESCAPE)){

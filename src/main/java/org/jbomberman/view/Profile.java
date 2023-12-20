@@ -11,19 +11,23 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Profile {
     private String nickname;
-    private String avatar;
+    private List<Color> avatarList = List.of(Color.RED);
+    private Color avatar;
     private int gamesPlayed;
     private int gamesWon;
     private int gamesLost;
-    private int level;
     private Pane mainProfile = SceneManager.getP("PROFILE", false,false);;
     private Pane chooser;
 
     public Profile() {
+        //default settings
         nickname = "Guest";
-        avatar = "Avatar";
+        avatar = avatarList.get(0);
         createChooser();
         createProfileWindow();
     }

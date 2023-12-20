@@ -395,7 +395,9 @@ public class GameModel extends Observable {
         }
     }
 
-
+    public int getPoints(){
+        return points;
+    }
 
 //####################################  NOTIFICATIONS  ####################################//
     public void notifyModelReady() {

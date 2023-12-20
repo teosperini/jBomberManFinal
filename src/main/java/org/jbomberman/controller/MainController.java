@@ -153,8 +153,8 @@ public class MainController {
     }
 
     public void quitMatch() {
-        //BackgroundMusic.stopMusic();
         scene.setRoot(menuView.getMenu());
+        model.setPoints(gameModel.getPoints());
         gameModel = null;
         gameView = null;
         //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
