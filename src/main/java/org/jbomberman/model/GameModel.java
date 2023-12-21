@@ -200,6 +200,7 @@ public class GameModel extends Observable {
 
         //with getCoordinates() I get every coordinates that needs to be checked
         ArrayList<Triad> adjacentCoordinates = getCoordinates();
+        System.out.println(adjacentCoordinates+"\n\n\n\n");
         adjacentCoordinates.add(new Triad(tntCoordinates, Direction.CENTER, true));
 
         for (Triad terna : adjacentCoordinates) {
@@ -232,6 +233,7 @@ public class GameModel extends Observable {
             points += addedPoints;
             notifyPoints(addedPoints, coordinate);
         });
+        notifyExplosion(adjacentCoordinates);
 
         System.out.println(adjacentCoordinates);
         tntCoordinates = null;
@@ -285,8 +287,8 @@ public class GameModel extends Observable {
     }
 
 
-//####################################  POWER UPS AND LIFE  ####################################//
 
+//####################################  POWER UPS AND LIFE  ####################################//
     private void lessLife() {
         if (!playerInvincible) {
             playerHp -= 1;
@@ -298,6 +300,7 @@ public class GameModel extends Observable {
             }
         }
     }
+
 
 
 
@@ -379,7 +382,6 @@ public class GameModel extends Observable {
     private int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }
-
     /**
      * Checks if the given coordinate collides with an existing fixed block or random block.
      * @param coordinate the coordinate to check
@@ -400,6 +402,7 @@ public class GameModel extends Observable {
     }
 
 //####################################  NOTIFICATIONS  ####################################//
+
     public void notifyModelReady() {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinateGround, SubMap.GROUND_BLOCKS));
@@ -423,15 +426,14 @@ public class GameModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.LOAD_ENEMIES, coordinateEnemies));
 
     }
-
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_BLOCK_DESTROYED, blockToRemove));
     }
+
     // quando viene ucciso un nemico, i punti compariranno sopra di esso
     // quando invece è il giocatore a passare sopra a un item che da punti, i punti compariranno
     // sopra il giocatore
-
     /**
      * notifica se il player è passato su una moneta
      * @param i
@@ -460,6 +462,11 @@ public class GameModel extends Observable {
     private void notifyLessLife() {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_RESPAWN, playerPosition, playerHp));
+    }
+
+    private void notifyExplosion(ArrayList<Triad> triadArrayList) {
+        setChanged();
+        notifyObservers(new UpdateInfo(triadArrayList, UpdateType.UPDATE_EXPLOSION));
     }
 
     public void notifyPUExplosion(){

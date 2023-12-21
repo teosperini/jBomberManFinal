@@ -10,6 +10,7 @@ public class UpdateInfo {
     private Coordinate newc;
     private Coordinate c;
     private ArrayList<Coordinate> array;
+    private ArrayList<Triad> triadArrayList;
     private int index;
     private int index2;
 
@@ -78,6 +79,11 @@ public class UpdateInfo {
         this.block = block;
     }
 
+    public UpdateInfo(ArrayList<Triad> triadArrayList, UpdateType updateType) {
+        this.updateType = updateType;
+        this.triadArrayList = triadArrayList;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }
@@ -110,5 +116,9 @@ public class UpdateInfo {
 
     public SubMap getSubBlock() {
         return block;
+    }
+
+    public ArrayList<Triad> getTriadArrayList() {
+        return triadArrayList;
     }
 }

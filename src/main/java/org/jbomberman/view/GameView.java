@@ -46,6 +46,7 @@ public class GameView implements Observer {
     private final List<ImageView> randomBlocks;
     private final List<ImageView> enemies;
     private final List<ImageView> coins;
+    private List<ImageView> bombExplosion;
 
     private final HBox bottomBar = new HBox();
 
@@ -92,6 +93,7 @@ public class GameView implements Observer {
         randomBlocks = new ArrayList<>();
         enemies = new ArrayList<>();
         coins = new ArrayList<>();
+        bombExplosion = new ArrayList<>();
         initialize();
     }
 
@@ -333,6 +335,26 @@ public class GameView implements Observer {
 
                 case UPDATE_BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
+                case UPDATE_EXPLOSION -> {
+                    updateInfo.getTriadArrayList().forEach(triad -> {
+                        //TODO creare stringa per prendere le immagini
+                        ImageView imageView;
+                        if (triad.getDirection().equals(Direction.CENTER)) {
+                            imageView = createImageView(triad.getCoordinate(), new Image(GameView.class.getResourceAsStream("explosion/1/centre.png")));
+                        } else if (triad.isLast()) {
+                            imageView = createImageView(triad.getCoordinate(), new Image(GameView.class.getResourceAsStream("explosion/1/" + triad.getDirection().getKeyCode() + "_external.png")));
+                        } else {
+                            imageView = createImageView(triad.getCoordinate(), new Image(GameView.class.getResourceAsStream("explosion/1/" + triad.getDirection().getKeyCode() + ".png")));
+                        }
+                        bombExplosion.add(imageView);
+                        gameBoard.getChildren().add(imageView);
+                    });
+                    PauseTransition pauseTransition = new PauseTransition(Duration.millis(500));
+                    pauseTransition.setOnFinished(event -> removeExplosion());
+                    pauseTransition.play();
+                }
+
+
                 case UPDATE_GAME_WIN -> {
                     BackgroundMusic.stopMusic();
                     BackgroundMusic.playSuccess();
@@ -362,6 +384,10 @@ public class GameView implements Observer {
                 default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
         }
+    }
+
+    private void removeExplosion() {
+        bombExplosion.forEach(imageView -> gameBoard.getChildren().remove(imageView));
     }
 
     private void drawImage(Coordinate coordinate, Image image, List<ImageView> entities) {
