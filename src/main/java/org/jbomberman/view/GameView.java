@@ -278,24 +278,27 @@ public class GameView implements Observer {
                         case GROUND_BLOCKS -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
 
                         case STATIC_BLOCKS -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+
                         case RANDOM_BLOCKS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE.getImage(), randomBlocks));
+
                         default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
                     }
                 }
+
                 case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY.getImage(), enemies));
 
                 case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.COIN.getImage(), coins));
 
 
-                case LOAD_PLAYER -> player = loadItems(player, updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+                case LOAD_PLAYER -> player = loadItems(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
 
-                case LOAD_EXIT -> exit = loadItems(exit, updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
+                case LOAD_EXIT -> exit = loadItems(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
 
-                case LOAD_POWER_UP_LIFE -> puLife = loadItems(puLife, updateInfo.getCoordinate(), BlockImage.LIFE.getImage());
+                case LOAD_POWER_UP_LIFE -> puLife = loadItems(updateInfo.getCoordinate(), BlockImage.LIFE.getImage());
 
-                case LOAD_POWER_UP_BOMB -> puBomb = loadItems(puBomb, updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
+                case LOAD_POWER_UP_BOMB -> puBomb = loadItems(updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
 
-                case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(puInvincible, updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
+                case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
 
 
                 case UPDATE_BLOCK_DESTROYED -> removeImageView(randomBlocks, updateInfo.getIndex());
@@ -320,7 +323,9 @@ public class GameView implements Observer {
 
                 case UPDATE_BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
 
-                case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList());
+                case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
+
+
 
                 case UPDATE_GAME_WIN -> gameWin();
 
@@ -331,8 +336,8 @@ public class GameView implements Observer {
         }
     }
 
-    private ImageView loadItems(ImageView item, Coordinate c, Image image) {
-        item = createImageView(c, image);
+    private ImageView loadItems(Coordinate c, Image image) {
+        ImageView item = createImageView(c, image);
         gameBoard.getChildren().add(item);
         return item;
     }
@@ -518,21 +523,27 @@ public class GameView implements Observer {
         array.remove(index);
     }
 
-    private void drawExplosion(ArrayList<Triad> triadArrayList) {
+    private void drawExplosion(ArrayList<Triad> triadArrayList, int i) {
+        String path = "explosion/" + i;
         triadArrayList.forEach(triad -> {
             ImageView imageView;
             if (triad.getDirection().equals(Direction.CENTER)) {
-                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("explosion/1/centre.png"))));
+                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( path + "/center.png"))));
             } else if (triad.isLast()) {
-                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("explosion/1/" + triad.getDirection().getKeyCode() + "_external.png"))));
+                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream(path +"/" + triad.getDirection().getKeyCode() + "_external.png"))));
             } else {
-                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("explosion/1/" + triad.getDirection().getKeyCode() + ".png"))));
+                imageView = createImageView(triad.getCoordinate(), new Image(Objects.requireNonNull(GameView.class.getResourceAsStream(path +"/" + triad.getDirection().getKeyCode() + ".png"))));
             }
             bombExplosion.add(imageView);
             gameBoard.getChildren().add(imageView);
         });
-        PauseTransition pauseTransition = new PauseTransition(Duration.millis(500));
-        pauseTransition.setOnFinished(event -> removeExplosion());
+
+        int j = i + 1;
+        PauseTransition pauseTransition = new PauseTransition(Duration.millis(150));
+        pauseTransition.setOnFinished(event -> {
+            removeExplosion();
+            if (j < 4) drawExplosion(triadArrayList, j);
+        });
         pauseTransition.play();
     }
 
