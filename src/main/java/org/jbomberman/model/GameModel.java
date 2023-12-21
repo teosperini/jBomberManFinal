@@ -53,7 +53,6 @@ public class GameModel extends Observable {
 //############################# CONSTRUCTOR AND INITIALIZATION ############################//
 
     public GameModel() {
-        System.out.println("Model Initialization");
         initialize();
     }
 
@@ -107,7 +106,6 @@ public class GameModel extends Observable {
     private void generateRandomBlocks() {
         int i = 0;
         while (i < numRndBlocks) {
-            System.out.println(i);
             Coordinate location = new Coordinate(
                     1 + random.nextInt(max.x()),
                     1 + random.nextInt(max.y())
@@ -200,7 +198,6 @@ public class GameModel extends Observable {
 
         //with getCoordinates() I get every coordinates that needs to be checked
         ArrayList<Triad> adjacentCoordinates = getCoordinates();
-        System.out.println(adjacentCoordinates+"\n\n\n\n");
         adjacentCoordinates.add(new Triad(tntCoordinates, Direction.CENTER, true));
 
         for (Triad terna : adjacentCoordinates) {
@@ -234,8 +231,6 @@ public class GameModel extends Observable {
             notifyPoints(addedPoints, coordinate);
         });
         notifyExplosion(adjacentCoordinates);
-
-        System.out.println(adjacentCoordinates);
         tntCoordinates = null;
         isBombExploding = false;
     }
@@ -300,7 +295,6 @@ public class GameModel extends Observable {
             }
         }
     }
-
 
 
 
@@ -400,6 +394,8 @@ public class GameModel extends Observable {
     public int getPoints(){
         return points;
     }
+
+
 
 //####################################  NOTIFICATIONS  ####################################//
 

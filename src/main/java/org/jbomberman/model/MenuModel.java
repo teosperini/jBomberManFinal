@@ -26,7 +26,7 @@ public class MenuModel extends Observable {
      */
 
     public void setPoints(int points){
-        this.points = points;
+        this.points += points;
     }
 
     public void loadProfileMenu() {

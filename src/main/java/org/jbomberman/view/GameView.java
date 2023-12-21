@@ -112,7 +112,10 @@ public class GameView implements Observer {
 
         pauseResumeButton.setOnMouseClicked(mouseEvent -> controller.resumeController());
         pauseOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(pause,options));
-        pauseRestartButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
+        pauseRestartButton.setOnMouseClicked(mouseEvent -> {
+            controller.gameButtonPressed();
+            BackgroundMusic.stopMusic();
+        });
         pauseExitButton.setOnMouseClicked(mouseEvent -> {
             controller.quitMatch();
             BackgroundMusic.stopMusic();
@@ -152,7 +155,10 @@ public class GameView implements Observer {
         Label gameOverExitButton = SceneManager.getButton("menu", 2, Color.WHITE);
 
         gameOverExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
-        gameOverRestartButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
+        gameOverRestartButton.setOnMouseClicked(mouseEvent -> {
+            controller.gameButtonPressed();
+            BackgroundMusic.stopMusic();
+        });
 
         gameOver.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
@@ -321,7 +327,10 @@ public class GameView implements Observer {
 
                 case UPDATE_PU_INVINCIBLE -> doInvinciblePowerUp(updateInfo.getBoo());
 
-                case UPDATE_BOMB_RELEASED -> drawBomb(updateInfo.getCoordinate());
+                case UPDATE_BOMB_RELEASED -> {
+                    BackgroundMusic.playBomb();
+                    drawBomb(updateInfo.getCoordinate(), 1);
+                }
 
                 case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
 
@@ -345,6 +354,7 @@ public class GameView implements Observer {
 
     private void gameLost(Coordinate c) {
         BackgroundMusic.stopMusic();
+        BackgroundMusic.playDeath();
         controller.endMatch();
         PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
         gameOverAnimation(c);
@@ -494,16 +504,24 @@ public class GameView implements Observer {
         gameBoard.getChildren().add(imageView);
     }
 
-    private void drawBomb(Coordinate coordinate) {
-        BackgroundMusic.playBomb();
-        ImageView tntImage = createImageView(coordinate, BlockImage.BOMB.getImage());
-        PauseTransition tnt = new PauseTransition(Duration.seconds(1.7));
+    private void drawBomb(Coordinate coordinate, int i) {
+        ImageView tntImage = createImageView(coordinate, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("bomb/bomb_" + i + ".png"))));
+
+        PauseTransition tnt = new PauseTransition(Duration.millis(250));
 
         gameBoard.getChildren().add(tntImage);
         player.toFront();
+
+        int j = i + 1;
         tnt.setOnFinished(actionEvent -> {
+
             gameBoard.getChildren().remove(tntImage);
-            controller.bombExploded();
+
+            if (j < 7) {
+                drawBomb(coordinate, j);
+            } else {
+                controller.bombExploded();
+            }
         });
         tnt.play();
     }
@@ -512,15 +530,25 @@ public class GameView implements Observer {
         gameBoard.getChildren().remove(array.get(index));
         if (array.equals(randomBlocks)){
             ImageView imageView = randomBlocks.get(index);
-            Coordinate coordinate = new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR);
-            ImageView newImageView = createImageView(coordinate, BlockImage.DESTRUCTION.getImage());
+            destroyBlock(new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR), 1);
+        } else if (array.equals(coins)){
 
-            gameBoard.getChildren().add(newImageView);
-            PauseTransition pauseTransition = new PauseTransition(Duration.millis(650));
-            pauseTransition.setOnFinished(event -> gameBoard.getChildren().remove(newImageView));
-            pauseTransition.play();
-            }
+            BackgroundMusic.playCoin();
+        }
         array.remove(index);
+    }
+
+    private void destroyBlock(Coordinate c, int i){
+        ImageView newImageView = createImageView(c, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( "random_blocks/" + i + ".png"))));
+
+        gameBoard.getChildren().add(newImageView);
+        int j = i + 1;
+        PauseTransition pauseTransition = new PauseTransition(Duration.millis(160));
+        pauseTransition.setOnFinished(event -> {
+            gameBoard.getChildren().remove(newImageView);
+            if (j < 7) destroyBlock(c, j);
+        });
+        pauseTransition.play();
     }
 
     private void drawExplosion(ArrayList<Triad> triadArrayList, int i) {

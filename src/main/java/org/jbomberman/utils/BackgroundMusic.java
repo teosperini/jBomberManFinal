@@ -4,19 +4,20 @@ import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
+import java.util.Objects;
+
 public class BackgroundMusic {
-    private static final String PATH = System.getProperty("user.dir");
-    private static final String GAMESOUNDTRACK = BackgroundMusic.class.getResource("UndertaleOST.mp3").toExternalForm();
-    private static final AudioClip GAMEBOMB = new AudioClip(BackgroundMusic.class.getResource("tnt_exp.mp3").toExternalForm());
-    private static final AudioClip SUCCESS = new AudioClip(BackgroundMusic.class.getResource("success.mp3").toExternalForm());
+    private static final String GAMESOUNDTRACK = Objects.requireNonNull(BackgroundMusic.class.getResource("UndertaleOST.mp3")).toExternalForm();
+    private static final AudioClip GAMEBOMB = new AudioClip(Objects.requireNonNull(BackgroundMusic.class.getResource("tnt_exp.mp3")).toExternalForm());
+    private static final AudioClip SUCCESS = new AudioClip(Objects.requireNonNull(BackgroundMusic.class.getResource("success.mp3")).toExternalForm());
+    private static final AudioClip COIN = new AudioClip(BackgroundMusic.class.getResource("coin.mp3").toExternalForm());
+    private static final AudioClip DEATH = new AudioClip(Objects.requireNonNull(BackgroundMusic.class.getResource("death.mp3")).toExternalForm());
 
     private static MediaPlayer mediaPlayer;
 
 
     public static void playMusic(){
-        // Carica il file audio da riprodurre
         Media media = new Media(GAMESOUNDTRACK);
-        System.out.println("source: " + GAMEBOMB.getSource());
         mediaPlayer =  new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Riproduce la musica in modo continuo
         mediaPlayer.play();
@@ -37,5 +38,13 @@ public class BackgroundMusic {
 
     public static void playSuccess() {
         SUCCESS.play();
+    }
+
+    public static void playCoin(){
+        COIN.play();
+    }
+
+    public static void playDeath(){
+        DEATH.play();
     }
 }

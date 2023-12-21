@@ -59,3 +59,6 @@ b
 2src/main/java/org/jbomberman/utils/Difficulty.java,8\9\897a021368849d648c1d3cee3e18d3a2144297d3
 c
 3src/main/java/org/jbomberman/utils/FontManager.java,e\9\e9afb21dc2e2ae1e7c834ddf6071e4e25591c0a9
+:
+
+.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302

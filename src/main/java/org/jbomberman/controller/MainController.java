@@ -81,7 +81,7 @@ public class MainController {
         moving = false;
         setTimeline();
         BackgroundMusic.playMusic();
-        BackgroundMusic.setVolume();
+        //BackgroundMusic.setVolume();
     }
 
 
@@ -138,7 +138,7 @@ public class MainController {
 
     private void setTimeline(){
         mobMovement = new Timeline(
-                new KeyFrame(Duration.millis(1000), event ->{
+                new KeyFrame(Duration.seconds(1), event ->{
                         if (!pause){
                             gameModel.moveEnemies();
                         }
