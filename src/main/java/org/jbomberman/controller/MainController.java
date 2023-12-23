@@ -3,7 +3,6 @@ package org.jbomberman.controller;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import org.jbomberman.model.GameModel;
 import org.jbomberman.model.MenuModel;
@@ -57,8 +56,12 @@ public class MainController {
         model = new MenuModel();
         model.addObserver(menuView);
         menuView.initialize();
+        gameModel = new GameModel();
 
         difficulty = Difficulty.NORMAL;
+
+        gameModel.setDifficulty(difficulty);
+
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
@@ -67,30 +70,29 @@ public class MainController {
     }
 
     //################ NEW GAME ################//
-    public void gameButtonPressed() {
-        gameView = new GameView();
-        gameModel = new GameModel();
-        gameModel.setDifficulty(difficulty);
-        gameModel.addObserver(gameView);
-        gameModel.notifyModelReady();
 
+    public void playButtonPressed(){
+        gameModel.deleteObservers();
+
+        gameView = new GameView();
+        gameModel.addObserver(gameView);
+
+        gameModel.notifyModelReady();
         scene.setRoot(gameView.getGame());
         gameView.getFocus();
 
         pause = false;
         moving = false;
         setTimeline();
-        BackgroundMusic.playMusic();
-        //BackgroundMusic.setVolume();
-    }
 
+        BackgroundMusic.playMusic();
+    }
 
     public void loadProfile() {
         //TODO caricherà i dati dal model quando ci sarà il file json
     }
 
     //HANDLING OF THE KEY-EVENTS IN GAME
-
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
         //public void handleGameKeyEvent(KeyCode keyCode){
@@ -110,6 +112,7 @@ public class MainController {
         }
 
     }
+
     public void pauseController() {
         pause = true;
         gameView.pauseView();
@@ -131,11 +134,6 @@ public class MainController {
         this.difficulty = difficulty;
     }
 
-    public void endMatch(){
-        mobMovement.stop();
-        pause = true;
-    }
-
     private void setTimeline(){
         mobMovement = new Timeline(
                 new KeyFrame(Duration.seconds(1), event ->{
@@ -152,12 +150,55 @@ public class MainController {
         gameModel.explosion();
     }
 
+    //irreversibly stops the game
+    public void endMatch(){
+        BackgroundMusic.stopMusic();
+        mobMovement.stop();
+        pause = true;
+    }
+
     public void quitMatch() {
         scene.setRoot(menuView.getMenu());
         model.setPoints(gameModel.getPoints());
-        gameModel = null;
-        gameView = null;
+
+        gameModel.reset();
+        gameModel.addObserver(gameView);
+
+        gameModel.setLevel(1);
+        gameModel.initialize();
         //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
+    }
+
+    public void restart() {
+        BackgroundMusic.stopMusic();
+        gameModel.reset();
+        gameModel.initialize();
+
+        gameView = new GameView();
+
+        gameModel.addObserver(gameView);
+        gameModel.notifyModelReady();
+
+        pause = false;
+        moving = false;
+
+        scene.setRoot(gameView.getGame());
+        gameView.getFocus();
+
+        setTimeline();
+
+
+        BackgroundMusic.playMusic();
+
+    }
+
+    public void nextLevel(){
+        BackgroundMusic.stopMusic();
+        gameView = new GameView();
+        gameModel.reset();
+        gameModel.setLevel(2);
+        gameModel.initialize();
+        BackgroundMusic.playMusic();
     }
 
     //############## CLOSE THE WINDOW #############//
@@ -166,13 +207,14 @@ public class MainController {
         stage.close();
     }
 
-
     //##################### TEST ####################//
     //TODO remove after test
+
     public void removeBlocks() {
         gameModel.removeRandom();
     }
 
     //###############################################//
 }
+
 

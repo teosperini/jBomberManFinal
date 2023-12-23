@@ -44,7 +44,7 @@ public class MenuView implements Observer{
         Label mainMenuProfileButton = SceneManager.getButton("profile", 2, color);
         Label mainMeniExitButton = SceneManager.getButton("quit", 3, color);
 
-        mainMenuPlayButton.setOnMouseClicked(mouseEvent -> controller.gameButtonPressed());
+        mainMenuPlayButton.setOnMouseClicked(mouseEvent -> controller.playButtonPressed());
         mainMenuOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(mainMenu, options));
         mainMenuProfileButton.setOnMouseClicked(mouseEvent -> {SceneManager.changePane(mainMenu, profile);});
         mainMeniExitButton.setOnMouseClicked(mouseEvent -> controller.gameExit());

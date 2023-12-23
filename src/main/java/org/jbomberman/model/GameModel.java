@@ -13,6 +13,7 @@ public class GameModel extends Observable {
     private final ArrayList<Coordinate> coordinatesFixedBlocks = new ArrayList<>();
     private final ArrayList<Coordinate> coordinatesRandomBlocks = new ArrayList<>();
     private final ArrayList<Coordinate> coordinateEnemies = new ArrayList<>();
+    private final ArrayList<Coordinate> coins = new ArrayList<>();
 
     private static final ArrayList<KeyCode> KEY_CODES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
     // LIMITS OF THE MAP
@@ -27,22 +28,19 @@ public class GameModel extends Observable {
     private Coordinate bombPu;
     private Coordinate lifePu;
     private Coordinate invinciblePu;
-    private Coordinate coin1;
-    private Coordinate coin2;
-    private Coordinate coin3;
-    private ArrayList<Coordinate> coins = new ArrayList<>();
 
+    private int level = 1;
 
     private boolean playerInvincible = false;
 
-    private int numberOfEnemies;
+    private int numberOfEnemies = 3;
     private int playerHp = 3;
     private Coordinate playerPosition = new Coordinate(1,1);
 
     // how much the character can move every time a key is pressed
-    private int movement = 1;
+    private static final int MOVEMENT = 1;
     // how many random blocks are going to spawn
-    private int numRndBlocks = 20;
+    private static final int NUM_RND_BLOCKS = 20;
     // the coordinates of the winning cell
 
     private int points = 0;
@@ -59,6 +57,8 @@ public class GameModel extends Observable {
     public void initialize(){
         generateBlocks();
         generateItemsExit();
+        generateEnemies();
+
         playerPosition = new Coordinate(1,1);
         playerHp = 3;
         bombRange = 1;
@@ -76,7 +76,6 @@ public class GameModel extends Observable {
             case HARD -> numberOfEnemies = 4;
             default -> numberOfEnemies = 0;
         }
-        generateEnemies();
     }
 
     private void generateBackground() {
@@ -105,7 +104,7 @@ public class GameModel extends Observable {
 
     private void generateRandomBlocks() {
         int i = 0;
-        while (i < numRndBlocks) {
+        while (i < NUM_RND_BLOCKS) {
             Coordinate location = new Coordinate(
                     1 + random.nextInt(max.x()),
                     1 + random.nextInt(max.y())
@@ -143,17 +142,17 @@ public class GameModel extends Observable {
 
 
         int randomCoin1 = random.nextInt(partial.size());
-        coin1 = partial.get(randomCoin1);
+        Coordinate coin1 = partial.get(randomCoin1);
 
         partial.remove(coin1);
 
         int randomCoin2 = random.nextInt(partial.size());
-        coin2 = partial.get(randomCoin2);
+        Coordinate coin2 = partial.get(randomCoin2);
 
         partial.remove(coin2);
 
         int randomCoin3 = random.nextInt(partial.size());
-        coin3 = partial.get(randomCoin3);
+        Coordinate coin3 = partial.get(randomCoin3);
 
         partial.remove(coin3);
 
@@ -165,6 +164,7 @@ public class GameModel extends Observable {
     public void generateEnemies() {
         int i = 0;
         while (i < numberOfEnemies) {
+            System.out.println("ayo");
             Coordinate coord = new Coordinate(random.nextInt(max.x()), random.nextInt(max.y()));
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
@@ -351,10 +351,10 @@ public class GameModel extends Observable {
         int deltaY = 0;
 
         switch (keyCode) {
-            case UP -> deltaY = -movement;
-            case DOWN -> deltaY = movement;
-            case LEFT -> deltaX = -movement;
-            case RIGHT -> deltaX = movement;
+            case UP -> deltaY = -MOVEMENT;
+            case DOWN -> deltaY = MOVEMENT;
+            case LEFT -> deltaX = -MOVEMENT;
+            case RIGHT -> deltaX = MOVEMENT;
             default -> {
                 return playerPosition;
             }
@@ -555,6 +555,28 @@ public class GameModel extends Observable {
         );
     }
 
+    public void reset() {
+        coordinateGround.clear();
+        coordinatesFixedBlocks.clear();
+        coordinatesRandomBlocks.clear();
+        coordinateEnemies.clear();
+        coins.clear();
+        playerPosition = new Coordinate(1,1);
+        bombRange = 1;
+        playerInvincible = false;
+        exit = null;
+        bombPu = null;
+        lifePu = null;
+        invinciblePu = null;
+        playerHp = 3;
+        points = 0;
+        tntCoordinates = null;
+        deleteObservers();
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
     //###############################################//
 }

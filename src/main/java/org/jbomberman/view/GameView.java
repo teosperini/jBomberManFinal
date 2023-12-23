@@ -112,13 +112,10 @@ public class GameView implements Observer {
 
         pauseResumeButton.setOnMouseClicked(mouseEvent -> controller.resumeController());
         pauseOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(pause,options));
-        pauseRestartButton.setOnMouseClicked(mouseEvent -> {
-            controller.gameButtonPressed();
-            BackgroundMusic.stopMusic();
-        });
+        pauseRestartButton.setOnMouseClicked(mouseEvent -> restart());
         pauseExitButton.setOnMouseClicked(mouseEvent -> {
+            controller.endMatch();
             controller.quitMatch();
-            BackgroundMusic.stopMusic();
         });
 
         pause.setOnKeyPressed(keyEvent -> {
@@ -155,10 +152,7 @@ public class GameView implements Observer {
         Label gameOverExitButton = SceneManager.getButton("menu", 2, Color.WHITE);
 
         gameOverExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
-        gameOverRestartButton.setOnMouseClicked(mouseEvent -> {
-            controller.gameButtonPressed();
-            BackgroundMusic.stopMusic();
-        });
+        gameOverRestartButton.setOnMouseClicked(mouseEvent -> restart());
 
         gameOver.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
@@ -191,10 +185,22 @@ public class GameView implements Observer {
         gameBoard.getChildren().addAll(pause, options , gameOver, victory);
     }
 
+    private void restart() {
+        controller.restart();
+        /*
+        gameBoard.getChildren().clear();
+        randomBlocks.clear();
+        enemies.clear();
+        coins.clear();
+        bombExplosion.clear();
+        bottomBar.getChildren().clear();
+        initialize();
+         */
+    }
+
 
     //#################### BOTTOM BAR ################//
     private void addBottomBar() {
-
         // build the bottomBar
         bottomBar.setLayoutX(0);
         bottomBar.setLayoutY((double)SCALE_FACTOR * 11);
@@ -353,9 +359,8 @@ public class GameView implements Observer {
 
 
     private void gameLost(Coordinate c) {
-        BackgroundMusic.stopMusic();
-        BackgroundMusic.playDeath();
         controller.endMatch();
+        BackgroundMusic.playDeath();
         PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
         gameOverAnimation(c);
         pauseGameOver.setOnFinished(event -> {
@@ -367,9 +372,8 @@ public class GameView implements Observer {
     }
 
     private void gameWin() {
-        BackgroundMusic.stopMusic();
-        BackgroundMusic.playSuccess();
         controller.endMatch();
+        BackgroundMusic.playSuccess();
         PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
         pauseGameWin.setOnFinished(event -> {
             victory.toFront();

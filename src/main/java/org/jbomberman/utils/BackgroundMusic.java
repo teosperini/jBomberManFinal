@@ -31,11 +31,6 @@ public class BackgroundMusic {
         GAMEBOMB.play();
     }
 
-    //capire bene come funziona
-    public static void setVolume(){
-        mediaPlayer.setVolume(20);
-    }
-
     public static void playSuccess() {
         SUCCESS.play();
     }
