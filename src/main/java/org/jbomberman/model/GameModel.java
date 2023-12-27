@@ -9,13 +9,41 @@ import java.util.*;
 
 public class GameModel extends Observable {
 
+    private static int NUMBER_OF_ENEMIES = 3;
+    public static final int NUMBER_OF_COINS = 3;
+
+    // how much the character can move every time a key is pressed
+    private static final int MOVEMENT = 1;
+    // how many random blocks are going to spawn
+    private static final int NUM_RND_BLOCKS = 20;
+
+
     private final ArrayList<Coordinate> coordinateGround = new ArrayList<>();
+
+    // the coordinates of the fixed blocks
     private final ArrayList<Coordinate> coordinatesFixedBlocks = new ArrayList<>();
+
+    // the coordinates of the random blocks (the blocks that can be destroyed)
     private final ArrayList<Coordinate> coordinatesRandomBlocks = new ArrayList<>();
 
+    // the coordinates of the exit door
+    private Coordinate exit;
+
+    // the coordinates of the high potential bomb
+    private Coordinate bombPu;
+
+    // the coordinates of the extra life
+    private Coordinate lifePu;
+
+    // the coordinates of the harmor
+    private Coordinate invinciblePu;
+
+
+    // the coordinates of the enemies
     private final ArrayList<Coordinate> coordinateEnemies = new ArrayList<>();
     private final ArrayList<Integer> enemiesHp = new ArrayList<>();
 
+    // the coordinates of the coins
     private final ArrayList<Coordinate> coins = new ArrayList<>();
 
     private static final ArrayList<KeyCode> KEY_CODES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
@@ -26,25 +54,14 @@ public class GameModel extends Observable {
     private Coordinate tntCoordinates;
     private int bombRange = 1;
 
-    //coordinate exit and power up
-    private Coordinate exit;
-    private Coordinate bombPu;
-    private Coordinate lifePu;
-    private Coordinate invinciblePu;
 
     private int level = 1;
 
     private boolean playerInvincible = false;
 
-    private int numberOfEnemies = 3;
     private int playerHp = 3;
     private Coordinate playerPosition = new Coordinate(1,1);
 
-    // how much the character can move every time a key is pressed
-    private static final int MOVEMENT = 1;
-    // how many random blocks are going to spawn
-    private static final int NUM_RND_BLOCKS = 20;
-    // the coordinates of the winning cell
 
     private int points = 0;
 
@@ -59,7 +76,7 @@ public class GameModel extends Observable {
 
     public void initialize(){
         generateBlocks();
-        generateItemsExit();
+        generateItemsAndExit();
         generateEnemies();
 
         playerPosition = new Coordinate(1,1);
@@ -74,10 +91,10 @@ public class GameModel extends Observable {
 
     public void setDifficulty(Difficulty difficulty){
         switch (difficulty){
-            case EASY -> numberOfEnemies = 2;
-            case NORMAL -> numberOfEnemies = 3;
-            case HARD -> numberOfEnemies = 4;
-            default -> numberOfEnemies = 0;
+            case EASY -> NUMBER_OF_ENEMIES = 2;
+            case NORMAL -> NUMBER_OF_ENEMIES = 3;
+            case HARD -> NUMBER_OF_ENEMIES = 4;
+            default -> NUMBER_OF_ENEMIES = 0;
         }
     }
 
@@ -119,54 +136,39 @@ public class GameModel extends Observable {
         }
     }
 
-    private void generateItemsExit() {
-        //we can use this array to prevent the items to stack over the same position
-        ArrayList<Coordinate> partial = new ArrayList<>(coordinatesRandomBlocks);
+    private void generateItemsAndExit() {
+        // the items are put behind the random blocks; we can use this array also
+        // to prevent the items to stack over the same position
+        ArrayList<Coordinate> availableCoordinates = new ArrayList<>(coordinatesRandomBlocks);
 
         int randomExit = random.nextInt(coordinatesRandomBlocks.size());
         exit = coordinatesRandomBlocks.get(randomExit);
+        availableCoordinates.remove(exit);
 
-        partial.remove(exit);
+        int randomFire = random.nextInt(availableCoordinates.size());
+        bombPu = availableCoordinates.get(randomFire);
+        availableCoordinates.remove(bombPu);
 
-        int randomFire = random.nextInt(partial.size());
-        bombPu = partial.get(randomFire);
+        int randomLife = random.nextInt(availableCoordinates.size());
+        lifePu = availableCoordinates.get(randomLife);
+        availableCoordinates.remove(lifePu);
 
-        partial.remove(bombPu);
+        int randomInvincible = random.nextInt(availableCoordinates.size());
+        invinciblePu = availableCoordinates.get(randomInvincible);
+        availableCoordinates.remove(invinciblePu);
 
-        int randomLife = random.nextInt(partial.size());
-        lifePu = partial.get(randomLife);
-
-        partial.remove(lifePu);
-
-        int randomInvincible = random.nextInt(partial.size());
-        invinciblePu = partial.get(randomInvincible);
-
-        partial.remove(invinciblePu);
-
-
-        int randomCoin1 = random.nextInt(partial.size());
-        Coordinate coin1 = partial.get(randomCoin1);
-
-        partial.remove(coin1);
-
-        int randomCoin2 = random.nextInt(partial.size());
-        Coordinate coin2 = partial.get(randomCoin2);
-
-        partial.remove(coin2);
-
-        int randomCoin3 = random.nextInt(partial.size());
-        Coordinate coin3 = partial.get(randomCoin3);
-
-        partial.remove(coin3);
-
-        coins.add(coin1);
-        coins.add(coin2);
-        coins.add(coin3);
+        // generate the coins
+        for (int i = 0; i < NUMBER_OF_COINS; i++) {
+            int randomCoin = random.nextInt(availableCoordinates.size());
+            Coordinate coin = availableCoordinates.get(randomCoin);
+            availableCoordinates.remove(coin);
+            coins.add(coin);
+        }
     }
     
     public void generateEnemies() {
         int i = 0;
-        while (i < numberOfEnemies) {
+        while (i < NUMBER_OF_ENEMIES) {
             Coordinate coord = new Coordinate(random.nextInt(max.x()), random.nextInt(max.y()));
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
@@ -388,6 +390,13 @@ public class GameModel extends Observable {
 
         return new Coordinate(newX, newY);
     }
+
+    /**
+     * A coordinate is valid if it is not already occupied by a fixed block or by another random block. Furthermore we
+     * should leave cleared the positions that are adiacent to the origin, where the player is initially positioned.
+     * @param c: the coordinate to evaluate
+     * @return if it is a valid location
+     */
     private boolean isValidLocation(Coordinate c) {
         return !coordinatesFixedBlocks.contains(c) && (c.x() + c.y() > 3)&& !coordinatesRandomBlocks.contains(c);
     }
@@ -426,9 +435,9 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LEVEL, level));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinateGround, SubMap.GROUND_BLOCKS));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, SubMap.GROUND_BLOCKS, coordinateGround));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinatesFixedBlocks, SubMap.STATIC_BLOCKS));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, SubMap.STATIC_BLOCKS, coordinatesFixedBlocks));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_POWER_UP_BOMB, bombPu));
         setChanged();
@@ -440,7 +449,7 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_COINS, coins));
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinatesRandomBlocks, SubMap.RANDOM_BLOCKS));
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, SubMap.RANDOM_BLOCKS, coordinatesRandomBlocks));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_PLAYER, playerPosition));
         setChanged();
@@ -544,7 +553,7 @@ public class GameModel extends Observable {
 
 //########################################  ENEMIES  ########################################//
     public void difficulty(int i) {
-        numberOfEnemies = i;
+        NUMBER_OF_ENEMIES = i;
     }
 
     public void moveEnemies() {

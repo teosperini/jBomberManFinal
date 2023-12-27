@@ -73,7 +73,7 @@ public class UpdateInfo {
         this.index2 = index2;
     }
 
-    public UpdateInfo(UpdateType updateType, ArrayList<Coordinate> array, SubMap block) {
+    public UpdateInfo(UpdateType updateType, SubMap block, ArrayList<Coordinate> array) {
         this.updateType = updateType;
         this.array = array;
         this.block = block;
