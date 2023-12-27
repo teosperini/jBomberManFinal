@@ -171,12 +171,15 @@ public class GameModel extends Observable {
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
                 coordinateEnemies.add(coord);
-                if (level == 2) {
+                if (level == 1) {
+                    enemiesHp.add(1);
+                } else {
                     enemiesHp.add(2);
                 }
                 i++;
             }
         }
+        System.out.println(enemiesHp);
     }
 
 
@@ -217,18 +220,13 @@ public class GameModel extends Observable {
                 blocksToRemove.add(coord);
             }
 
-            if (level == 1) {
-                if (coordinateEnemies.contains(coord)) {
+            if (coordinateEnemies.contains(coord)) {
+                int enemyIndex = coordinateEnemies.indexOf(coord);
+                if (enemiesHp.get(enemyIndex) == 2) {
+                    enemiesHp.set(enemyIndex, 1);
+                    enemiesHpToRemove.add(coord);
+                } else {
                     enemiesToRemove.add(coord);
-                }
-            } else {
-                if (coordinateEnemies.contains(coord)) {
-                    if (enemiesHp.get(coordinateEnemies.indexOf(coord)) == 2) {
-                        enemiesHp.set(coordinateEnemies.indexOf(coord), 1);
-                        enemiesHpToRemove.add(coord);
-                    } else {
-                        enemiesToRemove.add(coord);
-                    }
                 }
             }
         }
@@ -252,6 +250,7 @@ public class GameModel extends Observable {
             int index = coordinateEnemies.indexOf(coordinate);
             enemiesHpToRemove.remove(coordinate);
             notifyLessLifeEnemy(index);
+            System.out.println(enemiesHp);
         });
 
         notifyExplosion(adjacentCoordinates);
@@ -593,6 +592,7 @@ public class GameModel extends Observable {
         coordinatesFixedBlocks.clear();
         coordinatesRandomBlocks.clear();
         coordinateEnemies.clear();
+        enemiesHp.clear();
         coins.clear();
         playerPosition = new Coordinate(1,1);
         bombRange = 1;
