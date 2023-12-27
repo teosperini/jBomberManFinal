@@ -12,7 +12,10 @@ public class GameModel extends Observable {
     private final ArrayList<Coordinate> coordinateGround = new ArrayList<>();
     private final ArrayList<Coordinate> coordinatesFixedBlocks = new ArrayList<>();
     private final ArrayList<Coordinate> coordinatesRandomBlocks = new ArrayList<>();
+
     private final ArrayList<Coordinate> coordinateEnemies = new ArrayList<>();
+    private final ArrayList<Integer> enemiesHp = new ArrayList<>();
+
     private final ArrayList<Coordinate> coins = new ArrayList<>();
 
     private static final ArrayList<KeyCode> KEY_CODES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
@@ -164,11 +167,13 @@ public class GameModel extends Observable {
     public void generateEnemies() {
         int i = 0;
         while (i < numberOfEnemies) {
-            System.out.println("ayo");
             Coordinate coord = new Coordinate(random.nextInt(max.x()), random.nextInt(max.y()));
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
                 coordinateEnemies.add(coord);
+                if (level == 2) {
+                    enemiesHp.add(2);
+                }
                 i++;
             }
         }
@@ -195,6 +200,7 @@ public class GameModel extends Observable {
     public void explosion() {
         Set<Coordinate> blocksToRemove = new HashSet<>();
         Set<Coordinate> enemiesToRemove = new HashSet<>();
+        Set<Coordinate> enemiesHpToRemove = new HashSet<>();
 
         //with getCoordinates() I get every coordinates that needs to be checked
         ArrayList<Triad> adjacentCoordinates = getCoordinates();
@@ -211,8 +217,19 @@ public class GameModel extends Observable {
                 blocksToRemove.add(coord);
             }
 
-            if (coordinateEnemies.contains(coord)){
-                enemiesToRemove.add(coord);
+            if (level == 1) {
+                if (coordinateEnemies.contains(coord)) {
+                    enemiesToRemove.add(coord);
+                }
+            } else {
+                if (coordinateEnemies.contains(coord)) {
+                    if (enemiesHp.get(coordinateEnemies.indexOf(coord)) == 2) {
+                        enemiesHp.set(coordinateEnemies.indexOf(coord), 1);
+                        enemiesHpToRemove.add(coord);
+                    } else {
+                        enemiesToRemove.add(coord);
+                    }
+                }
             }
         }
 
@@ -230,6 +247,13 @@ public class GameModel extends Observable {
             points += addedPoints;
             notifyPoints(addedPoints, coordinate);
         });
+
+        enemiesHpToRemove.forEach(coordinate -> {
+            int index = coordinateEnemies.indexOf(coordinate);
+            enemiesHpToRemove.remove(coordinate);
+            notifyLessLifeEnemy(index);
+        });
+
         notifyExplosion(adjacentCoordinates);
         tntCoordinates = null;
         isBombExploding = false;
@@ -401,6 +425,8 @@ public class GameModel extends Observable {
 
     public void notifyModelReady() {
         setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.LEVEL, level));
+        setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinateGround, SubMap.GROUND_BLOCKS));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_MAP, coordinatesFixedBlocks, SubMap.STATIC_BLOCKS));
@@ -442,6 +468,11 @@ public class GameModel extends Observable {
     private void notifyPoints(int currentPoints, Coordinate coordinate) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_POINTS, coordinate, points, currentPoints));
+    }
+
+    private void notifyLessLifeEnemy(int index) {
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_ENEMY_LIFE, index));
     }
 
     private void notifyDeadEnemy(int index) {
@@ -543,6 +574,8 @@ public class GameModel extends Observable {
     private boolean isSafeZone(Coordinate newEnemyPosition) {
         return (newEnemyPosition.x()+newEnemyPosition.y() >3);
     }
+
+
     //##################### TEST ####################//
     //TODO remove after test
     public void removeRandom() {
@@ -576,6 +609,10 @@ public class GameModel extends Observable {
 
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    public int getLevel(){
+        return level;
     }
 
     //###############################################//

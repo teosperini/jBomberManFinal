@@ -51,17 +51,22 @@ public class GameView implements Observer {
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
+    private int level;
 
     //IMAGES
     private enum BlockImage {
         //bomb is the real bomb, fire is the power_up
         BEDROCK(BlockImage.class.getResourceAsStream("definitive/static_block.png")),
+        BEDROCK2(BlockImage.class.getResourceAsStream("definitive/static_block2.png")),
         STONE(BlockImage.class.getResourceAsStream("definitive/random_block.png")),
+        STONE2(BlockImage.class.getResourceAsStream("definitive/random_block2.png")),
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
+        GRASS2(BlockImage.class.getResourceAsStream("definitive/background_grey.png")),
         STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
+        ENEMY2(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
         INVINCIBLE(BlockImage.class.getResourceAsStream("power_up/resistance.png")),
@@ -168,9 +173,8 @@ public class GameView implements Observer {
 
         Label victoryNextLevelButton = SceneManager.getButton("nextLevel", 1, Color.WHITE);
         Label victoryExitButton = SceneManager.getButton("menu", 3, Color.WHITE);
-        victoryNextLevelButton.setOnMouseClicked(mouseEvent -> {
-            //TODO next level
-        });
+        victoryNextLevelButton.setOnMouseClicked(mouseEvent -> controller.nextLevel());
+
         victoryExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
 
         victory.setOnKeyPressed(keyEvent -> {
@@ -285,14 +289,30 @@ public class GameView implements Observer {
 
             switch (updateType) {
 
+                case LEVEL -> level = updateInfo.getIndex();
+
                 case LOAD_MAP -> {
                     switch (updateInfo.getSubBlock()) {
-                        case GROUND_BLOCKS -> loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                        case GROUND_BLOCKS -> {
+                            if (level == 1)
+                                loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                            else
+                                loader(updateInfo.getArray(), BlockImage.GRASS2.getImage());
+                        }
 
-                        case STATIC_BLOCKS -> loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+                        case STATIC_BLOCKS -> {
+                            if (level == 1)
+                                loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+                            else
+                                loader(updateInfo.getArray(), BlockImage.BEDROCK2.getImage());
+                        }
 
-                        case RANDOM_BLOCKS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE.getImage(), randomBlocks));
-
+                        case RANDOM_BLOCKS -> {
+                            if (level == 1)
+                                updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE.getImage(), randomBlocks));
+                            else
+                                updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE2.getImage(), randomBlocks));
+                        }
                         default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
                     }
                 }
@@ -340,7 +360,10 @@ public class GameView implements Observer {
 
                 case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
 
-
+                case UPDATE_ENEMY_LIFE -> {
+                    ImageView woundedEnemy = enemies.get(updateInfo.getIndex());
+                    woundedEnemy.setImage(BlockImage.ENEMY2.getImage());
+                }
 
                 case UPDATE_GAME_WIN -> gameWin();
 

@@ -57,6 +57,7 @@ public class MainController {
         model.addObserver(menuView);
         menuView.initialize();
         gameModel = new GameModel();
+        gameModel.setLevel(1);
 
         difficulty = Difficulty.NORMAL;
 
@@ -173,6 +174,7 @@ public class MainController {
         BackgroundMusic.stopMusic();
         gameModel.reset();
         gameModel.initialize();
+        gameModel.setLevel(gameModel.getLevel());
 
         gameView = new GameView();
 
@@ -194,10 +196,22 @@ public class MainController {
 
     public void nextLevel(){
         BackgroundMusic.stopMusic();
-        gameView = new GameView();
         gameModel.reset();
         gameModel.setLevel(2);
         gameModel.initialize();
+
+        gameView = new GameView();
+
+        gameModel.addObserver(gameView);
+        gameModel.notifyModelReady();
+
+        pause = false;
+        moving = false;
+
+        scene.setRoot(gameView.getGame());
+        gameView.getFocus();
+
+        setTimeline();
         BackgroundMusic.playMusic();
     }
 
@@ -216,5 +230,3 @@ public class MainController {
 
     //###############################################//
 }
-
-
