@@ -6,6 +6,7 @@ import org.jbomberman.utils.*;
 import javafx.scene.input.KeyCode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameModel extends Observable {
     // LIMITS OF THE MAP
@@ -31,6 +32,8 @@ public class GameModel extends Observable {
 
     // the coordinates of the random blocks (the blocks that can be destroyed)
     private final ArrayList<Coordinate> coordinatesRandomBlocks = new ArrayList<>();
+
+    private List<Coordinate>  freePositions;
 
     // the coordinates of the exit door
     private Coordinate exit;
@@ -103,18 +106,26 @@ public class GameModel extends Observable {
     }
 
     private void generateBackground() {
-        for (int x = 1; x <= X_MAX; x += 1) {
-            for (int y = 1; y <= Y_MAX; y += 1) {
+        // this is the green ground (1 .. X_MAX, 1 .. Y_MAX)
+        for (int x = MIN.x(); x <= MAX.x(); x += 1) {
+            for (int y = MIN.y(); y <= MAX.y(); y += 1) {
                 coordinateGround.add(new Coordinate(x, y));
             }
         }
 
+        // at the beginning the free positions are all the green ground positions, except the ones of the first corner
+        freePositions = coordinateGround.stream().filter(p -> p.x() + p.y() > 3).collect(Collectors.toList());
+
+        // this generates the fixed checkerboard blocks, removing the corresponding positions from the free positions list
         for (int x = MIN.x() + 1; x <= MAX.x(); x += 2) {
             for (int y = MIN.y() + 1; y <= MAX.y(); y += 2) {
-                coordinatesFixedBlocks.add(new Coordinate(x, y));
+                var fixedBlock = new Coordinate(x, y);
+                coordinatesFixedBlocks.add(fixedBlock);
+                freePositions.remove(fixedBlock);
             }
         }
 
+        // this generates the fixed blocks on the edges
         for (int x = 0; x <= MAX.x() + 1; x += 1) {
             for (int y = 0; y <= MAX.y() + 1; y += 1) {
                 //verifica se la coordinata è ai bordi
@@ -123,24 +134,16 @@ public class GameModel extends Observable {
                 }
             }
         }
-
     }
 
     /**
      * Generate NUM_RND_BLOCKS random blocks in the range 1 .. XMAX-1, 1 .. YMAX-1;
-     * the random coordinates are put in the list coordinatesRandomBlocks.
+     * the corresponding coordinates are taken from the free positions list and put in the coordinatesRandomBlocks list.
      */
     private void generateRandomBlocks() {
-        int i = 0;
-        while (i < NUM_RND_BLOCKS) {
-            Coordinate location = new Coordinate(
-                    1 + random.nextInt(MAX.x()-1),
-                    1 + random.nextInt(MAX.y()-1)
-            );
-            if (isValidLocation(location)) {
-                coordinatesRandomBlocks.add(location);
-                i++;
-            }
+        for (int i=0; i<NUM_RND_BLOCKS; i++) {
+            Coordinate rndBlock = freePositions.remove(random.nextInt(freePositions.size()-1));
+            coordinatesRandomBlocks.add(rndBlock);
         }
     }
 
@@ -175,19 +178,11 @@ public class GameModel extends Observable {
     }
     
     public void generateEnemies() {
-        int i = 0;
-        while (i < numberOfEnemies) {
-            Coordinate coord = new Coordinate(random.nextInt(MAX.x()), random.nextInt(MAX.y()));
-
-            if ((coord.x() + coord.y() > 3) && !collision(coord)) {
-                coordinateEnemies.add(coord);
-                if (level == 1) {
-                    enemiesHp.add(1);
-                } else {
-                    enemiesHp.add(2);
-                }
-                i++;
-            }
+        for (int i=0; i<numberOfEnemies; i++) {
+            var enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
+            coordinateEnemies.add(enemy);
+            // the number of life of an enemy depends upon the level
+            enemiesHp.add(level);
         }
         System.out.println(enemiesHp);
     }
