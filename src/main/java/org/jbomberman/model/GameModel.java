@@ -9,12 +9,13 @@ import java.util.*;
 
 public class GameModel extends Observable {
     // LIMITS OF THE MAP
-    public static final int XMAX = 15;
-    public static final int YMAX = 9;
-    public final Coordinate MAX = new Coordinate(XMAX, YMAX);
-    public final Coordinate MIN = new Coordinate(1,1);
+    public static final int X_MAX = 15;
+    public static final int Y_MAX = 9;
+    public static final Coordinate MAX = new Coordinate(X_MAX, Y_MAX);
+    public static final Coordinate MIN = new Coordinate(1,1);
 
-    private static int NUMBER_OF_ENEMIES = 3;
+    private int numberOfEnemies = 3;
+
     public static final int NUMBER_OF_COINS = 3;
 
     // how much the character can move every time a key is pressed
@@ -94,16 +95,16 @@ public class GameModel extends Observable {
 
     public void setDifficulty(Difficulty difficulty){
         switch (difficulty){
-            case EASY -> NUMBER_OF_ENEMIES = 2;
-            case NORMAL -> NUMBER_OF_ENEMIES = 3;
-            case HARD -> NUMBER_OF_ENEMIES = 4;
-            default -> NUMBER_OF_ENEMIES = 0;
+            case EASY -> numberOfEnemies = 2;
+            case NORMAL -> numberOfEnemies = 3;
+            case HARD -> numberOfEnemies = 4;
+            default -> numberOfEnemies = 0;
         }
     }
 
     private void generateBackground() {
-        for (int x = 1; x <= XMAX; x += 1) {
-            for (int y = 1; y <= YMAX; y += 1) {
+        for (int x = 1; x <= X_MAX; x += 1) {
+            for (int y = 1; y <= Y_MAX; y += 1) {
                 coordinateGround.add(new Coordinate(x, y));
             }
         }
@@ -175,7 +176,7 @@ public class GameModel extends Observable {
     
     public void generateEnemies() {
         int i = 0;
-        while (i < NUMBER_OF_ENEMIES) {
+        while (i < numberOfEnemies) {
             Coordinate coord = new Coordinate(random.nextInt(MAX.x()), random.nextInt(MAX.y()));
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
@@ -559,10 +560,6 @@ public class GameModel extends Observable {
 
 
 //########################################  ENEMIES  ########################################//
-    public void difficulty(int i) {
-        NUMBER_OF_ENEMIES = i;
-    }
-
     public void moveEnemies() {
         for (int i = 0; i< coordinateEnemies.size(); i++) {
             calculateNewEnemyPosition(i);
