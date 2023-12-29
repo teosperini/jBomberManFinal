@@ -8,6 +8,11 @@ import javafx.scene.input.KeyCode;
 import java.util.*;
 
 public class GameModel extends Observable {
+    // LIMITS OF THE MAP
+    public static final int XMAX = 15;
+    public static final int YMAX = 9;
+    public final Coordinate MAX = new Coordinate(XMAX, YMAX);
+    public final Coordinate MIN = new Coordinate(1,1);
 
     private static int NUMBER_OF_ENEMIES = 3;
     public static final int NUMBER_OF_COINS = 3;
@@ -47,9 +52,7 @@ public class GameModel extends Observable {
     private final ArrayList<Coordinate> coins = new ArrayList<>();
 
     private static final ArrayList<KeyCode> KEY_CODES = new ArrayList<>(List.of(KeyCode.UP,KeyCode.DOWN,KeyCode.LEFT,KeyCode.RIGHT));
-    // LIMITS OF THE MAP
-    public final Coordinate max = new Coordinate(15, 9);
-    public final Coordinate min = new Coordinate(1,1);
+
     // COORDINATES OF THE TNT
     private Coordinate tntCoordinates;
     private int bombRange = 1;
@@ -99,22 +102,22 @@ public class GameModel extends Observable {
     }
 
     private void generateBackground() {
-        for (int x = 1; x <= 15; x += 1) {
-            for (int y = 1; y < 10; y += 1) {
+        for (int x = 1; x <= XMAX; x += 1) {
+            for (int y = 1; y <= YMAX; y += 1) {
                 coordinateGround.add(new Coordinate(x, y));
             }
         }
 
-        for (int x = min.x() + 1; x <= max.x(); x += 2) {
-            for (int y = min.y() + 1; y <= max.y(); y += 2) {
+        for (int x = MIN.x() + 1; x <= MAX.x(); x += 2) {
+            for (int y = MIN.y() + 1; y <= MAX.y(); y += 2) {
                 coordinatesFixedBlocks.add(new Coordinate(x, y));
             }
         }
 
-        for (int x = 0; x <= max.x() + 1; x += 1) {
-            for (int y = 0; y <= max.y() + 1; y += 1) {
+        for (int x = 0; x <= MAX.x() + 1; x += 1) {
+            for (int y = 0; y <= MAX.y() + 1; y += 1) {
                 //verifica se la coordinata è ai bordi
-                if (x == 0 || x == max.x()+1 || y == 0 || y == max.y()+1) {
+                if (x == 0 || x == MAX.x()+1 || y == 0 || y == MAX.y()+1) {
                     coordinatesFixedBlocks.add(new Coordinate(x, y));
                 }
             }
@@ -122,12 +125,16 @@ public class GameModel extends Observable {
 
     }
 
+    /**
+     * Generate NUM_RND_BLOCKS random blocks in the range 1 .. XMAX-1, 1 .. YMAX-1;
+     * the random coordinates are put in the list coordinatesRandomBlocks.
+     */
     private void generateRandomBlocks() {
         int i = 0;
         while (i < NUM_RND_BLOCKS) {
             Coordinate location = new Coordinate(
-                    1 + random.nextInt(max.x()),
-                    1 + random.nextInt(max.y())
+                    1 + random.nextInt(MAX.x()-1),
+                    1 + random.nextInt(MAX.y()-1)
             );
             if (isValidLocation(location)) {
                 coordinatesRandomBlocks.add(location);
@@ -169,7 +176,7 @@ public class GameModel extends Observable {
     public void generateEnemies() {
         int i = 0;
         while (i < NUMBER_OF_ENEMIES) {
-            Coordinate coord = new Coordinate(random.nextInt(max.x()), random.nextInt(max.y()));
+            Coordinate coord = new Coordinate(random.nextInt(MAX.x()), random.nextInt(MAX.y()));
 
             if ((coord.x() + coord.y() > 3) && !collision(coord)) {
                 coordinateEnemies.add(coord);
@@ -385,8 +392,8 @@ public class GameModel extends Observable {
             }
         }
 
-        int newX = clamp(currentPosition.x() + deltaX, min.x(), max.x());
-        int newY = clamp(currentPosition.y() + deltaY, min.y(), max.y());
+        int newX = clamp(currentPosition.x() + deltaX, MIN.x(), MAX.x());
+        int newY = clamp(currentPosition.y() + deltaY, MIN.y(), MAX.y());
 
         return new Coordinate(newX, newY);
     }
