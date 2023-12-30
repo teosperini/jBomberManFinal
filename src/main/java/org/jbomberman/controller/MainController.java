@@ -4,8 +4,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import org.jbomberman.model.GameModel;
-import org.jbomberman.model.MenuModel;
+import org.jbomberman.model.MainModel;
 import org.jbomberman.utils.BackgroundMusic;
 import org.jbomberman.utils.Difficulty;
 import org.jbomberman.utils.SceneManager;
@@ -20,8 +19,7 @@ import javafx.stage.Stage;
 
 public class MainController {
     MenuView menuView;
-    MenuModel model;
-    GameModel gameModel;
+    MainModel model;
     GameView gameView;
 
 
@@ -53,15 +51,15 @@ public class MainController {
 
     public void initialize(){
         menuView = new MenuView();
-        model = new MenuModel();
+        model = new MainModel();
         model.addObserver(menuView);
+
         menuView.initialize();
-        gameModel = new GameModel();
-        gameModel.setLevel(1);
+        model.setLevel(1);
 
         difficulty = Difficulty.NORMAL;
 
-        gameModel.setDifficulty(difficulty);
+        model.setDifficulty(difficulty);
 
 
         Parent root = menuView.getMenu();
@@ -73,12 +71,14 @@ public class MainController {
     //################ NEW GAME ################//
 
     public void playButtonPressed(){
-        gameModel.deleteObservers();
+        model.deleteObservers();
 
         gameView = new GameView();
-        gameModel.addObserver(gameView);
+        model.addObserver(gameView);
 
-        gameModel.notifyModelReady();
+        model.notifyModelReady();
+        gameView.initialize();
+
         scene.setRoot(gameView.getGame());
         gameView.getFocus();
 
@@ -102,13 +102,13 @@ public class MainController {
         } else if (!pause && !moving){
             if (keyCode == KeyCode.SPACE) {
                 // if space is pressed we try to release a bomb
-                gameModel.releaseBomb();
+                model.releaseBomb();
             } else {
                 // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
                 // per uscire ne si possono muovere i mob
                 // se il player si sta muovendo o sta respawnando non devo permettere di ricevere input
                 //ma i mob devono continuare a muoversi
-                gameModel.movePlayer(keyCode);
+                model.movePlayer(keyCode);
             }
         }
 
@@ -139,7 +139,7 @@ public class MainController {
         mobMovement = new Timeline(
                 new KeyFrame(Duration.seconds(1), event ->{
                         if (!pause){
-                            gameModel.moveEnemies();
+                            model.moveEnemies();
                         }
                 })
         );
@@ -148,7 +148,7 @@ public class MainController {
     }
 
     public void bombExploded() {
-        gameModel.explosion();
+        model.explosion();
     }
 
     //irreversibly stops the game
@@ -160,26 +160,27 @@ public class MainController {
 
     public void quitMatch() {
         scene.setRoot(menuView.getMenu());
-        model.setPoints(gameModel.getPoints());
 
-        gameModel.reset();
-        gameModel.addObserver(gameView);
+        model.reset();
+        model.addObserver(gameView);
 
-        gameModel.setLevel(1);
-        gameModel.initialize();
+        model.setLevel(1);
+        model.initialize();
         //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
     }
 
     public void restart() {
         BackgroundMusic.stopMusic();
-        gameModel.reset();
-        gameModel.initialize();
-        gameModel.setLevel(gameModel.getLevel());
+        model.reset();
+        model.initialize();
+        model.setLevel(model.getLevel());
 
         gameView = new GameView();
 
-        gameModel.addObserver(gameView);
-        gameModel.notifyModelReady();
+        model.addObserver(gameView);
+        model.notifyModelReady();
+
+        gameView.initialize();
 
         pause = false;
         moving = false;
@@ -196,14 +197,16 @@ public class MainController {
 
     public void nextLevel(){
         BackgroundMusic.stopMusic();
-        gameModel.reset();
-        gameModel.setLevel(2);
-        gameModel.initialize();
+        model.reset();
+        model.setLevel(2);
+        model.initialize();
 
         gameView = new GameView();
 
-        gameModel.addObserver(gameView);
-        gameModel.notifyModelReady();
+        model.addObserver(gameView);
+        model.notifyModelReady();
+
+        gameView.initialize();
 
         pause = false;
         moving = false;
@@ -225,7 +228,11 @@ public class MainController {
     //TODO remove after test
 
     public void removeBlocks() {
-        gameModel.removeRandom();
+        model.removeRandom();
+    }
+
+    public void setNick(String nickname) {
+        model.setShownNickname(nickname);
     }
 
     //###############################################//

@@ -1,16 +1,5 @@
 package org.jbomberman.controller;
 
-import org.jbomberman.model.GameModel;
-import org.jbomberman.utils.BackgroundMusic;
-import org.jbomberman.view.GameView;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Duration;
-
 
 public class GameController {
     // model

@@ -7,7 +7,7 @@ import javafx.scene.input.KeyCode;
 
 import java.util.*;
 
-public class GameModel extends Observable {
+public class MainModel extends Observable {
     // LIMITS OF THE MAP
     public static final int X_MAX = 15;
     public static final int Y_MAX = 9;
@@ -70,11 +70,12 @@ public class GameModel extends Observable {
     private int points = 0;
 
     private final Random random = new Random();
+    private String nickname;
 
 
 //############################# CONSTRUCTOR AND INITIALIZATION ############################//
 
-    public GameModel() {
+    public MainModel() {
         initialize();
     }
 
@@ -208,6 +209,10 @@ public class GameModel extends Observable {
 
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_BOMB_RELEASED, tntCoordinates));
+
+        PauseTransition transition = new PauseTransition(Duration.millis(1500));
+        transition.setOnFinished(event -> explosion());
+        transition.play();
     }
 
     public void explosion() {
@@ -237,6 +242,7 @@ public class GameModel extends Observable {
                     enemiesHpToRemove.add(coord);
                 } else {
                     enemiesToRemove.add(coord);
+                    enemiesHp.remove(enemiesHp.get(enemyIndex));
                 }
             }
         }
@@ -431,11 +437,6 @@ public class GameModel extends Observable {
         }
     }
 
-    public int getPoints(){
-        return points;
-    }
-
-
 
 //####################################  NOTIFICATIONS  ####################################//
 
@@ -462,7 +463,8 @@ public class GameModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.LOAD_PLAYER, playerPosition));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_ENEMIES, coordinateEnemies));
-
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_NAME, nickname));
     }
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
@@ -626,6 +628,10 @@ public class GameModel extends Observable {
 
     public int getLevel(){
         return level;
+    }
+
+    public void setShownNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     //###############################################//

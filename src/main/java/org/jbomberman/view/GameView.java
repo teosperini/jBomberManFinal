@@ -2,6 +2,7 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
@@ -17,13 +18,14 @@ import javafx.util.Duration;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.jbomberman.utils.SceneManager.SCALE_FACTOR;
+import static org.jbomberman.utils.SceneManager.createImageView;
+
 public class GameView implements Observer {
 
     private final MainController controller;
 
     public final AnchorPane gameBoard;
-
-    public static final int SCALE_FACTOR = 35;
 
     //END GAME PANELS
     Pane gameOver;
@@ -46,12 +48,16 @@ public class GameView implements Observer {
     private final List<ImageView> coins;
     private final List<ImageView> bombExplosion;
 
+    private ArrayList<Image> bombs;
     //BOTTOM BAR
     private final HBox bottomBar = new HBox();
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
+    Label nameLabel;
+
     private int level;
+    private boolean bombAnimation;
 
     //IMAGES
     private enum BlockImage {
@@ -64,14 +70,17 @@ public class GameView implements Observer {
         GRASS2(BlockImage.class.getResourceAsStream("definitive/background_grey.png")),
         STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
-        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
+        //BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         ENEMY2(BlockImage.class.getResourceAsStream("definitive/steve.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
         INVINCIBLE(BlockImage.class.getResourceAsStream("power_up/resistance.png")),
         COIN(BlockImage.class.getResourceAsStream("power_up/coin.gif")),
-        DESTRUCTION(BlockImage.class.getResourceAsStream("random_blocks/blocks.gif"))
+        DESTRUCTION(BlockImage.class.getResourceAsStream("random_blocks/blocks.gif")),
+        BOMB0(BlockImage.class.getResourceAsStream("bomb/bomb_0")),
+        BOMB1(BlockImage.class.getResourceAsStream("bomb/bomb_1")),
+        BOMB2(BlockImage.class.getResourceAsStream("bomb/bomb_2"))
         ;
 
         private final Image image;
@@ -95,12 +104,11 @@ public class GameView implements Observer {
         enemies = new ArrayList<>();
         coins = new ArrayList<>();
         bombExplosion = new ArrayList<>();
-        initialize();
+        addBottomBar();
     }
 
     public void initialize() {
         genInGamePanels();
-        addBottomBar();
         gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
     }
 
@@ -182,8 +190,12 @@ public class GameView implements Observer {
                 controller.quitMatch();
             }
         });
-
-        victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        System.out.println(level);
+        if (level == 1) {
+            victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        }
+        else
+            victory.getChildren().add(victoryExitButton);
 
         //################## GAMEBOARD ################//
         gameBoard.getChildren().addAll(pause, options , gameOver, victory);
@@ -212,19 +224,25 @@ public class GameView implements Observer {
         bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
         bottomBar.setStyle("-fx-background-color: grey");
 
-        // build the label
+        // build the labels
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
         livesLabel = new Label("Lives: " + 3);
         pointsLabel = new Label("Points: " + 0);
         timerLabel = new Label("Tempo: 0");
+        nameLabel = new Label();
+
+        nameLabel.setFont(customFontSmall);
+        nameLabel.setTextFill(Color.BLACK);
 
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
         pointsLabel.setFont(customFontSmall);
         pointsLabel.setTextFill(Color.BLACK);
-        pointsLabel.setLayoutX(200);
+        pointsLabel.setAlignment(Pos.CENTER_RIGHT);
 
+        nameLabel.setText("player: guest");
+        HBox.setMargin(nameLabel, new Insets(0,0,0,20));
 
         //##################### TEST ####################//
         //TODO remove after test
@@ -239,7 +257,7 @@ public class GameView implements Observer {
         buttonBlocks.setLayoutX(40);
         buttonBlocks.setLayoutY(20);
 
-        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel);
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel, nameLabel);
         //###############################################//
 
         gameBoard.getChildren().add(bottomBar);
@@ -333,6 +351,12 @@ public class GameView implements Observer {
                 case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
 
 
+                case LOAD_NAME -> {
+                    if (updateInfo.getNickname() != null)
+                        nameLabel.setText("player: "+ updateInfo.getNickname());
+                }
+
+
                 case UPDATE_BLOCK_DESTROYED -> removeImageView(randomBlocks, updateInfo.getIndex());
 
                 case UPDATE_ENEMY_DEAD -> removeImageView(enemies, updateInfo.getIndex());
@@ -355,10 +379,13 @@ public class GameView implements Observer {
 
                 case UPDATE_BOMB_RELEASED -> {
                     BackgroundMusic.playBomb();
-                    drawBomb(updateInfo.getCoordinate(), 1);
+                    drawBomb(updateInfo.getCoordinate());
                 }
 
-                case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
+                case UPDATE_EXPLOSION -> {
+                    bombAnimation = false;
+                    drawExplosion(updateInfo.getTriadArrayList(), 1);
+                }
 
                 case UPDATE_ENEMY_LIFE -> {
                     ImageView woundedEnemy = enemies.get(updateInfo.getIndex());
@@ -516,14 +543,6 @@ public class GameView implements Observer {
 
 
     //###################### IMAGEVIEW METHODS ######################//
-    private ImageView createImageView(Coordinate c, Image image) {
-        ImageView imageView = new ImageView(image);
-        imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
-        imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
-        imageView.setFitHeight(SCALE_FACTOR);
-        imageView.setFitWidth(SCALE_FACTOR);
-        return imageView;
-    }
 
     private void drawImageView(Coordinate coordinate, Image image, List<ImageView> entities) {
         ImageView imageView = createImageView(coordinate, image);
@@ -531,26 +550,20 @@ public class GameView implements Observer {
         gameBoard.getChildren().add(imageView);
     }
 
-    private void drawBomb(Coordinate coordinate, int i) {
-        ImageView tntImage = createImageView(coordinate, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("bomb/bomb_" + i + ".png"))));
+    private void drawBomb(Coordinate coordinate) {
+        bombs = new ArrayList<>(List.of(BlockImage.BOMB0.getImage(), BlockImage.BOMB1.getImage(), BlockImage.BOMB2.getImage()));
+        bombAnimation = true;
+        int i = 0;
+        while (bombAnimation){
+            ImageView tntImage = createImageView(coordinate, bombs.get(i));
+            gameBoard.getChildren().add(tntImage);
+            player.toFront();
 
-        PauseTransition tnt = new PauseTransition(Duration.millis(250));
-
-        gameBoard.getChildren().add(tntImage);
-        player.toFront();
-
-        int j = i + 1;
-        tnt.setOnFinished(actionEvent -> {
-
-            gameBoard.getChildren().remove(tntImage);
-
-            if (j < 7) {
-                drawBomb(coordinate, j);
-            } else {
-                controller.bombExploded();
-            }
-        });
-        tnt.play();
+            PauseTransition tnt = new PauseTransition(Duration.millis(250));
+            tnt.setOnFinished(actionEvent -> {
+                gameBoard.getChildren().remove(tntImage);
+            });
+        }
     }
 
     private void removeImageView(List<ImageView> array, int index) {

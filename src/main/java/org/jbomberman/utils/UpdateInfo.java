@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class UpdateInfo {
     private final UpdateType updateType;
     private boolean b;
-    private String name;
+    private String nickname;
     private Coordinate oldc;
     private Coordinate newc;
     private Coordinate c;
@@ -57,7 +57,7 @@ public class UpdateInfo {
         this.updateType = updateType;
         this.oldc = oldc;
         this.newc = newc;
-        this.name = name;
+        this.nickname = name;
         this.index = index;
     }
 
@@ -82,6 +82,11 @@ public class UpdateInfo {
     public UpdateInfo(ArrayList<Triad> triadArrayList, UpdateType updateType) {
         this.updateType = updateType;
         this.triadArrayList = triadArrayList;
+    }
+
+    public UpdateInfo(UpdateType updateType, String nickname) {
+        this.updateType = updateType;
+        this.nickname = nickname;
     }
 
     public UpdateType getUpdateType() {
@@ -120,5 +125,9 @@ public class UpdateInfo {
 
     public ArrayList<Triad> getTriadArrayList() {
         return triadArrayList;
+    }
+
+    public String getNickname(){
+        return nickname;
     }
 }

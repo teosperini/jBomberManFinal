@@ -108,6 +108,12 @@ public class MenuView implements Observer{
 
         profile.setVisible(false);
 
+        Label profileBackButton = SceneManager.getButton("back", 2, Color.WHITE);
+
+        profileBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(profile, mainMenu));
+
+        profile.getChildren().add(profileBackButton);
+
 
         menu.getChildren().addAll(mainMenu, options, difficulty, profile);
     }
