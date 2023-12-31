@@ -193,19 +193,19 @@ public class GameModel extends Observable {
 
     boolean isBombExploding = false;
 
-    public void releaseBomb() {
-
+    public boolean releaseBomb() {
         if (tntCoordinates != null || Objects.equals(playerPosition, new Coordinate(1, 1))){
-            return;
+            return false;
         }
-        tntCoordinates = playerPosition;
 
+        tntCoordinates = playerPosition;
 
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_BOMB_RELEASED, tntCoordinates));
+        return true;
     }
 
-    public void explosion() {
+    public void explodeBomb() {
         Set<Coordinate> blocksToRemove = new HashSet<>();
         Set<Coordinate> enemiesToRemove = new HashSet<>();
         Set<Coordinate> enemiesHpToRemove = new HashSet<>();

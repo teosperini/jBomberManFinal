@@ -83,8 +83,6 @@ public class GameView implements Observer {
         public Image getImage() {
             return image;
         }
-
-
     }
 
     //############### CONSTRUCTOR AND INITIALIZE ################//
@@ -355,7 +353,7 @@ public class GameView implements Observer {
 
                 case UPDATE_BOMB_RELEASED -> {
                     BackgroundMusic.playBomb();
-                    drawBomb(updateInfo.getCoordinate(), 1);
+                    drawBomb(updateInfo.getCoordinate());
                 }
 
                 case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
@@ -531,26 +529,16 @@ public class GameView implements Observer {
         gameBoard.getChildren().add(imageView);
     }
 
-    private void drawBomb(Coordinate coordinate, int i) {
-        ImageView tntImage = createImageView(coordinate, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("bomb/bomb_" + i + ".png"))));
-
-        PauseTransition tnt = new PauseTransition(Duration.millis(250));
-
-        gameBoard.getChildren().add(tntImage);
+    ImageView currentTntImage = null;
+    private void drawBomb(Coordinate coordinate) {
+        currentTntImage = createImageView(coordinate, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("bomb/bomb.gif"))));
+        gameBoard.getChildren().add(currentTntImage);
         player.toFront();
+    }
 
-        int j = i + 1;
-        tnt.setOnFinished(actionEvent -> {
-
-            gameBoard.getChildren().remove(tntImage);
-
-            if (j < 7) {
-                drawBomb(coordinate, j);
-            } else {
-                controller.bombExploded();
-            }
-        });
-        tnt.play();
+    public void removeBomb() {
+         gameBoard.getChildren().remove(currentTntImage);
+        currentTntImage = null;
     }
 
     private void removeImageView(List<ImageView> array, int index) {
@@ -579,6 +567,7 @@ public class GameView implements Observer {
     }
 
     private void drawExplosion(ArrayList<Triad> triadArrayList, int i) {
+        removeBomb();
         String path = "explosion/" + i;
         triadArrayList.forEach(triad -> {
             ImageView imageView;

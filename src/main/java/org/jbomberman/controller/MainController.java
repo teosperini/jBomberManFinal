@@ -2,6 +2,7 @@ package org.jbomberman.controller;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import org.jbomberman.model.GameModel;
@@ -102,7 +103,14 @@ public class MainController {
         } else if (!pause && !moving){
             if (keyCode == KeyCode.SPACE) {
                 // if space is pressed we try to release a bomb
-                gameModel.releaseBomb();
+                if (gameModel.releaseBomb()) {
+                    // start a timer that at the end explode the bomb
+                    PauseTransition timer = new PauseTransition(Duration.millis(1750));
+                    timer.setOnFinished(actionEvent -> {
+                        gameModel.explodeBomb();
+                    });
+                    timer.play();
+                }
             } else {
                 // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
                 // per uscire ne si possono muovere i mob
@@ -118,7 +126,6 @@ public class MainController {
         pause = true;
         gameView.pauseView();
         mobMovement.pause();
-
     }
 
     public void resumeController() {
@@ -147,9 +154,6 @@ public class MainController {
         mobMovement.play();
     }
 
-    public void bombExploded() {
-        gameModel.explosion();
-    }
 
     //irreversibly stops the game
     public void endMatch(){
@@ -189,9 +193,7 @@ public class MainController {
 
         setTimeline();
 
-
         BackgroundMusic.playMusic();
-
     }
 
     public void nextLevel(){
