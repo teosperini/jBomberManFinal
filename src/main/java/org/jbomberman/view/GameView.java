@@ -537,31 +537,37 @@ public class GameView implements Observer {
     }
 
     public void removeBomb() {
-         gameBoard.getChildren().remove(currentTntImage);
+        gameBoard.getChildren().remove(currentTntImage);
         currentTntImage = null;
     }
 
-    private void removeImageView(List<ImageView> array, int index) {
-        gameBoard.getChildren().remove(array.get(index));
-        if (array.equals(randomBlocks)){
-            ImageView imageView = randomBlocks.get(index);
-            destroyBlock(new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR), 1);
-        } else if (array.equals(coins)){
+    private void removeImageView(List<ImageView> imglist, int index) {
+        var imgView = imglist.remove(index);
+        gameBoard.getChildren().remove(imgView);
 
+        if (imglist.equals(randomBlocks)){
+            runBlockDestructionAnimation(new Coordinate((int)imgView.getLayoutX()/SCALE_FACTOR, (int)imgView.getLayoutY()/SCALE_FACTOR));
+        } else if (imglist.equals(coins)){
             BackgroundMusic.playCoin();
         }
-        array.remove(index);
     }
 
-    private void destroyBlock(Coordinate c, int i){
-        ImageView newImageView = createImageView(c, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( "random_blocks/" + i + ".png"))));
+    /**
+     * Runs the block destruction animation at the given coordinates
+     * @param c
+     */
+    private void runBlockDestructionAnimation(Coordinate c){
+        runBlockDestructionAnimationInternal(c, 1);
+    }
 
-        gameBoard.getChildren().add(newImageView);
-        int j = i + 1;
+    private void runBlockDestructionAnimationInternal(Coordinate c, int i) {
+        ImageView frame = createImageView(c, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( "random_blocks/" + i + ".png"))));
+        gameBoard.getChildren().add(frame);
+
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(160));
         pauseTransition.setOnFinished(event -> {
-            gameBoard.getChildren().remove(newImageView);
-            if (j < 7) destroyBlock(c, j);
+            gameBoard.getChildren().remove(frame);
+            if (i < 6) runBlockDestructionAnimationInternal(c, i + 1);
         });
         pauseTransition.play();
     }
