@@ -60,28 +60,27 @@ public class GameView implements Observer {
     //IMAGES
     private enum BlockImage {
         //bomb is the real bomb, fire is the power_up
-        BEDROCK(BlockImage.class.getResourceAsStream("definitive/static_block.png")),
-        BEDROCK2(BlockImage.class.getResourceAsStream("definitive/static_block2.png")),
-        STONE(BlockImage.class.getResourceAsStream("definitive/random_block.png")),
-        STONE2(BlockImage.class.getResourceAsStream("definitive/random_block2.png")),
-        GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
-        GRASS2(BlockImage.class.getResourceAsStream("definitive/background_grey.png")),
-        STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
-        DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
-        BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
-        ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
-        ENEMY2(BlockImage.class.getResourceAsStream("definitive/enemy2.png")),
-        FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
-        LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
-        INVINCIBLE(BlockImage.class.getResourceAsStream("power_up/resistance.png")),
-        COIN(BlockImage.class.getResourceAsStream("power_up/coin.gif")),
-        DESTRUCTION(BlockImage.class.getResourceAsStream("random_blocks/blocks.gif"))
-        ;
+        BEDROCK("definitive/static_block.png"),
+        BEDROCK2("definitive/static_block2.png"),
+        STONE("definitive/random_block.png"),
+        STONE2("definitive/random_block2.png"),
+        GRASS("definitive/background_green.png"),
+        GRASS2("definitive/background_grey.png"),
+        STEVE("definitive/steve.png"),
+        DOOR("definitive/exit.png"),
+        BOMB("bomb/bomb.gif"),
+        ENEMY("definitive/enemy.png"),
+        ENEMY2("definitive/enemy2.png"),
+        FIRE("power_up/bomb.png"),
+        LIFE("power_up/oneup.png"),
+        INVINCIBLE("power_up/resistance.png"),
+        COIN("power_up/coin.gif"),
+        DESTRUCTION("random_blocks/blocks.gif");
 
         private final Image image;
 
-        BlockImage(InputStream path) {
-            this.image = new Image(path);
+        BlockImage(String path) {
+            image = new Image(Objects.requireNonNull(BlockImage.class.getResourceAsStream(path)));
         }
 
         public Image getImage() {
@@ -546,7 +545,7 @@ public class GameView implements Observer {
 
     ImageView currentTntImage = null;
     private void drawBomb(Coordinate coordinate) {
-        currentTntImage = createImageView(coordinate, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream("bomb/bomb.gif"))));
+        currentTntImage = createImageView(coordinate, BlockImage.BOMB.getImage());
         gameBoard.getChildren().add(currentTntImage);
         player.toFront();
     }
