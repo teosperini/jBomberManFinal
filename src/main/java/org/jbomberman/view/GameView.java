@@ -70,7 +70,7 @@ public class GameView implements Observer {
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
-        ENEMY2(BlockImage.class.getResourceAsStream("definitive/steve.png")),
+        ENEMY2(BlockImage.class.getResourceAsStream("definitive/enemy2.png")),
         FIRE(BlockImage.class.getResourceAsStream("power_up/bomb.png")),
         LIFE(BlockImage.class.getResourceAsStream("power_up/oneup.png")),
         INVINCIBLE(BlockImage.class.getResourceAsStream("power_up/resistance.png")),

@@ -228,12 +228,13 @@ public class MainModel extends Observable {
 
             if (coordinateEnemies.contains(coord)) {
                 int enemyIndex = coordinateEnemies.indexOf(coord);
-                if (enemiesHp.get(enemyIndex) == 2) {
-                    enemiesHp.set(enemyIndex, 1);
-                    enemiesHpToRemove.add(coord);
-                } else {
-                    enemiesToRemove.add(coord);
-                }
+
+                    enemiesHp.set(enemyIndex, enemiesHp.get(enemyIndex)-1);
+                    if (enemiesHp.get(enemyIndex) == 0) {
+                        enemiesToRemove.add(coord);
+                        enemiesHp.remove(enemyIndex);
+                    } else
+                        enemiesHpToRemove.add(coord);
             }
         }
 
@@ -252,9 +253,9 @@ public class MainModel extends Observable {
             notifyPoints(addedPoints, coordinate);
         });
 
+
         enemiesHpToRemove.forEach(coordinate -> {
             int index = coordinateEnemies.indexOf(coordinate);
-            enemiesHpToRemove.remove(coordinate);
             notifyLessLifeEnemy(index);
             System.out.println(enemiesHp);
         });
