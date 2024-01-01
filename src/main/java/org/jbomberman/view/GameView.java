@@ -2,7 +2,6 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
@@ -66,8 +65,9 @@ public class GameView implements Observer {
         STONE2(BlockImage.class.getResourceAsStream("definitive/random_block2.png")),
         GRASS(BlockImage.class.getResourceAsStream("definitive/background_green.png")),
         GRASS2(BlockImage.class.getResourceAsStream("definitive/background_grey.png")),
-        STEVE(BlockImage.class.getResourceAsStream("definitive/steve.png")),
+        BOMBERMAN(BlockImage.class.getResourceAsStream("definitive/bomberman.png")),
         DOOR(BlockImage.class.getResourceAsStream("definitive/exit.png")),
+        DOOR2(BlockImage.class.getResourceAsStream("definitive/exit2.png")),
         BOMB(BlockImage.class.getResourceAsStream("bomb/bomb.gif")),
         ENEMY(BlockImage.class.getResourceAsStream("definitive/enemy.png")),
         ENEMY2(BlockImage.class.getResourceAsStream("definitive/enemy2.png")),
@@ -333,7 +333,7 @@ public class GameView implements Observer {
                 case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.COIN.getImage(), coins));
 
 
-                case LOAD_PLAYER -> player = loadItems(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+                case LOAD_PLAYER -> player = loadItems(updateInfo.getCoordinate(), BlockImage.BOMBERMAN.getImage());
 
                 case LOAD_EXIT -> exit = loadItems(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
 
@@ -360,6 +360,10 @@ public class GameView implements Observer {
                     BackgroundMusic.playCoin();
                 }
 
+                case UPDATE_DOOR -> {
+                    exit.setImage(BlockImage.DOOR2.getImage());
+                    BackgroundMusic.playDoor();
+                }
 
                 case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex());
 
