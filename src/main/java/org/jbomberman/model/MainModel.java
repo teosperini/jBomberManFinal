@@ -75,6 +75,7 @@ public class MainModel extends Observable {
     private final Random random = new Random();
 
     private String nickname;
+    private boolean doorOpen = false;
 
 //############################# CONSTRUCTOR AND INITIALIZATION ############################//
 
@@ -263,6 +264,15 @@ public class MainModel extends Observable {
         notifyExplosion(adjacentCoordinates);
         tntCoordinates = null;
         isBombExploding = false;
+
+        openTheDoor();
+    }
+
+    private void openTheDoor() {
+        if (!doorOpen && coordinateEnemies.isEmpty()){
+            notifyOpenedDoor();
+            doorOpen = true;
+        }
     }
 
 
@@ -314,6 +324,7 @@ public class MainModel extends Observable {
 
 
 //####################################  POWER UPS AND LIFE  ####################################//
+
     private void lessLife() {
         if (!playerInvincible) {
             playerHp -= 1;
@@ -395,7 +406,6 @@ public class MainModel extends Observable {
 
         return new Coordinate(newX, newY);
     }
-
     /**
      * A coordinate is valid if it is not already occupied by a fixed block or by another random block. Furthermore we
      * should leave cleared the positions that are adiacent to the origin, where the player is initially positioned.
@@ -405,6 +415,7 @@ public class MainModel extends Observable {
     private boolean isValidLocation(Coordinate c) {
         return !coordinatesFixedBlocks.contains(c) && (c.x() + c.y() > 3)&& !coordinatesRandomBlocks.contains(c);
     }
+
     /**
      * if value<0 it returns 0;
      * if value>max it returns max;
@@ -421,7 +432,6 @@ public class MainModel extends Observable {
     private boolean collision(Coordinate coordinate) {
         return (coordinatesFixedBlocks.contains(coordinate) || coordinatesRandomBlocks.contains(coordinate) || coordinate.equals(tntCoordinates));
     }
-
     private void controlPosition() {
         if(coordinateEnemies.contains(playerPosition)){
             lessLife();
@@ -434,8 +444,8 @@ public class MainModel extends Observable {
 
 
 
-//####################################  NOTIFICATIONS  ####################################//
 
+//####################################  NOTIFICATIONS  ####################################//
     public void notifyModelReady() {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LEVEL, level));
@@ -462,6 +472,7 @@ public class MainModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_NAME, nickname));
     }
+
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_BLOCK_DESTROYED, blockToRemove));
@@ -478,7 +489,6 @@ public class MainModel extends Observable {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_COINS,i));
     }
-
     private void notifyPoints(int currentPoints, Coordinate coordinate) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_POINTS, coordinate, points, currentPoints));
@@ -487,6 +497,11 @@ public class MainModel extends Observable {
     private void notifyLessLifeEnemy(int index) {
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_ENEMY_LIFE, index));
+    }
+
+    private void notifyOpenedDoor() {
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_DOOR));
     }
 
     private void notifyDeadEnemy(int index) {
@@ -615,6 +630,7 @@ public class MainModel extends Observable {
         playerHp = 3;
         points = 0;
         tntCoordinates = null;
+        doorOpen = false;
         deleteObservers();
     }
 
