@@ -2,6 +2,7 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
@@ -17,13 +18,14 @@ import javafx.util.Duration;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.jbomberman.utils.SceneManager.SCALE_FACTOR;
+import static org.jbomberman.utils.SceneManager.createImageView;
+
 public class GameView implements Observer {
 
     private final MainController controller;
 
     public final AnchorPane gameBoard;
-
-    public static final int SCALE_FACTOR = 35;
 
     //END GAME PANELS
     Pane gameOver;
@@ -51,6 +53,8 @@ public class GameView implements Observer {
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
+    Label nameLabel;
+
     private int level;
 
     //IMAGES
@@ -95,12 +99,11 @@ public class GameView implements Observer {
         enemies = new ArrayList<>();
         coins = new ArrayList<>();
         bombExplosion = new ArrayList<>();
-        initialize();
+        addBottomBar();
     }
 
     public void initialize() {
         genInGamePanels();
-        addBottomBar();
         gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
     }
 
@@ -182,8 +185,12 @@ public class GameView implements Observer {
                 controller.quitMatch();
             }
         });
-
-        victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        System.out.println(level);
+        if (level == 1) {
+            victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        }
+        else
+            victory.getChildren().add(victoryExitButton);
 
         //################## GAMEBOARD ################//
         gameBoard.getChildren().addAll(pause, options , gameOver, victory);
@@ -212,19 +219,25 @@ public class GameView implements Observer {
         bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
         bottomBar.setStyle("-fx-background-color: grey");
 
-        // build the label
+        // build the labels
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
         livesLabel = new Label("Lives: " + 3);
         pointsLabel = new Label("Points: " + 0);
         timerLabel = new Label("Tempo: 0");
+        nameLabel = new Label();
+
+        nameLabel.setFont(customFontSmall);
+        nameLabel.setTextFill(Color.BLACK);
 
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
         pointsLabel.setFont(customFontSmall);
         pointsLabel.setTextFill(Color.BLACK);
-        pointsLabel.setLayoutX(200);
+        //pointsLabel.setAlignment(Pos.CENTER_RIGHT);
 
+        nameLabel.setText("player: guest");
+        HBox.setMargin(nameLabel, new Insets(0,0,0,20));
 
         //##################### TEST ####################//
         //TODO remove after test
@@ -239,7 +252,7 @@ public class GameView implements Observer {
         buttonBlocks.setLayoutX(40);
         buttonBlocks.setLayoutY(20);
 
-        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel);
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel, nameLabel);
         //###############################################//
 
         gameBoard.getChildren().add(bottomBar);
@@ -332,6 +345,10 @@ public class GameView implements Observer {
 
                 case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
 
+                case LOAD_NAME -> {
+                    if (updateInfo.getNickname() != null)
+                        nameLabel.setText("player: "+ updateInfo.getNickname());
+                }
 
                 case UPDATE_BLOCK_DESTROYED -> removeImageView(randomBlocks, updateInfo.getIndex());
 
@@ -516,14 +533,6 @@ public class GameView implements Observer {
 
 
     //###################### IMAGEVIEW METHODS ######################//
-    private ImageView createImageView(Coordinate c, Image image) {
-        ImageView imageView = new ImageView(image);
-        imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
-        imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
-        imageView.setFitHeight(SCALE_FACTOR);
-        imageView.setFitWidth(SCALE_FACTOR);
-        return imageView;
-    }
 
     private void drawImageView(Coordinate coordinate, Image image, List<ImageView> entities) {
         ImageView imageView = createImageView(coordinate, image);
@@ -546,8 +555,6 @@ public class GameView implements Observer {
 
             if (j < 7) {
                 drawBomb(coordinate, j);
-            } else {
-                controller.bombExploded();
             }
         });
         tnt.play();
@@ -610,3 +617,215 @@ public class GameView implements Observer {
         array.forEach(coordinate -> gameBoard.getChildren().add(createImageView(coordinate, image)));
     }
 }
+
+/*
+
+
+    //#################### BOTTOM BAR ################//
+    private void addBottomBar() {
+        // build the bottomBar
+        bottomBar.setLayoutX(0);
+        bottomBar.setLayoutY((double)SCALE_FACTOR * 11);
+        bottomBar.setPrefHeight(SCALE_FACTOR);
+        bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
+        bottomBar.setStyle("-fx-background-color: grey");
+
+        // build the labels
+        Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
+        livesLabel = new Label("Lives: " + 3);
+        pointsLabel = new Label("Points: " + 0);
+        timerLabel = new Label("Tempo: 0");
+        nameLabel = new Label();
+
+        nameLabel.setFont(customFontSmall);
+        nameLabel.setTextFill(Color.BLACK);
+
+        livesLabel.setFont(customFontSmall);
+        livesLabel.setTextFill(Color.BLACK);
+
+        pointsLabel.setFont(customFontSmall);
+        pointsLabel.setTextFill(Color.BLACK);
+        pointsLabel.setAlignment(Pos.CENTER_RIGHT);
+
+        nameLabel.setText("player: guest");
+        HBox.setMargin(nameLabel, new Insets(0,0,0,20));
+
+        //##################### TEST ####################//
+        //TODO remove after test
+
+        Button buttonBlocks = new Button();
+        buttonBlocks.setOnMouseClicked(mouseEvent -> {
+            controller.removeBlocks();
+            mouseEvent.consume();
+            gameBoard.toFront();
+            gameBoard.requestFocus();
+        });
+        buttonBlocks.setLayoutX(40);
+        buttonBlocks.setLayoutY(20);
+
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel, nameLabel);
+        //###############################################//
+
+        gameBoard.getChildren().add(bottomBar);
+    }
+
+    private void updateLife(int index){
+        livesLabel.setText("Lives: " + index);
+    }
+
+    private void updatePoints(int totalPoints, int currentPoints, Coordinate coordinate){
+        pointsLabel.setText("Points: " + totalPoints);
+
+        Label text = SceneManager.getText(Integer.toString(currentPoints), coordinate, SCALE_FACTOR);
+        gameBoard.getChildren().add(text);
+        text.setVisible(true);
+        text.toFront();
+
+        TranslateTransition transition = new TranslateTransition(Duration.millis(700), text);
+        transition.setByY(-30);
+
+        FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(900), text);
+        fadeOutTransition.setFromValue(1);
+        fadeOutTransition.setToValue(0);
+        fadeOutTransition.setOnFinished(actionEvent -> gameBoard.getChildren().remove(text));
+
+        ParallelTransition parallelTransition  = new ParallelTransition(transition, fadeOutTransition);
+        parallelTransition.play();
+    }
+
+
+    //####################### GETTER #######################//
+    public AnchorPane getGame() {
+        return gameBoard;
+    }
+
+    public void getFocus() {
+        gameBoard.setVisible(true);
+        gameBoard.toFront();
+        gameBoard.requestFocus();
+    }
+
+    @Override
+    public void update(Observable ignored, Object arg) {
+
+        if (arg instanceof UpdateInfo updateInfo) {
+            UpdateType updateType = updateInfo.getUpdateType();
+
+            switch (updateType) {
+
+                case LEVEL -> level = updateInfo.getIndex();
+
+                case LOAD_MAP -> {
+                    switch (updateInfo.getSubBlock()) {
+                        case GROUND_BLOCKS -> {
+                            if (level == 1)
+                                loader(updateInfo.getArray(), BlockImage.GRASS.getImage());
+                            else
+                                loader(updateInfo.getArray(), BlockImage.GRASS2.getImage());
+                        }
+
+                        case STATIC_BLOCKS -> {
+                            if (level == 1)
+                                loader(updateInfo.getArray(), BlockImage.BEDROCK.getImage());
+                            else
+                                loader(updateInfo.getArray(), BlockImage.BEDROCK2.getImage());
+                        }
+
+                        case RANDOM_BLOCKS -> {
+                            if (level == 1)
+                                updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE.getImage(), randomBlocks));
+                            else
+                                updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.STONE2.getImage(), randomBlocks));
+                        }
+                        default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
+                    }
+                }
+
+                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY.getImage(), enemies));
+
+                case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.COIN.getImage(), coins));
+
+
+                case LOAD_PLAYER -> player = loadItems(updateInfo.getCoordinate(), BlockImage.STEVE.getImage());
+
+                case LOAD_EXIT -> exit = loadItems(updateInfo.getCoordinate(), BlockImage.DOOR.getImage());
+
+                case LOAD_POWER_UP_LIFE -> puLife = loadItems(updateInfo.getCoordinate(), BlockImage.LIFE.getImage());
+
+                case LOAD_POWER_UP_BOMB -> puBomb = loadItems(updateInfo.getCoordinate(), BlockImage.FIRE.getImage());
+
+                case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
+
+
+
+
+                case UPDATE_BLOCK_DESTROYED -> removeImageView(randomBlocks, updateInfo.getIndex());
+
+                case UPDATE_ENEMY_DEAD -> removeImageView(enemies, updateInfo.getIndex());
+
+                case UPDATE_COINS -> removeImageView(coins, updateInfo.getIndex());
+
+
+                case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex());
+
+                case UPDATE_RESPAWN -> respawn(updateInfo.getIndex());
+
+
+                case UPDATE_POINTS -> updatePoints(updateInfo.getIndex(), updateInfo.getIndex2(), updateInfo.getCoordinate());
+
+                case UPDATE_PU_LIFE -> doLifePowerUp(updateInfo.getIndex());
+
+                case UPDATE_PU_BOMB -> doBombPowerUp();
+
+                case UPDATE_PU_INVINCIBLE -> doInvinciblePowerUp(updateInfo.getBoo());
+
+                case UPDATE_BOMB_RELEASED -> {
+                    BackgroundMusic.playBomb();
+                    drawBomb(updateInfo.getCoordinate());
+                }
+
+                case UPDATE_EXPLOSION -> {
+                    bombAnimation = false;
+                    drawExplosion(updateInfo.getTriadArrayList(), 1);
+                }
+
+                case UPDATE_ENEMY_LIFE -> {
+                    ImageView woundedEnemy = enemies.get(updateInfo.getIndex());
+                    woundedEnemy.setImage(BlockImage.ENEMY2.getImage());
+                }
+
+                case UPDATE_GAME_WIN -> gameWin();
+
+                case UPDATE_GAME_OVER -> gameLost(updateInfo.getCoordinate());
+
+                default -> throw new IllegalStateException("Unexpected value: " + updateType);
+            }
+        }
+    }
+
+    private void gameLost(Coordinate c) {
+        controller.endMatch();
+        BackgroundMusic.playDeath();
+        PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
+        gameOverAnimation(c);
+        pauseGameOver.setOnFinished(event -> {
+            gameOver.toFront();
+            gameOver.setVisible(true);
+            gameOver.requestFocus();
+        });
+        pauseGameOver.play();
+    }
+
+    private void gameWin() {
+        controller.endMatch();
+        BackgroundMusic.playSuccess();
+        PauseTransition pauseGameWin = new PauseTransition(Duration.millis(400));
+        pauseGameWin.setOnFinished(event -> {
+            victory.toFront();
+            victory.setVisible(true);
+            victory.requestFocus();
+        });
+        pauseGameWin.play();
+    }
+
+ */

@@ -13,8 +13,10 @@ public class SceneManager {
 
     public static final int WIDTH = 594;
     public static final int HEIGHT = 420;
+    public static final int SCALE_FACTOR = 35;
     private static final Font CUSTOM_FONT_SMALL = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 30.0);
     private static final Image menuImage = new Image(SceneManager.class.getResourceAsStream("/org/jbomberman/sfondo_small.jpg"));
+
 
 
     /**
@@ -87,10 +89,10 @@ public class SceneManager {
             textNode.setFill(color);
         });
 
-        double textWidth = textNode.getLayoutBounds().getWidth();
-        double textHeight = textNode.getLayoutBounds().getHeight();
 
         Platform.runLater(() -> {
+            double textWidth = textNode.getLayoutBounds().getWidth();
+            double textHeight = textNode.getLayoutBounds().getHeight();
             double centerX = (double) WIDTH / 2;
             double centerY = (double) HEIGHT / 2;
             clickableText.setLayoutX(centerX - textWidth / 2);
@@ -139,5 +141,15 @@ public class SceneManager {
         text.setLayoutY((((double)coordinate.y()) * scale)-10);
         System.out.println(text.getLayoutY());
         return text;
+    }
+
+
+    public static ImageView createImageView(Coordinate c, Image image) {
+        ImageView imageView = new ImageView(image);
+        imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
+        imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
+        imageView.setFitHeight(SCALE_FACTOR);
+        imageView.setFitWidth(SCALE_FACTOR);
+        return imageView;
     }
 }

@@ -16,7 +16,7 @@ public class JBomberMan extends Application {
     @Override
     public void start(Stage stage){
         this.stage = stage;
-        Image icon = new Image(getClass().getResourceAsStream("view/bomb/bomb_2.png"));
+        Image icon = new Image(JBomberMan.class.getResourceAsStream("view/bomb/bomb_2.png"));
         stage.getIcons().add(icon);
 
         stage.setResizable(true);
