@@ -331,11 +331,17 @@ public class GameView implements Observer {
                 case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
 
 
-                case UPDATE_BLOCK_DESTROYED -> removeImageView(randomBlocks, updateInfo.getIndex());
+                case UPDATE_BLOCK_DESTROYED -> {
+                    ImageView imageView = removeImageView(randomBlocks, updateInfo.getIndex());
+                    runBlockDestructionAnimation(new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR));
+                }
 
                 case UPDATE_ENEMY_DEAD -> removeImageView(enemies, updateInfo.getIndex());
 
-                case UPDATE_COINS -> removeImageView(coins, updateInfo.getIndex());
+                case UPDATE_COINS -> {
+                    removeImageView(coins, updateInfo.getIndex());
+                    BackgroundMusic.playCoin();
+                }
 
 
                 case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex());
@@ -541,15 +547,10 @@ public class GameView implements Observer {
         currentTntImage = null;
     }
 
-    private void removeImageView(List<ImageView> imglist, int index) {
-        var imgView = imglist.remove(index);
+    private ImageView removeImageView(List<ImageView> imglist, int index) {
+        ImageView imgView = imglist.remove(index);
         gameBoard.getChildren().remove(imgView);
-
-        if (imglist.equals(randomBlocks)){
-            runBlockDestructionAnimation(new Coordinate((int)imgView.getLayoutX()/SCALE_FACTOR, (int)imgView.getLayoutY()/SCALE_FACTOR));
-        } else if (imglist.equals(coins)){
-            BackgroundMusic.playCoin();
-        }
+        return imgView;
     }
 
     /**
