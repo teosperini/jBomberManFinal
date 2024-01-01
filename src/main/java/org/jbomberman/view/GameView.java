@@ -2,6 +2,7 @@ package org.jbomberman.view;
 
 import javafx.animation.*;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
@@ -17,13 +18,14 @@ import javafx.util.Duration;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.jbomberman.utils.SceneManager.SCALE_FACTOR;
+import static org.jbomberman.utils.SceneManager.createImageView;
+
 public class GameView implements Observer {
 
     private final MainController controller;
 
     public final AnchorPane gameBoard;
-
-    public static final int SCALE_FACTOR = 35;
 
     //END GAME PANELS
     Pane gameOver;
@@ -51,6 +53,8 @@ public class GameView implements Observer {
     Label livesLabel;
     Label pointsLabel;
     Label timerLabel;
+    Label nameLabel;
+
     private int level;
 
     //IMAGES
@@ -93,12 +97,11 @@ public class GameView implements Observer {
         enemies = new ArrayList<>();
         coins = new ArrayList<>();
         bombExplosion = new ArrayList<>();
-        initialize();
+        addBottomBar();
     }
 
     public void initialize() {
         genInGamePanels();
-        addBottomBar();
         gameBoard.setOnKeyPressed(controller::handleGameKeyEvent);
     }
 
@@ -180,8 +183,12 @@ public class GameView implements Observer {
                 controller.quitMatch();
             }
         });
-
-        victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        System.out.println(level);
+        if (level == 1) {
+            victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
+        }
+        else
+            victory.getChildren().add(victoryExitButton);
 
         //################## GAMEBOARD ################//
         gameBoard.getChildren().addAll(pause, options , gameOver, victory);
@@ -210,19 +217,25 @@ public class GameView implements Observer {
         bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
         bottomBar.setStyle("-fx-background-color: grey");
 
-        // build the label
+        // build the labels
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
         livesLabel = new Label("Lives: " + 3);
         pointsLabel = new Label("Points: " + 0);
         timerLabel = new Label("Tempo: 0");
+        nameLabel = new Label();
+
+        nameLabel.setFont(customFontSmall);
+        nameLabel.setTextFill(Color.BLACK);
 
         livesLabel.setFont(customFontSmall);
         livesLabel.setTextFill(Color.BLACK);
 
         pointsLabel.setFont(customFontSmall);
         pointsLabel.setTextFill(Color.BLACK);
-        pointsLabel.setLayoutX(200);
+        //pointsLabel.setAlignment(Pos.CENTER_RIGHT);
 
+        nameLabel.setText("player: guest");
+        HBox.setMargin(nameLabel, new Insets(0,0,0,20));
 
         //##################### TEST ####################//
         //TODO remove after test
@@ -237,7 +250,7 @@ public class GameView implements Observer {
         buttonBlocks.setLayoutX(40);
         buttonBlocks.setLayoutY(20);
 
-        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel);
+        bottomBar.getChildren().addAll(livesLabel, buttonBlocks, pointsLabel, nameLabel);
         //###############################################//
 
         gameBoard.getChildren().add(bottomBar);
@@ -330,6 +343,10 @@ public class GameView implements Observer {
 
                 case LOAD_POWER_UP_INVINCIBLE -> puInvincible = loadItems(updateInfo.getCoordinate(), BlockImage.INVINCIBLE.getImage());
 
+                case LOAD_NAME -> {
+                    if (updateInfo.getNickname() != null)
+                        nameLabel.setText("player: "+ updateInfo.getNickname());
+                }
 
                 case UPDATE_BLOCK_DESTROYED -> {
                     ImageView imageView = removeImageView(randomBlocks, updateInfo.getIndex());
@@ -520,14 +537,6 @@ public class GameView implements Observer {
 
 
     //###################### IMAGEVIEW METHODS ######################//
-    private ImageView createImageView(Coordinate c, Image image) {
-        ImageView imageView = new ImageView(image);
-        imageView.setLayoutX((double)c.x() * SCALE_FACTOR);
-        imageView.setLayoutY((double)c.y() * SCALE_FACTOR);
-        imageView.setFitHeight(SCALE_FACTOR);
-        imageView.setFitWidth(SCALE_FACTOR);
-        return imageView;
-    }
 
     private void drawImageView(Coordinate coordinate, Image image, List<ImageView> entities) {
         ImageView imageView = createImageView(coordinate, image);

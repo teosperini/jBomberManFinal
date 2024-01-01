@@ -1,5 +1,12 @@
 package org.jbomberman.view;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import org.jbomberman.controller.MainController;
+import org.jbomberman.utils.Coordinate;
 import org.jbomberman.utils.SceneManager;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -13,7 +20,11 @@ import javafx.scene.paint.Color;
 
 import java.util.List;
 
+import static org.jbomberman.utils.SceneManager.*;
+import static org.jbomberman.utils.SceneManager.SCALE_FACTOR;
+
 public class Profile {
+    private final MainController controller = MainController.getInstance();
     private String nickname;
     private List<Color> avatarList = List.of(Color.RED);
     private Color avatar;
@@ -32,11 +43,56 @@ public class Profile {
     }
 
     private void createProfileWindow() {
-        Label chooseProfile = SceneManager.getButton("choose profile", 1, Color.WHITE);
-        chooseProfile.setOnMouseClicked(event -> {
-            SceneManager.changePane(mainProfile, chooser);
+        mainProfile.setOnMouseClicked(event -> mainProfile.requestFocus());
+
+        TextField textField = new TextField();
+        mainProfile.getChildren().addAll(textField);
+
+        Platform.runLater(() -> {
+            double textWidth = textField.getLayoutBounds().getWidth();
+            double textHeight = textField.getLayoutBounds().getHeight();
+
+            double centerX = (double) SceneManager.WIDTH / 2;
+            double centerY = (double) SceneManager.HEIGHT / 2;
+            textField.setLayoutX(centerX - textWidth / 2);
+            textField.setLayoutY(centerY - textHeight / 2);
         });
-        mainProfile.getChildren().addAll(SceneManager.backButton(mainProfile),chooseProfile ,chooser);
+
+        int maxLength = 8;
+
+        TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
+            if (change.isAdded() && change.getControlNewText().length() > maxLength) {
+                return null; // Ignora il cambiamento se supera il limite
+            }
+            return change;
+        });
+
+        textField.setTextFormatter(textFormatter);
+
+        String string = "nickname";
+        textField.setPromptText(string);
+
+        if (textField.isFocused()) {
+            textField.setPromptText("");
+        }
+        else {
+            textField.setPromptText(string);
+        }
+
+        textField.setOnKeyPressed(keyEvent -> {
+            ImageView imageView = new ImageView(new Image(Profile.class.getResourceAsStream("definitive/ok.png")));
+            imageView.setLayoutX(180);
+            imageView.setLayoutY(192);
+            imageView.setFitHeight(SCALE_FACTOR);
+            imageView.setFitWidth(SCALE_FACTOR);
+            if (keyEvent.getCode().equals(KeyCode.ENTER)){
+                nickname = textField.getText();
+                textField.clear();
+                mainProfile.requestFocus();
+                mainProfile.getChildren().add(imageView);
+                controller.setNick(nickname);
+            }
+        });
     }
 
     private void createChooser(){

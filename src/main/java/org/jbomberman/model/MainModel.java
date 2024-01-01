@@ -8,7 +8,7 @@ import javafx.scene.input.KeyCode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GameModel extends Observable {
+public class MainModel extends Observable {
     // LIMITS OF THE MAP
     public static final int X_MAX = 15;
     public static final int Y_MAX = 9;
@@ -74,10 +74,11 @@ public class GameModel extends Observable {
 
     private final Random random = new Random();
 
+    private String nickname;
 
 //############################# CONSTRUCTOR AND INITIALIZATION ############################//
 
-    public GameModel() {
+    public MainModel() {
         initialize();
     }
 
@@ -176,7 +177,7 @@ public class GameModel extends Observable {
             coins.add(coin);
         }
     }
-    
+
     public void generateEnemies() {
         for (int i=0; i<numberOfEnemies; i++) {
             var enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
@@ -457,7 +458,8 @@ public class GameModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.LOAD_PLAYER, playerPosition));
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.LOAD_ENEMIES, coordinateEnemies));
-
+        setChanged();
+        notifyObservers(new UpdateInfo(UpdateType.LOAD_NAME, nickname));
     }
     private void notifyBlockRemoved(int blockToRemove) {
         setChanged();
@@ -623,5 +625,8 @@ public class GameModel extends Observable {
         return level;
     }
 
+    public void setShownNickname(String nickname) {
+        this.nickname = nickname;
+    }
     //###############################################//
 }
