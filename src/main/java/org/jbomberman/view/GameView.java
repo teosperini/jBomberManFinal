@@ -300,12 +300,10 @@ public class GameView implements Observer {
 
     @Override
     public void update(Observable ignored, Object arg) {
-
         if (arg instanceof UpdateInfo updateInfo) {
             UpdateType updateType = updateInfo.getUpdateType();
 
             switch (updateType) {
-
                 case LEVEL -> level = updateInfo.getIndex();
 
                 case LOAD_MAP -> {
@@ -389,7 +387,7 @@ public class GameView implements Observer {
                     drawBomb(updateInfo.getCoordinate());
                 }
 
-                case UPDATE_EXPLOSION -> drawExplosion(updateInfo.getTriadArrayList(), 1);
+                case UPDATE_EXPLOSION -> playExplosionAnimation(updateInfo.getTriadArrayList());
 
                 case UPDATE_ENEMY_LIFE -> {
                     ImageView woundedEnemy = enemies.get(updateInfo.getIndex());
@@ -598,8 +596,12 @@ public class GameView implements Observer {
         pauseTransition.play();
     }
 
-    private void drawExplosion(ArrayList<Triad> triadArrayList, int i) {
+    private void playExplosionAnimation(ArrayList<Triad> triadArrayList) {
         removeBomb();
+        playExplosionAnimation(triadArrayList, 1);
+    }
+
+    private void playExplosionAnimation(ArrayList<Triad> triadArrayList, int i) {
         String path = "explosion/" + i;
         triadArrayList.forEach(triad -> {
             ImageView imageView;
@@ -618,7 +620,7 @@ public class GameView implements Observer {
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(150));
         pauseTransition.setOnFinished(event -> {
             removeExplosion();
-            if (j < 4) drawExplosion(triadArrayList, j);
+            if (j < 4) playExplosionAnimation(triadArrayList, j);
         });
         pauseTransition.play();
     }
