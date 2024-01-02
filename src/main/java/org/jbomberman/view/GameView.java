@@ -14,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
-import java.io.InputStream;
 import java.util.*;
 
 import static org.jbomberman.utils.SceneManager.SCALE_FACTOR;
@@ -69,13 +68,21 @@ public class GameView implements Observer {
         DOOR("definitive/exit.png"),
         DOOR2("definitive/exit2.png"),
         BOMB("bomb/bomb.gif"),
-        ENEMY("definitive/enemy.png"),
+        ENEMY_LEFT("definitive/enemyLeft.png"),
         ENEMY2("definitive/enemy2.png"),
         FIRE("power_up/bomb.png"),
         LIFE("power_up/oneup.png"),
         INVINCIBLE("power_up/resistance.png"),
         COIN("power_up/coin.gif"),
-        DESTRUCTION("random_blocks/blocks.gif");
+        DESTRUCTION("random_blocks/blocks.gif"),
+        ENEMY_RIGHT("definitive/enemyRight.png"),
+        ENEMY_DOWN("definitive/enemyDown.png"),
+        ENEMY_UP("definitive/enemyUp.png")
+        //ENEMY_LEFT2
+        //ENEMY_RIGHT2
+        //ENEMY_DOWN2
+        //ENEMY_UP2
+        ;
 
         private final Image image;
 
@@ -327,7 +334,7 @@ public class GameView implements Observer {
                     }
                 }
 
-                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY.getImage(), enemies));
+                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY_LEFT.getImage(), enemies));
 
                 case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.COIN.getImage(), coins));
 
@@ -364,7 +371,7 @@ public class GameView implements Observer {
                     BackgroundMusic.playDoor();
                 }
 
-                case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex());
+                case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex(), updateInfo.getKeyCode());
 
                 case UPDATE_RESPAWN -> respawn(updateInfo.getIndex());
 
@@ -431,7 +438,7 @@ public class GameView implements Observer {
     }
     //#################### ANIMATION AND MOVEMENT ##################//
 
-    private void position(Coordinate newC, Coordinate oldC, int index) {
+    private void position(Coordinate newC, Coordinate oldC, int index, KeyCode keyCode) {
         int oldX = oldC.x() * SCALE_FACTOR;
         int oldY = oldC.y() * SCALE_FACTOR;
         int newX = newC.x() * SCALE_FACTOR;
@@ -452,6 +459,12 @@ public class GameView implements Observer {
             );
             transition.setNode(player);
         } else {
+            switch (keyCode){
+                case LEFT -> enemies.get(index).setImage(BlockImage.ENEMY_LEFT.getImage());
+                case RIGHT -> enemies.get(index).setImage(BlockImage.ENEMY_RIGHT.getImage());
+                case DOWN -> enemies.get(index).setImage(BlockImage.ENEMY_DOWN.getImage());
+                case UP -> enemies.get(index).setImage(BlockImage.ENEMY_UP.getImage());
+            }
             transition.setDuration(Duration.millis(600));
             transition.setNode(enemies.get(index));
         }

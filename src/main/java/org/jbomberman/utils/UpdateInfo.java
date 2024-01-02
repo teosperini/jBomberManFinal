@@ -1,9 +1,12 @@
 package org.jbomberman.utils;
 
+import javafx.scene.input.KeyCode;
+
 import java.util.ArrayList;
 
 public class UpdateInfo {
     private final UpdateType updateType;
+    private KeyCode keyCode;
     private boolean b;
     private String nickname;
     private Coordinate oldc;
@@ -89,6 +92,14 @@ public class UpdateInfo {
         this.nickname = nickname;
     }
 
+    public UpdateInfo(UpdateType updateType, Coordinate oldPosition, Coordinate newPosition, int index, KeyCode keyCode) {
+        this.updateType = updateType;
+        this.oldc = oldPosition;
+        this.newc = newPosition;
+        this.index = index;
+        this.keyCode = keyCode;
+    }
+
     public UpdateType getUpdateType() {
         return updateType;
     }
@@ -129,5 +140,9 @@ public class UpdateInfo {
 
     public String getNickname(){
         return nickname;
+    }
+
+    public KeyCode getKeyCode() {
+        return keyCode;
     }
 }

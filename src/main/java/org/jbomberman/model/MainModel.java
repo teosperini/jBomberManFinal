@@ -397,7 +397,7 @@ public class MainModel extends Observable {
             case LEFT -> deltaX = -MOVEMENT;
             case RIGHT -> deltaX = MOVEMENT;
             default -> {
-                return playerPosition;
+                return new Coordinate(1,1);
             }
         }
 
@@ -563,9 +563,9 @@ public class MainModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_GAME_OVER, playerPosition));
     }
 
-    private void notifyEnemyMovement(Coordinate oldPosition, Coordinate newPosition, int enemyId) {
+    private void notifyEnemyMovement(Coordinate oldPosition, Coordinate newPosition, int enemyId, KeyCode keyCode) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,newPosition, enemyId));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,newPosition, enemyId, keyCode));
         controlPosition();
     }
 
@@ -584,15 +584,17 @@ public class MainModel extends Observable {
         int randomInt = random.nextInt(KEY_CODES.size());
         Coordinate newEnemyPosition;
         int i = 0;
+        KeyCode key;
         do{
-            newEnemyPosition = calculateNewPosition(KEY_CODES.get((randomInt + i)%4), oldEnemyPosition);
+             key = KEY_CODES.get((randomInt + i)%4);
+            newEnemyPosition = calculateNewPosition(key, oldEnemyPosition);
             i++;
 
         } while((collision(newEnemyPosition) || coordinateEnemies.contains(newEnemyPosition)|| !isSafeZone(newEnemyPosition)) && i < 4);
 
         if (i != 4){
             coordinateEnemies.set(enemyId, newEnemyPosition);
-            notifyEnemyMovement(oldEnemyPosition, newEnemyPosition, enemyId);
+            notifyEnemyMovement(oldEnemyPosition, newEnemyPosition, enemyId, key);
         }
     }
 
