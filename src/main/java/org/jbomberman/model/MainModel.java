@@ -208,7 +208,6 @@ public class MainModel extends Observable {
         exitDoor = coordinatesRandomBlocks.get(randomExit);
         availableCoordinates.remove(exitDoor);
 
-        // generate the powers up
         int randomFire = random.nextInt(availableCoordinates.size());
         bombPu = availableCoordinates.get(randomFire);
         availableCoordinates.remove(bombPu);
@@ -232,7 +231,7 @@ public class MainModel extends Observable {
 
     public void generateEnemies() {
         for (int i = 0; i< _numberOfEnemies; i++) {
-            var enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
+            Coordinate enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
             coordinateEnemies.add(enemy);
             // the number of lives of an enemy depends upon the level
             enemiesHp.add(level);
@@ -486,7 +485,7 @@ public class MainModel extends Observable {
         }
     }
 
-    public int get_points(){
+    public int getPoints(){
         return _points;
     }
 
