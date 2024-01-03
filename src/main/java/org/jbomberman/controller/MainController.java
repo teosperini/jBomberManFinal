@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 
 
 public class MainController {
+    public static final int DX=17;
+    public static final int DY=12;
     MenuView menuView;
     MainModel model;
     GameView gameView;
@@ -52,8 +54,9 @@ public class MainController {
 
     public void initialize(){
         menuView = new MenuView();
-        model = new MainModel();
+        model = new MainModel(DX, DY);
         model.addObserver(menuView);
+        model.initialize();
 
         menuView.initialize();
         model.setLevel(1);
@@ -61,7 +64,6 @@ public class MainController {
         difficulty = Difficulty.NORMAL;
 
         model.setDifficulty(difficulty);
-
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);

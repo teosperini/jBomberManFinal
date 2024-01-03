@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
+import org.jbomberman.model.MainModel;
 import org.jbomberman.utils.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -218,15 +219,15 @@ public class GameView implements Observer {
     private void addBottomBar() {
         // build the bottomBar
         bottomBar.setLayoutX(0);
-        bottomBar.setLayoutY((double)SCALE_FACTOR * 11);
+        bottomBar.setLayoutY((double)SCALE_FACTOR * (MainController.DY-1));
         bottomBar.setPrefHeight(SCALE_FACTOR);
-        bottomBar.setPrefWidth((double)SCALE_FACTOR * 17);
+        bottomBar.setPrefWidth((double)SCALE_FACTOR * MainController.DX);
         bottomBar.setStyle("-fx-background-color: grey");
 
         // build the labels
         Font customFontSmall = Font.loadFont(GameView.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 25.0);
-        livesLabel = new Label("Lives: " + 3);
-        pointsLabel = new Label("Points: " + 0);
+        livesLabel = new Label();
+        pointsLabel = new Label();
         timerLabel = new Label("Tempo: 0");
         nameLabel = new Label();
 
@@ -331,6 +332,9 @@ public class GameView implements Observer {
                         default -> throw new IllegalStateException("Unexpected value: " + updateInfo.getIndex());
                     }
                 }
+                case LOAD_POINTS -> pointsLabel.setText("Points: "+updateInfo.getIndex());
+
+                case LOAD_LIFE -> livesLabel.setText("Lives: " + updateInfo.getIndex());
 
                 case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY_LEFT.getImage(), enemies));
 
