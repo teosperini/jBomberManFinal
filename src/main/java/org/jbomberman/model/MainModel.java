@@ -121,7 +121,7 @@ public class MainModel extends Observable {
         // this generates the fixed checkerboard blocks, removing the corresponding positions from the free positions list
         for (int x = MIN.x() + 1; x <= MAX.x(); x += 2) {
             for (int y = MIN.y() + 1; y <= MAX.y(); y += 2) {
-                var fixedBlock = new Coordinate(x, y);
+                Coordinate fixedBlock = new Coordinate(x, y);
                 coordinatesFixedBlocks.add(fixedBlock);
                 freePositions.remove(fixedBlock);
             }
@@ -181,7 +181,7 @@ public class MainModel extends Observable {
 
     public void generateEnemies() {
         for (int i=0; i<numberOfEnemies; i++) {
-            var enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
+            Coordinate enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
             coordinateEnemies.add(enemy);
             // the number of life of an enemy depends upon the level
             enemiesHp.add(level);
