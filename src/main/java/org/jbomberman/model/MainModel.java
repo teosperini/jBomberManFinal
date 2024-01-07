@@ -90,6 +90,7 @@ public class MainModel extends Observable {
         generateEnemies();
 
         playerPosition = new Coordinate(1,1);
+
         bombRange = 1;
     }
 
@@ -230,6 +231,7 @@ public class MainModel extends Observable {
     }
 
     public void generateEnemies() {
+        System.out.println(_numberOfEnemies);
         for (int i = 0; i< _numberOfEnemies; i++) {
             Coordinate enemy = freePositions.remove(random.nextInt(freePositions.size()-1));
             coordinateEnemies.add(enemy);

@@ -35,7 +35,7 @@ public class MainController {
     private boolean pause = false;
 
     private static MainController instance;
-    private Difficulty difficulty;
+    private Difficulty difficulty = Difficulty.NORMAL;
 
     private MainController() {
     }
@@ -54,16 +54,17 @@ public class MainController {
 
     public void initialize(){
         menuView = new MenuView();
+        menuView.initialize();
+
         model = new MainModel(DX, DY);
         model.addObserver(menuView);
-        model.initialize();
 
-        menuView.initialize();
+        //model.setDifficulty(difficulty);
         model.setLevel(1);
+
 
         difficulty = Difficulty.NORMAL;
 
-        model.setDifficulty(difficulty);
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
@@ -73,26 +74,38 @@ public class MainController {
 
     //################ NEW GAME ################//
 
-    public void playButtonPressed(){
+    public void playButtonPressed() {
+        // preparing the model
+        model.initialize();
+
+        //deleting all the previous observers
         model.deleteObservers();
 
+        //preparing the view
         gameView = new GameView();
         model.addObserver(gameView);
-
         model.notifyModelReady();
         gameView.initialize();
 
+        if (!BackgroundMusic.isPlaying()) {
+            BackgroundMusic.playMusic();
+        } else {
+            BackgroundMusic.stopMusic();
+            BackgroundMusic.playMusic();
+        }
+
+        //setting the scene
         scene.setRoot(gameView.getGame());
         gameView.getFocus();
 
+        //setting the controller
         pause = false;
         moving = false;
         setTimeline();
 
-        BackgroundMusic.playMusic();
     }
 
-    public void loadProfile() {
+    public void loadLeaderboard() {
         //TODO caricherà i dati dal model quando ci sarà il file json
     }
 
@@ -175,13 +188,17 @@ public class MainController {
         //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
     }
 
+    public void reset(){
+        model.reset();
+    }
     public void restart() {
         BackgroundMusic.stopMusic();
         model.reset();
         model.initialize();
-        model.setLevel(model.getLevel());
 
         gameView = new GameView();
+
+        System.out.println(BackgroundMusic.isPlaying());
 
         model.addObserver(gameView);
         model.notifyModelReady();
@@ -197,6 +214,7 @@ public class MainController {
         setTimeline();
 
         BackgroundMusic.playMusic();
+        System.out.println(BackgroundMusic.isPlaying());
     }
 
     public void nextLevel(){

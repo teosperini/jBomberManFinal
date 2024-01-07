@@ -15,6 +15,7 @@ public class BackgroundMusic {
     private static final AudioClip DOOR = new AudioClip(Objects.requireNonNull(BackgroundMusic.class.getResource("door.mp3").toExternalForm()));
 
     private static MediaPlayer mediaPlayer;
+    private static boolean isPlaying = false;
 
 
     public static void playMusic(){
@@ -22,9 +23,14 @@ public class BackgroundMusic {
         mediaPlayer =  new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Riproduce la musica in modo continuo
         mediaPlayer.play();
+        isPlaying = true;
     }
 
+    public static boolean isPlaying(){
+        return isPlaying;
+    }
     public static void stopMusic(){
+        isPlaying = false;
         mediaPlayer.stop();
     }
 
