@@ -13,7 +13,7 @@ import org.jbomberman.model.MainModel;
 
 public class SceneManager {
 
-    public static final int SCALE_FACTOR = 35;
+    public static final int SCALE_FACTOR = 50;
     public static final int WIDTH = SCALE_FACTOR* MainController.DX;
     public static final int HEIGHT = SCALE_FACTOR*MainController.DY;
     private static final Font CUSTOM_FONT_SMALL = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 30.0);

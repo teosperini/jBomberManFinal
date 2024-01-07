@@ -31,7 +31,7 @@ public class Profile {
     private int gamesPlayed;
     private int gamesWon;
     private int gamesLost;
-    private Pane mainProfile = SceneManager.getP("PROFILE", false,false);;
+    private final Pane mainProfile = SceneManager.getP("PROFILE", false,false);;
     private Pane chooser;
 
     public Profile() {

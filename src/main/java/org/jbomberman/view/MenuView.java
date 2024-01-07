@@ -19,6 +19,7 @@ public class MenuView implements Observer{
     private Pane mainMenu;
     private Pane options;
     private Pane profile;
+    private Pane leaderboard;
     private Profile profileGetter;
     Pane difficulty;
 
@@ -30,7 +31,6 @@ public class MenuView implements Observer{
         controller = MainController.getInstance();
         profileGetter = new Profile();
         buttons();
-        profile();
     }
 
 
@@ -103,6 +103,8 @@ public class MenuView implements Observer{
 
         difficulty.getChildren().addAll(difficultyEasy,difficultyNormal,difficultyHard,difficultyBackButton);
 
+        //############### LEADERBOARD ##############//
+        //leaderboard = Leaderboard;
         //################# PROFILE ################//
         profile = profileGetter.getProfile();
 
@@ -116,13 +118,6 @@ public class MenuView implements Observer{
 
 
         menu.getChildren().addAll(mainMenu, options, difficulty, profile);
-    }
-
-    /**
-     * Sets the profile of the menu
-     */
-    private void profile() {
-
     }
 
 
