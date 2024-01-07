@@ -5,7 +5,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
-import org.jbomberman.model.MainModel;
 import org.jbomberman.utils.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -70,7 +69,10 @@ public class GameView implements Observer {
         DOOR2("definitive/exit2.png"),
         BOMB("bomb/bomb.gif"),
         ENEMY_LEFT("definitive/enemyLeft.png"),
-        ENEMY2("definitive/enemy2.png"),
+        ENEMY_2_LEFT("definitive/angryEnemyLeft.png"),
+        ENEMY_2_RIGHT("definitive/angryEnemyRight.png"),
+        ENEMY_2_DOWN("definitive/angryEnemyDown.png"),
+        ENEMY_2_UP("definitive/angryEnemyUp.png"),
         FIRE("power_up/bomb.png"),
         LIFE("power_up/oneup.png"),
         INVINCIBLE("power_up/resistance.png"),
@@ -336,7 +338,7 @@ public class GameView implements Observer {
 
                 case LOAD_LIFE -> livesLabel.setText("Lives: " + updateInfo.getIndex());
 
-                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY_LEFT.getImage(), enemies));
+                case LOAD_ENEMIES -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.ENEMY_DOWN.getImage(), enemies));
 
                 case LOAD_COINS -> updateInfo.getArray().forEach(coordinate -> drawImageView(coordinate, BlockImage.COIN.getImage(), coins));
 
@@ -373,7 +375,7 @@ public class GameView implements Observer {
                     BackgroundMusic.playDoor();
                 }
 
-                case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex(), updateInfo.getKeyCode());
+                case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex(), updateInfo.getKeyCode(), updateInfo.getBoo());
 
                 case UPDATE_RESPAWN -> respawn(updateInfo.getIndex());
 
@@ -395,7 +397,7 @@ public class GameView implements Observer {
 
                 case UPDATE_ENEMY_LIFE -> {
                     ImageView woundedEnemy = enemies.get(updateInfo.getIndex());
-                    woundedEnemy.setImage(BlockImage.ENEMY2.getImage());
+                    woundedEnemy.setImage(BlockImage.ENEMY_2_LEFT.getImage());
                 }
 
                 case UPDATE_GAME_WIN -> gameWin();
@@ -440,7 +442,7 @@ public class GameView implements Observer {
     }
     //#################### ANIMATION AND MOVEMENT ##################//
 
-    private void position(Coordinate newC, Coordinate oldC, int index, KeyCode keyCode) {
+    private void position(Coordinate newC, Coordinate oldC, int entity, KeyCode keyCode, boolean lastLife) {
         int oldX = oldC.x() * SCALE_FACTOR;
         int oldY = oldC.y() * SCALE_FACTOR;
         int newX = newC.x() * SCALE_FACTOR;
@@ -453,7 +455,7 @@ public class GameView implements Observer {
             transition.setByY((double)newY-oldY);
         }
 
-        if (index < 0) {
+        if (entity < 0) {
             controller.moving(true);
             transition.setDuration(Duration.millis(200));
             transition.setOnFinished(event ->
@@ -461,14 +463,23 @@ public class GameView implements Observer {
             );
             transition.setNode(player);
         } else {
-            switch (keyCode){
-                case LEFT -> enemies.get(index).setImage(BlockImage.ENEMY_LEFT.getImage());
-                case RIGHT -> enemies.get(index).setImage(BlockImage.ENEMY_RIGHT.getImage());
-                case DOWN -> enemies.get(index).setImage(BlockImage.ENEMY_DOWN.getImage());
-                case UP -> enemies.get(index).setImage(BlockImage.ENEMY_UP.getImage());
+            if (level == 1 || !lastLife) {
+                switch (keyCode) {
+                    case LEFT -> enemies.get(entity).setImage(BlockImage.ENEMY_LEFT.getImage());
+                    case RIGHT -> enemies.get(entity).setImage(BlockImage.ENEMY_RIGHT.getImage());
+                    case DOWN -> enemies.get(entity).setImage(BlockImage.ENEMY_DOWN.getImage());
+                    case UP -> enemies.get(entity).setImage(BlockImage.ENEMY_UP.getImage());
+                }
+            } else {
+                switch (keyCode) {
+                    case LEFT -> enemies.get(entity).setImage(BlockImage.ENEMY_2_LEFT.getImage());
+                    case RIGHT -> enemies.get(entity).setImage(BlockImage.ENEMY_2_RIGHT.getImage());
+                    case DOWN -> enemies.get(entity).setImage(BlockImage.ENEMY_2_DOWN.getImage());
+                    case UP -> enemies.get(entity).setImage(BlockImage.ENEMY_2_UP.getImage());
+                }
             }
             transition.setDuration(Duration.millis(600));
-            transition.setNode(enemies.get(index));
+            transition.setNode(enemies.get(entity));
         }
         transition.play();
     }

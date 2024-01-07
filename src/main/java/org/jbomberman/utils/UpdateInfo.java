@@ -92,12 +92,21 @@ public class UpdateInfo {
         this.nickname = nickname;
     }
 
-    public UpdateInfo(UpdateType updateType, Coordinate oldPosition, Coordinate newPosition, int index, KeyCode keyCode) {
+    public UpdateInfo(UpdateType updateType, Coordinate oldc, Coordinate newc, int index, KeyCode keyCode) {
         this.updateType = updateType;
-        this.oldc = oldPosition;
-        this.newc = newPosition;
+        this.oldc = oldc;
+        this.newc = newc;
         this.index = index;
         this.keyCode = keyCode;
+    }
+
+    public UpdateInfo(UpdateType updateType, Coordinate oldc, Coordinate newc, int index, KeyCode keyCode, boolean b) {
+        this.updateType = updateType;
+        this.oldc = oldc;
+        this.newc = newc;
+        this.index = index;
+        this.keyCode = keyCode;
+        this.b = b;
     }
 
     public UpdateType getUpdateType() {

@@ -83,8 +83,10 @@ public class MainController {
 
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
-        //public void handleGameKeyEvent(KeyCode keyCode){
-        if (keyCode == KeyCode.ESCAPE){
+        //il tasto tab fa perdere il focus alla gameBoard, quindi l'ho escluso
+        if (keyEvent.getCode() == KeyCode.TAB) {
+            keyEvent.consume();
+        } else if (keyCode == KeyCode.ESCAPE){
             pauseController();
         } else if (!pause && !moving){
             if (keyCode == KeyCode.SPACE) {

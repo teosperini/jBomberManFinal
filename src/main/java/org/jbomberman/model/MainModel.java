@@ -396,33 +396,35 @@ public class MainModel extends Observable {
      * @param keyCode is the code of the key pressed by the player
      */
     public void movePlayer(KeyCode keyCode) {
+        if (KEY_CODES.contains(keyCode)) {
         Coordinate oldPosition = playerPosition;
-        Coordinate newPosition = calculateNewPosition(keyCode, playerPosition);
+            Coordinate newPosition = calculateNewPosition(keyCode, playerPosition);
 
-        if (!newPosition.equals(oldPosition) && !collision(newPosition)) {
-            playerPosition = newPosition;
-            notifyPlayerPosition(newPosition, oldPosition, keyCode.getName());
+            if (!newPosition.equals(oldPosition) && !collision(newPosition)) {
+                playerPosition = newPosition;
+                notifyPlayerPosition(newPosition, oldPosition, keyCode.getName());
 
-            if (newPosition.equals(exitDoor) && coordinateEnemies.isEmpty()) {
-                notifyVictory();
-            } else if (newPosition.equals(bombPu)){
-                notifyPUExplosion();
-            } else if (newPosition.equals(lifePu)){
-                notifyPULife();
-            } else if (newPosition.equals(invinciblePu)){
-                notifyPUInvincible();
-            } else {
-                ArrayList<Coordinate> coinsToRemove = new ArrayList<>(coins);
-                coinsToRemove.forEach(coordinate -> {
-                    if (newPosition.equals(coordinate)){
-                        //notifico che il player è passato sulla moneta quindi si può togliere
-                        notifyCoin(coins.indexOf(coordinate));
-                        coins.remove(coordinate);
-                        //notifico l'aggiunta dei punti
-                        _points += POINTS_FOR_A_COIN;
-                        notifyPoints(POINTS_FOR_A_COIN, coordinate);
-                    }
-                });
+                if (newPosition.equals(exitDoor) && coordinateEnemies.isEmpty()) {
+                    notifyVictory();
+                } else if (newPosition.equals(bombPu)) {
+                    notifyPUExplosion();
+                } else if (newPosition.equals(lifePu)) {
+                    notifyPULife();
+                } else if (newPosition.equals(invinciblePu)) {
+                    notifyPUInvincible();
+                } else {
+                    ArrayList<Coordinate> coinsToRemove = new ArrayList<>(coins);
+                    coinsToRemove.forEach(coordinate -> {
+                        if (newPosition.equals(coordinate)) {
+                            //notifico che il player è passato sulla moneta quindi si può togliere
+                            notifyCoin(coins.indexOf(coordinate));
+                            coins.remove(coordinate);
+                            //notifico l'aggiunta dei punti
+                            _points += POINTS_FOR_A_COIN;
+                            notifyPoints(POINTS_FOR_A_COIN, coordinate);
+                        }
+                    });
+                }
             }
         }
     }
@@ -446,7 +448,6 @@ public class MainModel extends Observable {
             case LEFT -> deltaX = -MOVEMENT;
             case RIGHT -> deltaX = MOVEMENT;
             default -> {
-                return new Coordinate(1,1);
             }
         }
 
@@ -618,7 +619,7 @@ public class MainModel extends Observable {
 
     private void notifyEnemyMovement(Coordinate oldPosition, Coordinate newPosition, int enemyId, KeyCode keyCode) {
         setChanged();
-        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,newPosition, enemyId, keyCode));
+        notifyObservers(new UpdateInfo(UpdateType.UPDATE_POSITION, oldPosition,newPosition, enemyId, keyCode, enemiesHp.get(enemyId) == 1));
         controlPosition();
     }
 
@@ -639,7 +640,7 @@ public class MainModel extends Observable {
         int i = 0;
         KeyCode key;
         do{
-             key = KEY_CODES.get((randomInt + i)%4);
+            key = KEY_CODES.get((randomInt + i)%4);
             newEnemyPosition = calculateNewPosition(key, oldEnemyPosition);
             i++;
 
