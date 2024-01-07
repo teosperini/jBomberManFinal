@@ -53,17 +53,16 @@ public class MainController {
 
 
     public void initialize(){
+        //creazione menu
         menuView = new MenuView();
         menuView.initialize();
 
+        //creazione model
         model = new MainModel(DX, DY);
         model.addObserver(menuView);
-
-        //model.setDifficulty(difficulty);
         model.setLevel(1);
-
-
-        difficulty = Difficulty.NORMAL;
+        //difficulty = Difficulty.NORMAL;
+        //model.setDifficulty(difficulty);
 
 
         Parent root = menuView.getMenu();
@@ -74,42 +73,14 @@ public class MainController {
 
     //################ NEW GAME ################//
 
-    public void playButtonPressed() {
-        // preparing the model
-        model.initialize();
-
-        //deleting all the previous observers
-        model.deleteObservers();
-
-        //preparing the view
-        gameView = new GameView();
-        model.addObserver(gameView);
-        model.notifyModelReady();
-        gameView.initialize();
-
-        if (!BackgroundMusic.isPlaying()) {
-            BackgroundMusic.playMusic();
-        } else {
-            BackgroundMusic.stopMusic();
-            BackgroundMusic.playMusic();
-        }
-
-        //setting the scene
-        scene.setRoot(gameView.getGame());
-        gameView.getFocus();
-
-        //setting the controller
-        pause = false;
-        moving = false;
-        setTimeline();
-
-    }
-
     public void loadLeaderboard() {
-        //TODO caricherà i dati dal model quando ci sarà il file json
+        // TODO caricherà i dati dal model quando ci sarà il file json
+        //  alla fine di ogni partita sarà richiesto di inserire il nome (altrimenti "guest")
+        //  e verrà salvato insieme al punteggio raggiunto e al livello raggiunto (completato)
     }
 
     //HANDLING OF THE KEY-EVENTS IN GAME
+
     public void handleGameKeyEvent(KeyEvent keyEvent) {
         KeyCode keyCode = keyEvent.getCode();
         //public void handleGameKeyEvent(KeyCode keyCode){
@@ -121,22 +92,15 @@ public class MainController {
                 if (model.releaseBomb()) {
                     // start a timer that at the end explode the bomb
                     PauseTransition timer = new PauseTransition(Duration.millis(1750));
-                    timer.setOnFinished(actionEvent -> {
-                        model.explodeBomb();
-                    });
+                    timer.setOnFinished(actionEvent -> model.explodeBomb());
                     timer.play();
                 }
             } else {
-                // se il gioco è in pausa o voglio uscire non devo poter ricevere input tranne il tasto
-                // per uscire ne si possono muovere i mob
-                // se il player si sta muovendo o sta respawnando non devo permettere di ricevere input
-                //ma i mob devono continuare a muoversi
                 model.movePlayer(keyCode);
             }
         }
 
     }
-
     public void pauseController() {
         pause = true;
         gameView.pauseView();
@@ -177,67 +141,60 @@ public class MainController {
         pause = true;
     }
 
+    //returns to the main menu
     public void quitMatch() {
         scene.setRoot(menuView.getMenu());
 
-        model.reset();
-        model.addObserver(gameView);
+        model.deleteObservers();
+        model.addObserver(menuView);
 
+
+        model.reset();
         model.setLevel(1);
-        model.initialize();
-        //resettare il gioco alle impostaizoni di partenza, pronto per una nuova partita
+        model.resetGame();
     }
 
-    public void reset(){
-        model.reset();
-    }
-    public void restart() {
-        BackgroundMusic.stopMusic();
-        model.reset();
+    public void playButtonPressed() {
+        // preparing the model
         model.initialize();
 
+        //deleting all the previous observers
+        model.deleteObservers();
+
+        //preparing the view
         gameView = new GameView();
-
-        System.out.println(BackgroundMusic.isPlaying());
-
         model.addObserver(gameView);
         model.notifyModelReady();
-
         gameView.initialize();
 
-        pause = false;
-        moving = false;
+        if (!BackgroundMusic.isPlaying()) {
+            BackgroundMusic.playMusic();
+        } else {
+            BackgroundMusic.stopMusic();
+            BackgroundMusic.playMusic();
+        }
 
+        //setting the scene
         scene.setRoot(gameView.getGame());
         gameView.getFocus();
 
+        //setting the controller
+        pause = false;
+        moving = false;
         setTimeline();
+    }
 
-        BackgroundMusic.playMusic();
-        System.out.println(BackgroundMusic.isPlaying());
+    public void restart(){
+        model.reset();
+        model.setLevel(1);
+        model.resetGame();
+        playButtonPressed();
     }
 
     public void nextLevel(){
-        BackgroundMusic.stopMusic();
         model.reset();
         model.setLevel(2);
-        model.initialize();
-
-        gameView = new GameView();
-
-        model.addObserver(gameView);
-        model.notifyModelReady();
-
-        gameView.initialize();
-
-        pause = false;
-        moving = false;
-
-        scene.setRoot(gameView.getGame());
-        gameView.getFocus();
-
-        setTimeline();
-        BackgroundMusic.playMusic();
+        playButtonPressed();
     }
 
     //############## CLOSE THE WINDOW #############//

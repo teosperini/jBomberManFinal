@@ -668,6 +668,10 @@ public class MainModel extends Observable {
         );
     }
 
+    public void resetGame(){
+        _playerHp = 3;
+        _points = 0;
+    }
 
     public void setLevel(int level) {
         this.level = level;
