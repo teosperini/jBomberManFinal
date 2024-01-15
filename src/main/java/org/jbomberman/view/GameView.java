@@ -220,10 +220,11 @@ public class GameView implements Observer {
     //#################### BOTTOM BAR ################//
     private void addBottomBar() {
         // build the bottomBar
+
         bottomBar.setLayoutX(0);
         bottomBar.setLayoutY((double)SCALE_FACTOR * (MainController.DY-1));
         bottomBar.setPrefHeight(SCALE_FACTOR);
-        bottomBar.setPrefWidth((double)SCALE_FACTOR * MainController.DX);
+        bottomBar.setPrefWidth(SceneManager.WIDTH);
         bottomBar.setStyle("-fx-background-color: grey");
 
         // build the labels

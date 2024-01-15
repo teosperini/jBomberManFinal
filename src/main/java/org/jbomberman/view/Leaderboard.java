@@ -1,59 +1,78 @@
 package org.jbomberman.view;
 
-
+import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.SceneManager;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.FileReader;
+import java.util.Map;
 
-public class Leaderboard{
-    private final Pane leaderboardPane = SceneManager.getP("LEADERBOARD", false,false);;
-    public Pane getLeaderboard() {
-        return leaderboardPane;
-    }
-    private void createLeaderboard(){
-    // Carica i dati dalla leaderboard (puoi mettere questo in una funzione a parte)
-        JSONArray leaderboard = loadLeaderboardData();
+public class Leaderboard {
 
-        // Crea una VBox per organizzare i dati nella scena
+    private final MainController controller = MainController.getInstance();
+    private final Pane leaderboardPane = SceneManager.getP("LEADERBOARD", false, false);
+
+    public Leaderboard() {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setPrefSize(150, 150);
+
+        VBox contentPane = new VBox(2); // 10 è lo spazio tra le label
+
+        contentPane.setAlignment(Pos.CENTER);
+
+        for (int i = 1; i <= 10; i++) {
+            Label label = new Label("Label " + i);
+            label.setStyle("-fx-text-fill: white;");
+            contentPane.getChildren().add(label);
+        }
+        scrollPane.setStyle("-fx-control-inner-background: transparent;");
+        contentPane.setStyle("-fx-background-color: transparent;");
+        scrollPane.setId("mainScrollPane");
+        scrollPane.getStylesheets().add("org/jbomberman/view/scrollPane.css");
+
+        scrollPane.setContent(contentPane);
+
+        Platform.runLater(() -> {
+                    double paneWidth = scrollPane.getLayoutBounds().getWidth();
+                    double paneHeight = scrollPane.getLayoutBounds().getHeight();
+
+                    double centerX = (double) SceneManager.WIDTH / 2;
+                    double centerY = (double) SceneManager.HEIGHT / 2;
+                    scrollPane.setLayoutX(centerX - paneWidth / 2);
+                    scrollPane.setLayoutY(centerY - paneHeight / 2);
+                });
+
+        /*
+        Map<String, Integer> leaderboard = controller.loadLeaderboard();
+
         VBox vbox = new VBox();
+        vbox.setAlignment(Pos.CENTER); // Imposta l'allineamento al centro
         vbox.setSpacing(10);
 
-        // Aggiungi un'intestazione
-        Label headerLabel = new Label("Leaderboard");
-        vbox.getChildren().add(headerLabel);
+        leaderboard.keySet().forEach(name -> {
+            int points = leaderboard.get(name);
+            Label player = new Label(name + ": " + points);
+            player.setFont(SceneManager.CUSTOM_FONT_SMALL);
+            vbox.getChildren().add(player);
+        });
 
-        // Itera attraverso i dati e crea una Label per ciascun giocatore
-        for (int i = 0; i < leaderboard.length(); i++) {
-            JSONObject player = leaderboard.getJSONObject(i);
-            String nome = player.getString("nome");
-            int punteggio = player.getInt("punteggio");
+        ScrollPane scrollPane = new ScrollPane(vbox);
+        scrollPane.setFitToWidth(true);
 
-            Label playerLabel = new Label(nome + ": " + punteggio);
-            vbox.getChildren().add(playerLabel);
-        }
+        vbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0);");
+        scrollPane.setStyle("-fx-background-color: rgba(0, 0, 0, 0);");
 
-        // Crea un componente ScrollPane e imposta la VBox come contenuto
-        ScrollPane leaderboardPane = new ScrollPane(vbox);
-        leaderboardPane.setFitToWidth(true);
+             */
+
+        leaderboardPane.getChildren().add(scrollPane);
     }
-    // Funzione per caricare i dati dalla leaderboard (puoi sostituirla con la tua logica di caricamento)
-    private JSONArray loadLeaderboardData() {
-        /*
 
-        try {
-            return new JSONArray(new FileReader(Leaderboard.class.getResourceAsStream("leaderboard.json")));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new JSONArray(); // Ritorna un array vuoto in caso di errore
-        }
-
-         */
-    return null;
+    public Pane getLeaderboardPane() {
+        return leaderboardPane;
     }
 }

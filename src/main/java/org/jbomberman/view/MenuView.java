@@ -1,6 +1,7 @@
 package org.jbomberman.view;
 
 
+import javafx.scene.control.ScrollPane;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.Difficulty;
 import org.jbomberman.utils.SceneManager;
@@ -18,7 +19,6 @@ public class MenuView implements Observer{
     private final AnchorPane menu = new AnchorPane();
     private Pane mainMenu;
     private Pane options;
-    private Pane profile;
     private Pane leaderboard;
     private Profile profileGetter;
     Pane difficulty;
@@ -29,7 +29,7 @@ public class MenuView implements Observer{
      */
     public void initialize() {
         controller = MainController.getInstance();
-        profileGetter = new Profile();
+        leaderboard = new Leaderboard().getLeaderboardPane();
         buttons();
     }
 
@@ -41,15 +41,15 @@ public class MenuView implements Observer{
 
         Label mainMenuPlayButton = SceneManager.getButton("play", 0, color);
         Label mainMenuOptionsButton = SceneManager.getButton("options", 1, color);
-        Label mainMenuProfileButton = SceneManager.getButton("profile", 2, color);
+        Label mainMenuLeaderboardButton = SceneManager.getButton("leaderboard", 2, color);
         Label mainMeniExitButton = SceneManager.getButton("quit", 3, color);
 
         mainMenuPlayButton.setOnMouseClicked(mouseEvent -> controller.playButtonPressed());
         mainMenuOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(mainMenu, options));
-        mainMenuProfileButton.setOnMouseClicked(mouseEvent -> {SceneManager.changePane(mainMenu, profile);});
+        mainMenuLeaderboardButton.setOnMouseClicked(mouseEvent -> {SceneManager.changePane(mainMenu, leaderboard);});
         mainMeniExitButton.setOnMouseClicked(mouseEvent -> controller.gameExit());
 
-        mainMenu.getChildren().addAll(mainMenuPlayButton, mainMenuOptionsButton, mainMenuProfileButton, mainMeniExitButton);
+        mainMenu.getChildren().addAll(mainMenuPlayButton, mainMenuOptionsButton, mainMenuLeaderboardButton, mainMeniExitButton);
 
         //################# OPTIONS #################//
         options = SceneManager.getP("Options", false, false);
@@ -104,20 +104,31 @@ public class MenuView implements Observer{
         difficulty.getChildren().addAll(difficultyEasy,difficultyNormal,difficultyHard,difficultyBackButton);
 
         //############### LEADERBOARD ##############//
-        //leaderboard = Leaderboard;
+
+        leaderboard.setVisible(false);
+
+        Label leaderboardBackButton = SceneManager.getButton("back", 3, Color.WHITE);
+
+        leaderboardBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(leaderboard, mainMenu));
+
+        leaderboard.getChildren().add(leaderboardBackButton);
+
         //################# PROFILE ################//
+        /*
         profile = profileGetter.getProfile();
 
         profile.setVisible(false);
 
-        Label profileBackButton = SceneManager.getButton("back", 2, Color.WHITE);
+        Label profileBackButton = SceneManager.getButton("back", 3, Color.WHITE);
 
         profileBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(profile, mainMenu));
 
         profile.getChildren().add(profileBackButton);
 
+         */
 
-        menu.getChildren().addAll(mainMenu, options, difficulty, profile);
+
+        menu.getChildren().addAll(mainMenu, options, leaderboard, difficulty);
     }
 
 

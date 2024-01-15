@@ -38,7 +38,7 @@ public class Profile {
         //default settings
         nickname = "Guest";
         avatar = avatarList.get(0);
-        createChooser();
+        //createChooser();
         createProfileWindow();
     }
 
@@ -81,8 +81,8 @@ public class Profile {
 
         textField.setOnKeyPressed(keyEvent -> {
             ImageView imageView = new ImageView(new Image(Profile.class.getResourceAsStream("definitive/ok.png")));
-            imageView.setLayoutX(180);
-            imageView.setLayoutY(192);
+            imageView.setLayoutX((double) SceneManager.WIDTH /3);
+            imageView.setLayoutY((double) SceneManager.HEIGHT /2 - (double) SCALE_FACTOR /2);
             imageView.setFitHeight(SCALE_FACTOR);
             imageView.setFitWidth(SCALE_FACTOR);
             if (keyEvent.getCode().equals(KeyCode.ENTER)){

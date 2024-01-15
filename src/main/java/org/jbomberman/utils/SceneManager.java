@@ -13,10 +13,10 @@ import org.jbomberman.model.MainModel;
 
 public class SceneManager {
 
-    public static final int SCALE_FACTOR = 50;
+    public static final int SCALE_FACTOR = 35;
     public static final int WIDTH = SCALE_FACTOR* MainController.DX;
     public static final int HEIGHT = SCALE_FACTOR*MainController.DY;
-    private static final Font CUSTOM_FONT_SMALL = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 30.0);
+    public static final Font CUSTOM_FONT_SMALL = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), SCALE_FACTOR-5);
     private static final Image menuImage = new Image(SceneManager.class.getResourceAsStream("/org/jbomberman/sfondo_small.jpg"));
 
 
@@ -49,11 +49,11 @@ public class SceneManager {
         }
 
         if (main) {
-            customFont = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 55);
+            customFont = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), SCALE_FACTOR + 15);
             text.setFont(customFont);
             text.setStyle("-fx-fill: darkcyan");
         } else {
-            customFont = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), 40);
+            customFont = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), SCALE_FACTOR + 5);
             text.setFont(customFont);
             text.setStyle("-fx-fill: white");
         }
@@ -71,6 +71,7 @@ public class SceneManager {
         ImageView imageView = new ImageView(menuImage);
         imageView.setFitHeight(HEIGHT);
         imageView.setFitWidth(WIDTH);
+        System.out.println("la larghezza è " + WIDTH);
         if (opacity) imageView.setOpacity(0);
         return new Pane(imageView);
     }
@@ -98,7 +99,7 @@ public class SceneManager {
             double centerX = (double) WIDTH / 2;
             double centerY = (double) HEIGHT / 2;
             clickableText.setLayoutX(centerX - textWidth / 2);
-            clickableText.setLayoutY(centerY - textHeight / 2 + (i * 40));
+            clickableText.setLayoutY(centerY - textHeight / 2 + (i * SCALE_FACTOR));
         });
 
         return clickableText;

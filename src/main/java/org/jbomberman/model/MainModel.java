@@ -10,6 +10,12 @@ import java.util.stream.Collectors;
 
 public class MainModel extends Observable {
     private static final int POINTS_FOR_A_COIN = 400;
+
+    private HashMap<String, Integer> leaderboard = new HashMap<>(Map.of("Matteo",1200, "Marco", 1000, "Leo", 1500));
+    // how much the character can move every time a key is pressed
+    private static final int MOVEMENT = 1;
+
+
     // LIMITS OF THE MAP
     private final int _xmax;
     private final int _ymax;
@@ -21,9 +27,6 @@ public class MainModel extends Observable {
     private int _playerHp;
 
     private int _points;
-
-    // how much the character can move every time a key is pressed
-    private static final int MOVEMENT = 1;
 
 
     private final ArrayList<Coordinate> coordinateGround = new ArrayList<>();
@@ -667,6 +670,10 @@ public class MainModel extends Observable {
                     notifyBlockRemoved(index);
                 }
         );
+    }
+
+    public HashMap<String, Integer> getLeaderboard(){
+        return leaderboard;
     }
 
     public void resetGame(){

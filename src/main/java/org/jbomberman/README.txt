@@ -13,3 +13,10 @@ FORSE sistemare se necessario movimento nemici che continuano a muoversi sullo s
 4. prevedere una pagina "Scores"
 5. prevedere una pagina "Credits"
 
+UPDATE
+1. il text field va aggiunto alla fine della partita, sia quando si decide di uscire che quando si vince / perde
+    in teoria il gioco non dovrebbe finire mai, quindi per questo va aggiunto anche quando si vince al secondo livello,
+    perchè la vittoria è solo per limitare il livello a 2, quindi insomma OGNI VOLTA CHE SI VA AL MENU
+2. creare la pagina leaderboard, al posto di quella profilo, dove verranno visualizzati tutti i vari punteggi di tutte
+    le persone in un elenco (usare ScrollPane(?))
+3. nelle opzioni aggiungere possibilità disattivare musica

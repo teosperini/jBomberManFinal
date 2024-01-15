@@ -17,6 +17,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class MainController {
     public static final int DX=17;
@@ -53,30 +56,32 @@ public class MainController {
 
 
     public void initialize(){
-        //creazione menu
-        menuView = new MenuView();
-        menuView.initialize();
-
         //creazione model
         model = new MainModel(DX, DY);
-        model.addObserver(menuView);
         model.setLevel(1);
         //difficulty = Difficulty.NORMAL;
         //model.setDifficulty(difficulty);
 
+        //creazione menu
+        menuView = new MenuView();
+        menuView.initialize();
+
+        model.addObserver(menuView);
 
         Parent root = menuView.getMenu();
         scene = new Scene(root, SceneManager.WIDTH, SceneManager.HEIGHT);
         stage.setScene(scene);
         stage.show();
+        System.out.println("la larghezza dello stage è " + stage.getWidth());
     }
 
     //################ NEW GAME ################//
 
-    public void loadLeaderboard() {
+    public Map<String, Integer> loadLeaderboard() {
         // TODO caricherà i dati dal model quando ci sarà il file json
         //  alla fine di ogni partita sarà richiesto di inserire il nome (altrimenti "guest")
         //  e verrà salvato insieme al punteggio raggiunto e al livello raggiunto (completato)
+        return model.getLeaderboard();
     }
 
     //HANDLING OF THE KEY-EVENTS IN GAME
