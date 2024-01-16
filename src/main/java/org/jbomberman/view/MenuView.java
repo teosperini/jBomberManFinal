@@ -56,7 +56,7 @@ public class MenuView implements Observer{
         options.setVisible(false);
 
         Label optionsDifficultyButton = SceneManager.getButton("difficulty",1, color);
-        Label optionsBackButton = SceneManager.getButton("back", 2, color);
+        Label optionsBackButton = SceneManager.getButton("back", 3, color);
 
         optionsDifficultyButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options,difficulty));
         optionsBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options, mainMenu));
@@ -112,21 +112,6 @@ public class MenuView implements Observer{
         leaderboardBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(leaderboard, mainMenu));
 
         leaderboard.getChildren().add(leaderboardBackButton);
-
-        //################# PROFILE ################//
-        /*
-        profile = profileGetter.getProfile();
-
-        profile.setVisible(false);
-
-        Label profileBackButton = SceneManager.getButton("back", 3, Color.WHITE);
-
-        profileBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(profile, mainMenu));
-
-        profile.getChildren().add(profileBackButton);
-
-         */
-
 
         menu.getChildren().addAll(mainMenu, options, leaderboard, difficulty);
     }

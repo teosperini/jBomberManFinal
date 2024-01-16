@@ -143,7 +143,9 @@ public class MainController {
 
     //irreversibly stops the game
     public void endMatch(){
-        BackgroundMusic.stopMusic();
+        if (BackgroundMusic.isPlaying()) {
+            BackgroundMusic.stopMusic();
+        }
         mobMovement.stop();
         pause = true;
     }
@@ -204,6 +206,9 @@ public class MainController {
         playButtonPressed();
     }
 
+    public void stopMusic(){
+        BackgroundMusic.stopMusic();
+    }
     //############## CLOSE THE WINDOW #############//
 
     public void gameExit() {

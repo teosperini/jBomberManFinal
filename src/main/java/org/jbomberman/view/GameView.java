@@ -1,8 +1,11 @@
 package org.jbomberman.view;
 
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.*;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.*;
@@ -26,6 +29,9 @@ public class GameView implements Observer {
     public final AnchorPane gameBoard;
 
     //END GAME PANELS
+    Pane continueGameOver;
+
+    Pane continueVictory;
     Pane gameOver;
     Pane victory;
 
@@ -146,8 +152,10 @@ public class GameView implements Observer {
         options = SceneManager.getP("Options", true, false);
         options.setVisible(false);
 
+        Label optionsStopMusicButton = SceneManager.getButton("stop music", 1, Color.WHITE);
         Label optionsBackButton = SceneManager.getButton("back", 2, Color.WHITE);
 
+        optionsStopMusicButton.setOnMouseClicked(mouseEvent -> controller.stopMusic());
         optionsBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(options, pause));
 
         options.setOnKeyPressed(keyEvent -> {
@@ -157,14 +165,84 @@ public class GameView implements Observer {
             }
         });
 
-        options.getChildren().addAll(optionsBackButton);
+        options.getChildren().addAll(optionsStopMusicButton, optionsBackButton);
+        //################# GAME CONTINUE ################//
+        /*
+            mainProfile.setOnMouseClicked(event -> mainProfile.requestFocus());
+
+            TextField textField = new TextField();
+            mainProfile.getChildren().addAll(textField);
+
+            Platform.runLater(() -> {
+                double textWidth = textField.getLayoutBounds().getWidth();
+                double textHeight = textField.getLayoutBounds().getHeight();
+
+                double centerX = (double) SceneManager.WIDTH / 2;
+                double centerY = (double) SceneManager.HEIGHT / 2;
+                textField.setLayoutX(centerX - textWidth / 2);
+                textField.setLayoutY(centerY - textHeight / 2);
+            });
+
+            int maxLength = 8;
+
+            TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
+                if (change.isAdded() && change.getControlNewText().length() > maxLength) {
+                    return null; // Ignora il cambiamento se supera il limite
+                }
+                return change;
+            });
+
+            textField.setTextFormatter(textFormatter);
+
+            String string = "nickname";
+            textField.setPromptText(string);
+
+            if (textField.isFocused()) {
+                textField.setPromptText("");
+            }
+            else {
+                textField.setPromptText(string);
+            }
+
+            textField.setOnKeyPressed(keyEvent -> {
+                ImageView imageView = new ImageView(new Image(Profile.class.getResourceAsStream("definitive/ok.png")));
+                imageView.setLayoutX((double) SceneManager.WIDTH /3);
+                imageView.setLayoutY((double) SceneManager.HEIGHT /2 - (double) SCALE_FACTOR /2);
+                imageView.setFitHeight(SCALE_FACTOR);
+                imageView.setFitWidth(SCALE_FACTOR);
+                if (keyEvent.getCode().equals(KeyCode.ENTER)){
+                    nickname = textField.getText();
+                    textField.clear();
+                    mainProfile.requestFocus();
+                    mainProfile.getChildren().add(imageView);
+                    controller.setNick(nickname);
+                }
+            });
+
+         */
+
 
         //################## GAME OVER #################//
+        continueGameOver = SceneManager.getP("Save your results", true,false);
         gameOver = SceneManager.getP("Game Over", true,false);
         gameOver.setVisible(false);
 
+
+        Label gameOverContinue = SceneManager.getButton("continue", 2, Color.WHITE);
         Label gameOverRestartButton = SceneManager.getButton("restart", 1, Color.WHITE);
         Label gameOverExitButton = SceneManager.getButton("menu", 2, Color.WHITE);
+
+        gameOverRestartButton.setVisible(false);
+        gameOverExitButton.setVisible(false);
+
+        gameOverContinue.setOnMouseClicked(mouseEvent -> {
+            //SceneManager.changePane(gameOver, continueGameOver);
+            gameOverContinue.setVisible(false);
+            gameOverRestartButton.setVisible(true);
+            gameOverExitButton.setVisible(true);
+        });
+
+
 
         gameOverExitButton.setOnMouseClicked(mouseEvent -> controller.quitMatch());
         gameOverRestartButton.setOnMouseClicked(mouseEvent -> restart());
@@ -175,9 +253,12 @@ public class GameView implements Observer {
             }
         });
 
-        gameOver.getChildren().addAll(gameOverRestartButton, gameOverExitButton);
+        gameOver.getChildren().addAll(gameOverContinue, gameOverRestartButton, gameOverExitButton);
 
         //################## VICTORY ###################//
+        continueVictory = SceneManager.getP("continue", true, false);
+        continueVictory.setVisible(false);
+
         victory = SceneManager.getP("Victory", true, false);
         victory.setVisible(false);
 
@@ -198,6 +279,7 @@ public class GameView implements Observer {
         }
         else
             victory.getChildren().add(victoryExitButton);
+
 
         //################## GAMEBOARD ################//
         gameBoard.getChildren().addAll(pause, options , gameOver, victory);
@@ -403,7 +485,7 @@ public class GameView implements Observer {
 
                 case UPDATE_GAME_WIN -> gameWin();
 
-                case UPDATE_GAME_OVER -> gameLost(updateInfo.getCoordinate());
+                case UPDATE_GAME_OVER -> gameLost();
 
                 default -> throw new IllegalStateException("Unexpected value: " + updateType);
             }
@@ -417,11 +499,10 @@ public class GameView implements Observer {
     }
 
 
-    private void gameLost(Coordinate c) {
+    private void gameLost() {
         controller.endMatch();
         BackgroundMusic.playDeath();
         PauseTransition pauseGameOver = new PauseTransition(Duration.millis(400));
-        gameOverAnimation(c);
         pauseGameOver.setOnFinished(event -> {
             gameOver.toFront();
             gameOver.setVisible(true);
@@ -500,26 +581,6 @@ public class GameView implements Observer {
             controller.moving(false);
         });
         return pauseRespawn;
-    }
-
-    /*
-    private AnimationTimer animationTimer(){
-        return new AnimationTimer() {
-            public void handle(long now) {
-                // Avvia l'animazione parallela quando la transizione di traslazione inizia
-                if (translateTransition.getStatus() == Animation.Status.RUNNING) {
-                    parallelTransition.play();
-                    stop(); // Arresta l'AnimationTimer dopo l'avvio dell'animazione parallela
-
-                }
-            }
-        };
-    }
-
-    */
-
-    private void gameOverAnimation(Coordinate coordinate) {
-        //TODO
     }
 
 
