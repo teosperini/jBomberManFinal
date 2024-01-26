@@ -1,6 +1,7 @@
 package org.jbomberman.utils;
 
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -9,7 +10,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jbomberman.controller.MainController;
-import org.jbomberman.model.MainModel;
 
 public class SceneManager {
 
@@ -113,36 +113,11 @@ public class SceneManager {
         toShow.requestFocus();
     }
 
-
-    /**
-     * Creates a back button for the given pane
-     * @param pane
-     * @return
-     */
-    public static Label backButton(Pane pane) {
-        Label backButton = SceneManager.getButton("back", 3, Color.WHITE);
-        backButton.setOnMouseClicked(event -> {
-            pane.setVisible(false);
-        });
-        return backButton;
-    }
-
-    public static Label backButtonInternal(Pane current, Pane below){
-        Label backButton = SceneManager.getButton("back", 3, Color.WHITE);
-        backButton.setOnMouseClicked(event -> {
-            current.setVisible(false);
-            below.setVisible(true);
-        });
-        return backButton;
-    }
-
-    public static Label getText(String string, Coordinate coordinate, int scale){
+    public static Label getPoints(String string, Coordinate coordinate){
         Label text = new Label("+" + string);
         text.setFont(CUSTOM_FONT_SMALL);
-        text.setLayoutX(((double)coordinate.x() * scale)-30);
-        System.out.println(text.getLayoutX());
-        text.setLayoutY((((double)coordinate.y()) * scale)-10);
-        System.out.println(text.getLayoutY());
+        text.setLayoutX(((double)coordinate.x() * SCALE_FACTOR)-30);
+        text.setLayoutY((((double)coordinate.y()) * SCALE_FACTOR)-10);
         return text;
     }
 
@@ -154,5 +129,17 @@ public class SceneManager {
         imageView.setFitHeight(SCALE_FACTOR);
         imageView.setFitWidth(SCALE_FACTOR);
         return imageView;
+    }
+
+    public static void setCentred(Node node){
+        Platform.runLater(() -> {
+            double textWidth = node.getLayoutBounds().getWidth();
+            double textHeight = node.getLayoutBounds().getHeight();
+
+            double centerX = (double) SceneManager.WIDTH / 2;
+            double centerY = (double) SceneManager.HEIGHT / 2;
+            node.setLayoutX(centerX - textWidth / 2);
+            node.setLayoutY(centerY - textHeight / 2);
+        });
     }
 }

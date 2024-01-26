@@ -20,6 +20,7 @@ public class MenuView implements Observer{
     private Pane mainMenu;
     private Pane options;
     private Pane leaderboard;
+    Leaderboard leader;
     private Profile profileGetter;
     Pane difficulty;
 
@@ -29,7 +30,8 @@ public class MenuView implements Observer{
      */
     public void initialize() {
         controller = MainController.getInstance();
-        leaderboard = new Leaderboard().getLeaderboardPane();
+        leader = new Leaderboard();
+        leaderboard = leader.getLeaderboardPane();
         buttons();
     }
 
@@ -42,14 +44,18 @@ public class MenuView implements Observer{
         Label mainMenuPlayButton = SceneManager.getButton("play", 0, color);
         Label mainMenuOptionsButton = SceneManager.getButton("options", 1, color);
         Label mainMenuLeaderboardButton = SceneManager.getButton("leaderboard", 2, color);
-        Label mainMeniExitButton = SceneManager.getButton("quit", 3, color);
+        Label mainMenuExitButton = SceneManager.getButton("quit", 3, color);
 
         mainMenuPlayButton.setOnMouseClicked(mouseEvent -> controller.playButtonPressed());
         mainMenuOptionsButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(mainMenu, options));
-        mainMenuLeaderboardButton.setOnMouseClicked(mouseEvent -> {SceneManager.changePane(mainMenu, leaderboard);});
-        mainMeniExitButton.setOnMouseClicked(mouseEvent -> controller.gameExit());
+        mainMenuLeaderboardButton.setOnMouseClicked(mouseEvent -> {
+            leader.updateScrollPane();
+            leaderboard = leader.getLeaderboardPane();
+            SceneManager.changePane(mainMenu, leaderboard);
+        });
+        mainMenuExitButton.setOnMouseClicked(mouseEvent -> controller.gameExit());
 
-        mainMenu.getChildren().addAll(mainMenuPlayButton, mainMenuOptionsButton, mainMenuLeaderboardButton, mainMeniExitButton);
+        mainMenu.getChildren().addAll(mainMenuPlayButton, mainMenuOptionsButton, mainMenuLeaderboardButton, mainMenuExitButton);
 
         //################# OPTIONS #################//
         options = SceneManager.getP("Options", false, false);
@@ -107,7 +113,7 @@ public class MenuView implements Observer{
 
         leaderboard.setVisible(false);
 
-        Label leaderboardBackButton = SceneManager.getButton("back", 3, Color.WHITE);
+        Label leaderboardBackButton = SceneManager.getButton("back", 4, Color.WHITE);
 
         leaderboardBackButton.setOnMouseClicked(mouseEvent -> SceneManager.changePane(leaderboard, mainMenu));
 

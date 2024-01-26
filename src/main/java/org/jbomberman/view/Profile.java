@@ -39,10 +39,11 @@ public class Profile {
         nickname = "Guest";
         avatar = avatarList.get(0);
         //createChooser();
-        createProfileWindow();
+        //createProfileWindow();
     }
 
     private void createProfileWindow() {
+        /*
         mainProfile.setOnMouseClicked(event -> mainProfile.requestFocus());
 
         TextField textField = new TextField();
@@ -93,9 +94,12 @@ public class Profile {
                 controller.setNick(nickname);
             }
         });
+
+         */
     }
 
     private void createChooser(){
+        /*
         chooser = SceneManager.getP("choose your avatar",false,false);
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER);
@@ -143,6 +147,8 @@ public class Profile {
             hbox.setLayoutX((chooser.getWidth() - hbox.getWidth()) / 2);
             hbox.setLayoutY((chooser.getHeight() - hbox.getHeight()) / 2);
         });
+
+         */
     }
 
     public Pane getProfile() {

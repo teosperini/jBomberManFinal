@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class MainModel extends Observable {
     private static final int POINTS_FOR_A_COIN = 400;
 
-    private HashMap<String, Integer> leaderboard = new HashMap<>(Map.of("Matteo",1200, "Marco", 1000, "Leo", 1500));
+    private final HashMap<String, Integer> leaderboard = new HashMap<>();
     // how much the character can move every time a key is pressed
     private static final int MOVEMENT = 1;
 
@@ -691,6 +691,10 @@ public class MainModel extends Observable {
 
     public void setShownNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void addPlayer(String player) {
+        leaderboard.put(player, _points);
     }
     //###############################################//
 }

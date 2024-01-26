@@ -77,6 +77,9 @@ public class MainController {
 
     //################ NEW GAME ################//
 
+    public void newPlayer(String player){
+        model.addPlayer(player);
+    }
     public Map<String, Integer> loadLeaderboard() {
         // TODO caricherà i dati dal model quando ci sarà il file json
         //  alla fine di ogni partita sarà richiesto di inserire il nome (altrimenti "guest")
@@ -122,6 +125,10 @@ public class MainController {
 
     public void moving(boolean bool) {
         moving = bool;
+    }
+
+    public void setPause(boolean pause) {
+        this.pause = pause;
     }
 
     public void setDifficulty(Difficulty difficulty){
