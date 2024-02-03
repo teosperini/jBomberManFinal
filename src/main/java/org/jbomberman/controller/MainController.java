@@ -101,9 +101,9 @@ public class MainController {
                 // if space is pressed we try to release a bomb
                 if (model.releaseBomb()) {
                     // start a timer that at the end explode the bomb
-                    PauseTransition timer = new PauseTransition(Duration.millis(1750));
-                    timer.setOnFinished(actionEvent -> model.explodeBomb());
-                    timer.play();
+                    PauseTransition bombTimer = new PauseTransition(Duration.millis(1750));
+                    bombTimer.setOnFinished(actionEvent -> model.explodeBomb());
+                    bombTimer.play();
                 }
             } else {
                 model.movePlayer(keyCode);

@@ -70,7 +70,6 @@ public class GameView implements Observer {
         GRASS2("definitive/background_grey.png"),
         BOMBERMAN("definitive/bomberman.png"),
         DOOR("definitive/exit.png"),
-        DOOR2("definitive/exit2.png"),
         BOMB("bomb/bomb.gif"),
         ENEMY_LEFT("definitive/enemyLeft.png"),
         ENEMY_2_LEFT("definitive/angryEnemyLeft.png"),
@@ -439,7 +438,8 @@ public class GameView implements Observer {
 
                 case UPDATE_BLOCK_DESTROYED -> {
                     ImageView imageView = removeImageView(randomBlocks, updateInfo.getIndex());
-                    runBlockDestructionAnimation(new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR));
+                    runBlockDestructionAnimation(imageView);
+                    //runBlockDestructionAnimation(new Coordinate((int)imageView.getLayoutX()/SCALE_FACTOR, (int)imageView.getLayoutY()/SCALE_FACTOR));
                 }
 
                 case UPDATE_ENEMY_DEAD -> removeImageView(enemies, updateInfo.getIndex());
@@ -450,8 +450,8 @@ public class GameView implements Observer {
                 }
 
                 case UPDATE_DOOR -> {
-                    exit.setImage(BlockImage.DOOR2.getImage());
                     BackgroundMusic.playDoor();
+                    runOpeningDoorAnimation();
                 }
 
                 case UPDATE_POSITION -> position(updateInfo.getNewCoord(), updateInfo.getOldCoord(), updateInfo.getIndex(), updateInfo.getKeyCode(), updateInfo.getBoo());
@@ -645,29 +645,31 @@ public class GameView implements Observer {
         gameBoard.getChildren().remove(currentTntImage);
         currentTntImage = null;
     }
-
+//TODO quando si crea l'animazione, togliere l'immagine e rimetterla ogni volta è scomodo, sarebbe più comodo se cambiassimo immagine ogni volta;
+// alla fine poi si toglie l'immagine, però appunto, perchè toglierla e rimetterla ogni volta?
     private ImageView removeImageView(List<ImageView> imglist, int index) {
         ImageView imgView = imglist.remove(index);
         gameBoard.getChildren().remove(imgView);
         return imgView;
     }
 
-    /**
-     * Runs the block destruction animation at the given coordinates
-     * @param c
-     */
-    private void runBlockDestructionAnimation(Coordinate c){
-        runBlockDestructionAnimationInternal(c, 1);
+    private void runOpeningDoorAnimation(){
+        runAnimation(exit, 1,14, "doors");
     }
 
-    private void runBlockDestructionAnimationInternal(Coordinate c, int i) {
-        ImageView frame = createImageView(c, new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( "random_blocks/" + i + ".png"))));
-        gameBoard.getChildren().add(frame);
+    /**
+     * Runs the block destruction animation at the given coordinates
+     * @param
+     */
+    private void runBlockDestructionAnimation(ImageView imageView){
+        runAnimation(imageView, 1, 6, "random_blocks");
+    }
 
+    private void runAnimation(ImageView imageView, int index, int end, String path) {
+        imageView.setImage(new Image(Objects.requireNonNull(GameView.class.getResourceAsStream( path + "/" + index + ".png"))));
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(160));
         pauseTransition.setOnFinished(event -> {
-            gameBoard.getChildren().remove(frame);
-            if (i < 6) runBlockDestructionAnimationInternal(c, i + 1);
+            if (index < end) runAnimation(imageView, index + 1, end, path);
         });
         pauseTransition.play();
     }
