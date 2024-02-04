@@ -1,9 +1,9 @@
 package org.jbomberman.utils;
 
 public class Triad {
-    private Coordinate coordinate;
-    private Direction direction;
-    private boolean isLast;
+    private final Coordinate coordinate;
+    private final Direction direction;
+    private final boolean isLast;
 
     public Triad(Coordinate coordinate, Direction direction, boolean isLast) {
         this.coordinate = coordinate;
@@ -25,14 +25,6 @@ public class Triad {
 
     @Override
     public String toString() {
-        /*
-        return "Triad{" +
-                "coordinate=" + coordinate +
-                ", direction=" + direction +
-                ", isLast=" + isLast +
-                '}';
-
-         */
         return coordinate + " " + direction + " " + isLast;
     }
 }

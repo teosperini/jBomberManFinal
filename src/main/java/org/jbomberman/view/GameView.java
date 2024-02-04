@@ -199,7 +199,7 @@ public class GameView implements Observer {
             }
 
         textField.setOnKeyPressed(keyEvent -> {
-                ImageView imageView = new ImageView(new Image(Profile.class.getResourceAsStream("definitive/ok.png")));
+                ImageView imageView = new ImageView(new Image(GameView.class.getResourceAsStream("definitive/ok.png")));
                 imageView.setLayoutX(textField.getLayoutX()-SCALE_FACTOR-5);
                 imageView.setLayoutY((double) SceneManager.HEIGHT / 2 - (double) SCALE_FACTOR /2);
                 imageView.setFitHeight(SCALE_FACTOR);
@@ -237,7 +237,6 @@ public class GameView implements Observer {
         gameOverContinue.setOnMouseClicked(mouseEvent -> {
             gameOver.getChildren().remove(deathPointsLabel);
             SceneManager.changePane(gameOver, gameContinue);
-            System.out.println("bravo scemo");
         });
 
         setCentred(deathPointsLabel);
@@ -278,7 +277,6 @@ public class GameView implements Observer {
                 controller.quitMatch();
             }
         });
-        System.out.println(level);
         if (level == 1) {
             victory.getChildren().addAll(victoryNextLevelButton, victoryExitButton);
         }

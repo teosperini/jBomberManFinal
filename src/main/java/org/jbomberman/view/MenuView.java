@@ -1,7 +1,6 @@
 package org.jbomberman.view;
 
 
-import javafx.scene.control.ScrollPane;
 import org.jbomberman.controller.MainController;
 import org.jbomberman.utils.Difficulty;
 import org.jbomberman.utils.SceneManager;
@@ -20,8 +19,7 @@ public class MenuView implements Observer{
     private Pane mainMenu;
     private Pane options;
     private Pane leaderboard;
-    Leaderboard leader;
-    private Profile profileGetter;
+    LeaderboardView leader;
     Pane difficulty;
 
     private MainController controller;
@@ -30,7 +28,7 @@ public class MenuView implements Observer{
      */
     public void initialize() {
         controller = MainController.getInstance();
-        leader = new Leaderboard();
+        leader = new LeaderboardView();
         leaderboard = leader.getLeaderboardPane();
         buttons();
     }

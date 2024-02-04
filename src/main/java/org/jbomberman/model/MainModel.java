@@ -1,17 +1,25 @@
 package org.jbomberman.model;
 
+import com.google.gson.reflect.TypeToken;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import org.jbomberman.utils.*;
 import javafx.scene.input.KeyCode;
+import com.google.gson.Gson;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MainModel extends Observable {
     private static final int POINTS_FOR_A_COIN = 400;
+    private static final int POINTS_FOR_AN_ENEMY = 200;
 
-    private final HashMap<String, Integer> leaderboard = new HashMap<>();
+    //private final HashMap<String, Integer> leaderboard = new HashMap<>();
+    private ArrayList<User> leaderboard;
     // how much the character can move every time a key is pressed
     private static final int MOVEMENT = 1;
 
@@ -85,6 +93,8 @@ public class MainModel extends Observable {
         _ymax = dy-2-1;
         _playerHp = 3;
         _points = 0;
+        load();
+        //leaderboard = new ArrayList<>(List.of(new User("matteo", 10, 2), new User("marco", 20, 3)));
     }
 
     public void initialize(){
@@ -303,9 +313,8 @@ public class MainModel extends Observable {
             int index = coordinateEnemies.indexOf(coordinate);
             coordinateEnemies.remove(coordinate);
             notifyDeadEnemy(index);
-            int addedPoints = 200;
-            _points += addedPoints;
-            notifyPoints(addedPoints, coordinate);
+            _points += POINTS_FOR_AN_ENEMY;
+            notifyPoints(POINTS_FOR_AN_ENEMY, coordinate);
         });
 
         enemiesHpToRemove.forEach(coordinate -> {
@@ -547,6 +556,9 @@ public class MainModel extends Observable {
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_COINS,i));
     }
     private void notifyPoints(int currentPoints, Coordinate coordinate) {
+
+        System.out.println(_points);
+
         setChanged();
         notifyObservers(new UpdateInfo(UpdateType.UPDATE_POINTS, coordinate, _points, currentPoints));
     }
@@ -672,7 +684,7 @@ public class MainModel extends Observable {
         );
     }
 
-    public HashMap<String, Integer> getLeaderboard(){
+    public ArrayList<User> getLeaderboard(){
         return leaderboard;
     }
 
@@ -693,8 +705,66 @@ public class MainModel extends Observable {
         this.nickname = nickname;
     }
 
-    public void addPlayer(String player) {
-        leaderboard.put(player, _points);
+    public void setPlayer(String name) {
+        //using the returning Optional value of the stream to check if the player is already present in the leaderboard
+        Optional<User> existingUser = leaderboard.stream()
+                .filter(user -> user.name().equals(name))
+                .findAny();
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            //checking if
+            if (_points > user.score() || level > user.level()) {
+                user = new User(name, _points, level);
+                leaderboard.remove(existingUser.get());
+                leaderboard.add(user);
+            }
+        } else {
+            User user = new User(name, _points, level);
+            leaderboard.add(user);
+        }
+    }
+
+    private void load(){
+        String filePath = "src/main/java/org/jbomberman/model/output.json";
+
+        try {
+            FileReader fileReader = new FileReader(filePath);
+
+            Gson gson = new Gson();
+
+            //using type class to match the type of what is written in the gson file (an ArrayList of User)
+            Type type = new TypeToken<ArrayList<User>>(){}.getType();
+            leaderboard = gson.fromJson(fileReader, type);
+
+            fileReader.close();
+
+        } catch (IOException e) {
+            System.out.println("Si è verificato un errore durante la lettura del file: " + e.getMessage());
+            e.printStackTrace();
+            leaderboard = new ArrayList<>();
+        }
+    }
+
+    public void save(){
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(leaderboard);
+
+        System.out.println(jsonString);
+
+        String filePath = "src/main/java/org/jbomberman/model/output.json";
+        try {
+            FileWriter fileWriter = new FileWriter(filePath);
+
+            fileWriter.write(jsonString);
+
+            fileWriter.close();
+
+            System.out.println("Stringa JSON salvata con successo su " + filePath);
+        } catch (IOException e) {
+            System.out.println("Si è verificato un errore durante il salvataggio del file: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     //###############################################//
 }

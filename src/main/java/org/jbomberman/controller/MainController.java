@@ -6,6 +6,7 @@ import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import org.jbomberman.model.MainModel;
+import org.jbomberman.model.User;
 import org.jbomberman.utils.BackgroundMusic;
 import org.jbomberman.utils.Difficulty;
 import org.jbomberman.utils.SceneManager;
@@ -17,7 +18,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -78,9 +79,9 @@ public class MainController {
     //################ NEW GAME ################//
 
     public void newPlayer(String player){
-        model.addPlayer(player);
+        model.setPlayer(player);
     }
-    public Map<String, Integer> loadLeaderboard() {
+    public ArrayList<User> loadLeaderboard() {
         // TODO caricherà i dati dal model quando ci sarà il file json
         //  alla fine di ogni partita sarà richiesto di inserire il nome (altrimenti "guest")
         //  e verrà salvato insieme al punteggio raggiunto e al livello raggiunto (completato)
@@ -159,6 +160,7 @@ public class MainController {
 
     //returns to the main menu
     public void quitMatch() {
+        model.save();
         scene.setRoot(menuView.getMenu());
 
         model.deleteObservers();

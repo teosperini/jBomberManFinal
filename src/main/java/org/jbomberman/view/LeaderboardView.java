@@ -1,24 +1,26 @@
 package org.jbomberman.view;
 
-import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.jbomberman.controller.MainController;
+import org.jbomberman.model.User;
 import org.jbomberman.utils.SceneManager;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Map;
 
-public class Leaderboard {
+public class LeaderboardView {
 
     private final MainController controller = MainController.getInstance();
     private final Pane leaderboardPane = SceneManager.getP("LEADERBOARD", false, false);
     private final ScrollPane scrollPane = new ScrollPane();
     private final VBox contentPane = new VBox(2); //lo spazio tra le scritte
 
-    public Leaderboard() {
+    public LeaderboardView() {
         initScrollPane();
 
         leaderboardPane.getChildren().add(scrollPane);
@@ -39,11 +41,12 @@ public class Leaderboard {
     public void updateScrollPane() {
         contentPane.getChildren().clear(); // Rimuove tutti i label attuali
 
-        Map<String, Integer> leaderboard = controller.loadLeaderboard();
+        ArrayList<User> leaderboard = controller.loadLeaderboard();
+        leaderboard.sort(Comparator.comparingInt(User::score).reversed().thenComparing(User::level).thenComparing(User::name));
 
-        leaderboard.keySet().forEach(name -> {
-            int points = leaderboard.get(name);
-            Label player = new Label(name + ": " + points);
+
+        leaderboard.forEach(user -> {
+            Label player = new Label(user.name() + ": " + user.score() + " - " + user.level());
             player.setFont(SceneManager.CUSTOM_FONT_SMALL);
             player.setStyle("-fx-text-fill: white;");
             contentPane.getChildren().add(player);

@@ -16,9 +16,8 @@ public class SceneManager {
     public static final int SCALE_FACTOR = 35;
     public static final int WIDTH = SCALE_FACTOR* MainController.DX;
     public static final int HEIGHT = SCALE_FACTOR*MainController.DY;
+    public static final Font CUSTOM_FONT = FontManager.SMALL;
     public static final Font CUSTOM_FONT_SMALL = Font.loadFont(SceneManager.class.getResourceAsStream("/org/jbomberman/SfComicScriptBold-YXD2.ttf"), SCALE_FACTOR-5);
-    private static final Image menuImage = new Image(SceneManager.class.getResourceAsStream("/org/jbomberman/sfondo_small.jpg"));
-
 
 
     /**
@@ -68,7 +67,7 @@ public class SceneManager {
 
     private static Pane getPaneImage(boolean opacity) {
         //l'immagine la carico comunque, ma differenzio tra menu e gioco perchè nel gioco l'immagine la rendo invisibile
-        ImageView imageView = new ImageView(menuImage);
+        ImageView imageView = new ImageView(new Image(SceneManager.class.getResourceAsStream("/org/jbomberman/sfondo_small.jpg")));
         imageView.setFitHeight(HEIGHT);
         imageView.setFitWidth(WIDTH);
         System.out.println("la larghezza è " + WIDTH);
